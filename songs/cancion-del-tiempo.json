@@ -1,0 +1,17 @@
+{
+  "id": "cancion-del-tiempo",
+  "title": "Canción del Tiempo",
+  "meter": "",
+  "difficulty": "",
+  "origin": "videojuegos",
+  "status": "",
+  "tags": ["zelda"],
+  "order": 2,
+  "lines": [
+    { "subtitle": "", "notes": ["La", "Re"] },
+    { "subtitle": "", "notes": ["Fa", "La", "Re"] },
+    { "subtitle": "", "notes": ["Fa", "La", "Do^", "Si", "Sol", "Fa"] },
+    { "subtitle": "", "notes": ["Sol", "La", "Re"] },
+    { "subtitle": "", "notes": ["Do", "Mi", "Re"] }
+  ]
+}

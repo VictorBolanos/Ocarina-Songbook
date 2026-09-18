@@ -1,0 +1,962 @@
+/* Base tokens (canela + clásica). Everything else is derived from bg/paper/ink/accent,
+   so a theme only has to redefine those four. */
+:root{
+  --bg: #f4ecd8;
+  --paper: #fffaf0;
+  --ink: #2b2118;
+  --accent: #8a4b22;
+  --accent-2: #c99a3b;
+  --oc-halo: none;
+  --danger: #b3261e;
+  --low: #3f6f7d;       --low-ink: #fdfdfb;
+  --high: #d1a53d;      --high-ink: #3a2a08;
+  --high2: #b5502f;     --high2-ink: #fdf3ea;
+  --font: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+
+  --ink-soft: color-mix(in srgb, var(--ink) 62%, var(--paper));
+  --mid: color-mix(in srgb, var(--accent) 14%, var(--paper));
+  --line: color-mix(in srgb, var(--ink) 14%, transparent);
+  --shade: color-mix(in srgb, var(--ink) 22%, transparent);
+  --shadow: color-mix(in srgb, var(--ink) 9%, transparent);
+
+  /* The look: a page tinted with the theme colour, and translucent "glass" cards framed in it. */
+  --page: color-mix(in srgb, var(--accent) 34%, var(--bg));
+  --card: color-mix(in srgb, var(--paper) 64%, transparent);        /* cards */
+  --shell: color-mix(in srgb, var(--paper) 42%, transparent);       /* the frame around the content */
+  --glass-shadow: 0 14px 34px var(--shade);
+  color-scheme: light;
+}
+
+/* Colors x modes. A color only redefines bg/paper/ink/accent; the mode rule below adds the
+   note colors that need to change on dark. Both are also matched by the picker swatches
+   (they carry data-theme and data-mode themselves), hence no :root. */
+[data-theme="neutro"]  { --bg:#f5f5f4; --paper:#ffffff; --ink:#1f1f1f; --accent:#2f3b46; }
+[data-theme="rojo"]    { --bg:#f8e9e7; --paper:#fff6f4; --ink:#2b1512; --accent:#b3261e; }
+[data-theme="amarillo"]{ --bg:#fbf1c7; --paper:#fffbe6; --ink:#2b2410; --accent:#8a6a00; }
+[data-theme="verde"]   { --bg:#e6f0e4; --paper:#f6fbf4; --ink:#14261a; --accent:#2e6b3a; }
+[data-theme="canela"]  { --bg:#f4ecd8; --paper:#fffaf0; --ink:#2b2118; --accent:#8a4b22; }
+[data-theme="morado"]  { --bg:#eee8f6; --paper:#faf7fd; --ink:#211630; --accent:#6a3fa0; }
+[data-theme="rosa"]    { --bg:#fbe8f0; --paper:#fff5f9; --ink:#2d1520; --accent:#c2185b; }
+[data-theme="azul"]    { --bg:#e5eef9; --paper:#f5f9fe; --ink:#101f33; --accent:#1f5fa8; }
+
+[data-mode="oscuro"]{
+  --low:#5b93a4; --low-ink:#0d1a1e; --high2:#d9694a; --high2-ink:#240f07;
+  --danger: #ff8a80;
+  --shade: rgba(0, 0, 0, .5);
+  --shadow: rgba(0, 0, 0, .4);
+  --page: color-mix(in srgb, var(--accent) 46%, var(--bg));
+  --oc-halo: drop-shadow(0 0 1.2px #fff);   /* keeps the black ocarina outline visible on dark */
+  color-scheme: dark;
+}
+[data-theme="neutro"][data-mode="oscuro"]  { --bg:#0e0e0e; --paper:#1a1a1a; --ink:#ededed; --accent:#e4e4e4; }
+[data-theme="rojo"][data-mode="oscuro"]    { --bg:#1c0f0e; --paper:#2a1715; --ink:#f5e3e0; --accent:#ff7b70; }
+[data-theme="amarillo"][data-mode="oscuro"]{ --bg:#1b170a; --paper:#29230f; --ink:#f7efcf; --accent:#f0c93a; }
+[data-theme="verde"][data-mode="oscuro"]   { --bg:#0d1a11; --paper:#16261b; --ink:#e3f1e5; --accent:#6fcf85; }
+[data-theme="canela"][data-mode="oscuro"]  { --bg:#17130f; --paper:#221c16; --ink:#f1e7d3; --accent:#d9925a; }
+[data-theme="morado"][data-mode="oscuro"]  { --bg:#16101f; --paper:#21182e; --ink:#eee6f8; --accent:#b48cf0; }
+[data-theme="rosa"][data-mode="oscuro"]    { --bg:#1f0f17; --paper:#2d1822; --ink:#fbe6ef; --accent:#f472a8; }
+[data-theme="azul"][data-mode="oscuro"]    { --bg:#0d1521; --paper:#152233; --ink:#e2ecf8; --accent:#6aaeee; }
+
+/* Fonts. Also used by the options in the picker. */
+[data-font="clasica"]   { --font: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+                          --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+[data-font="moderna"]   { --font: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                          --sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+[data-font="legible"]   { --font: Verdana, Tahoma, 'DejaVu Sans', sans-serif;
+                          --sans: Verdana, Tahoma, 'DejaVu Sans', sans-serif; }
+[data-font="manuscrita"]{ --font: 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', 'Comic Neue', cursive;
+                          --sans: 'Segoe Print', 'Bradley Hand', 'Comic Sans MS', 'Comic Neue', cursive; }
+[data-font="consolas"]  { --font: Consolas, 'Lucida Console', 'DejaVu Sans Mono', ui-monospace, monospace;
+                          --sans: Consolas, 'Lucida Console', 'DejaVu Sans Mono', ui-monospace, monospace; }
+[data-font="maquina"]   { --font: 'Courier New', ui-monospace, Courier, monospace;
+                          --sans: 'Courier New', ui-monospace, Courier, monospace; }
+
+*{ box-sizing: border-box; }
+
+html{ scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior: auto; } }
+
+body{
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 1rem;
+  background-color: var(--page);
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.5;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* The page is a flat colour. If the user picked a background picture (js/background.js) it is laid over
+   it on one fixed layer, at the chosen intensity and blur. */
+body::before{
+  content: "";
+  position: fixed;
+  inset: -30px;                      /* bleed, so a blurred edge never shows */
+  z-index: -1;
+  pointer-events: none;
+  background: var(--bg-image, none) center / cover no-repeat;
+  opacity: var(--bg-opacity, 0);
+  filter: blur(var(--bg-blur, 0px));
+}
+.wrap{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* Icons (js/icons.js): inline SVGs that take the text colour of whatever holds them. */
+.icon{ width: 1.21em; height: 1.21em; flex: none; }
+[data-icon]{ display:inline-flex; }
+.picker > button [data-icon]{ color: var(--accent); }
+
+/* Theme + font pickers */
+.toolbar{
+  display:flex;
+  flex-wrap: wrap;
+  justify-content:flex-end;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--sans);
+  font-size: .85rem;
+}
+
+.toolbar[hidden]{ display:none; }
+
+.picker{ position: relative; }
+
+.picker > button,
+.mode-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap: .5rem;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  padding: .4rem .85rem;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.picker > button:hover,
+.picker > button[aria-expanded="true"],
+.mode-toggle:hover{ border-color: var(--accent); }
+
+.swatch{
+  width: 1rem; height: 1rem;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--bg) 50%, var(--accent) 50%);
+}
+
+.menu{
+  position: absolute;
+  top: calc(100% + .4rem);
+  right: 0;
+  z-index: 10;
+  min-width: 11.5rem;
+  background: var(--paper);
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  padding: .35rem;
+  box-shadow: 0 8px 24px var(--shade);
+}
+.menu[hidden]{ display:none; }
+
+.menu button{
+  display:flex;
+  align-items:center;
+  gap: .6rem;
+  width: 100%;
+  background: none;
+  border: 0;
+  border-radius: 9px;
+  padding: .45rem .6rem;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.menu button[data-font]{ font-family: var(--font); }
+.menu button:hover{ background: var(--mid); }
+.menu button.danger{ color: var(--danger); }
+.menu button[aria-pressed="true"]{ background: var(--mid); font-weight: 700; }
+
+a:focus-visible,
+button:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.legend{
+  padding: .9rem 1.2rem;
+  margin-bottom: 1.2rem;
+  font-size: .88rem;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  display:flex;
+  flex-wrap: wrap;
+  gap: .4rem 1.4rem;
+  justify-content: center;
+  align-items:center;
+}
+
+.legend-item{ display:flex; align-items:center; gap:.45rem; white-space: nowrap; }
+.legend .note{ font-size: .85rem; }
+
+.song{
+  padding: 1.4rem 1.5rem 1.6rem;
+  scroll-margin-top: 1rem;
+}
+
+.song-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: .8rem;
+  margin-bottom: .9rem;
+}
+
+.song h2{
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--accent);
+  display:flex;
+  align-items:baseline;
+  gap:.6rem;
+  flex-wrap: wrap;
+}
+
+.badge{
+  font-family: var(--sans);
+  font-size: .68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  background: var(--mid);
+  color: var(--ink-soft);
+  padding: .2rem .55rem;
+  border-radius: 999px;
+}
+
+.row{ margin-top: .5rem; }
+.row:first-child{ margin-top: 0; }
+.row.has-title{ margin-top: 1rem; }
+.row.has-title:first-child{ margin-top: 0; }
+
+.row h3{
+  font-family: var(--sans);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--ink-soft);
+  margin: 0 0 .5rem;
+}
+
+.line{
+  display:flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: .4rem;
+}
+
+/* A note is just its name; octave dots (::before) and the sharp sign (<sup>) are decoration */
+.note{
+  display:inline-flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:flex-end;
+  background: var(--mid);
+  color: var(--ink);
+  border-radius: 10px;
+  min-width: 2.4em;
+  padding: 0 .5em .35em;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 1px 2px var(--shadow);
+}
+
+.note::before{
+  content: "\00a0";
+  font-size: .62rem;
+  line-height: 1;
+  height: .8em;
+  opacity: .9;
+}
+.note--high::before{ content: "\2022"; }
+.note--high2::before{ content: "\2022\2022"; }
+
+.note sup{
+  font-size: .6em;
+  line-height: 0;
+  margin-left: 2px;
+  opacity: .85;
+}
+
+button.note{
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Notes that have a fingering diagram hold both the diagram and the name; html[data-view] picks
+   what shows: "names" (the plain chip), "fingering" (diagram only) or "both". */
+.note--oc .ocarina{ display: none; width: 4em; height: auto; }
+
+[data-view="fingering"] .note--oc,
+[data-view="both"] .note--oc{ padding: 0; background: none; box-shadow: none; }
+[data-view="fingering"] .note--oc .ocarina,
+[data-view="both"] .note--oc .ocarina{ display: block; }
+[data-view="fingering"] .note--oc .note-name{ display: none; }
+[data-view="both"] .note--oc .note-name{
+  margin-top: .1rem;
+  font-family: var(--sans);
+  font-size: .78rem;
+  line-height: 1.2;
+  color: var(--ink-soft);
+}
+
+.note--low{ background: var(--low); color: var(--low-ink); }
+.note--high{ background: var(--high); color: var(--high-ink); }
+.note--high2{ background: var(--high2); color: var(--high2-ink); }
+
+.tbd{
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: .85rem;
+  color: var(--ink-soft);
+  background: var(--mid);
+  display:inline-block;
+  padding: .35rem .8rem;
+  border-radius: 999px;
+}
+
+/* ---- Buttons, fields ---------------------------------------------------------------------- */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap: .4rem;
+  padding: .35rem .8rem;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--sans);
+  font-size: .82rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color .15s;
+}
+.btn:hover:not(:disabled){ border-color: var(--accent); }
+.btn:disabled{ opacity: .45; cursor: default; }
+.btn--sm{ padding: .25rem .65rem; font-size: .76rem; }
+.btn--ghost{ background: transparent; color: var(--ink-soft); }
+.btn--primary{ background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.btn--danger{ color: var(--danger); }
+.btn--danger:hover:not(:disabled){ border-color: var(--danger); }
+
+.input{
+  width: 100%;
+  padding: .45rem .6rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--sans);
+  font-size: .9rem;
+}
+.input:focus-visible{ outline: 2px solid var(--accent); outline-offset: 1px; }
+.input--title{ font-family: var(--font); font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+.input--sub{ padding: .3rem .55rem; font-size: .8rem; }
+
+/* ---- Song editor -------------------------------------------------------------------------- */
+.song--editing{ border-width: 3px; }
+
+.edit-head{
+  display:grid;
+  grid-template-columns: 1fr 8rem;
+  gap: .6rem;
+}
+.field{
+  display:grid;
+  gap: .25rem;
+  font-family: var(--sans);
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--ink-soft);
+}
+.edit-actions{ display:flex; justify-content:flex-end; margin: .5rem 0 .2rem; }
+
+.eline{
+  margin-top: .6rem;
+  padding: .55rem .7rem .7rem;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  cursor: text;
+}
+.eline.is-active{
+  border: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.eline-top{ display:flex; align-items:center; gap: .5rem; }
+.eline-notes{
+  display:flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: .5rem .4rem;
+  min-height: 2.8rem;
+  padding-top: .55rem;
+}
+
+.ec{ position: relative; display:inline-flex; }
+.ec-x{
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  z-index: 1;
+  display:grid;
+  place-items:center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.ec-x .icon{ width: 100%; height: 100%; }
+.ec-x:hover{ color: var(--danger); }
+@media (pointer: coarse){ .ec-x{ width: 29px; height: 29px; top: -11px; right: -11px; } }
+
+.caret{
+  align-self: stretch;
+  width: 2px;
+  min-height: 2.2rem;
+  border-radius: 1px;
+  background: var(--accent);
+  animation: caret-blink 1.1s steps(1) infinite;
+}
+@keyframes caret-blink{ 50%{ opacity: 0; } }
+@media (prefers-reduced-motion: reduce){ .caret{ animation: none; } }
+
+.hint{ align-self:center; font-family: var(--sans); font-size: .8rem; color: var(--ink-soft); }
+.eline:not(.is-active) .hint--on,
+.eline.is-active .hint--off{ display:none; }
+
+/* ---- Note palette ------------------------------------------------------------------------- */
+.dock{
+  position: sticky;
+  bottom: .6rem;
+  z-index: 5;
+  margin-top: 1.1rem;
+  padding: .7rem .8rem;
+  border: 2px solid var(--accent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+  font-family: var(--sans);
+}
+.dock-head{ display:flex; flex-wrap: wrap; align-items:center; gap: .4rem; }
+.dock-title{
+  margin-right: auto;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--ink-soft);
+}
+.dock-status{ margin: .5rem 0 0; font-size: .72rem; color: var(--ink-soft); }
+.dock-status.is-error{ color: var(--danger); }
+
+.pal{ display:grid; gap: .45rem; margin-top: .65rem; }
+.pal-row{ display:grid; grid-template-columns: 5.4rem 1fr; align-items:center; gap: .5rem; }
+.pal-label{ font-size: .72rem; color: var(--ink-soft); }
+.pal-notes{ display:flex; flex-wrap: wrap; gap: .35rem; }
+.pal-notes .note{ font-size: 1rem; padding-top: .15em; }
+
+/* ---- Page furniture ----------------------------------------------------------------------- */
+.add-song{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: .5rem;
+  width: 100%;
+  margin: 0 0 .9rem;
+  padding: 1rem;
+  border: 2px dashed color-mix(in srgb, var(--accent) 75%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--paper) 30%, transparent);
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: .95rem;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.add-song:hover{ border-color: var(--accent); color: var(--accent); }
+
+.empty{ text-align:center; color: var(--ink-soft); }
+.empty p{ margin: 0 0 1rem; font-style: italic; }
+
+.dialog{
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 0;
+  border: 3px solid var(--accent);
+  border-radius: 22px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, .45);
+}
+.dialog::backdrop{ background: rgba(0,0,0,.5); }
+.dialog form{ padding: 1.2rem 1.3rem; }
+.dialog h2{ margin: 0 0 .5rem; font-family: var(--font); font-size: 1.1rem; color: var(--accent); }
+.dialog p{ margin: 0 0 1.1rem; font-size: .9rem; color: var(--ink-soft); }
+.dialog-actions{ display:flex; justify-content:flex-end; gap: .5rem; }
+
+.toast{
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  z-index: 30;
+  display:flex;
+  align-items:center;
+  gap: .9rem;
+  max-width: calc(100vw - 2rem);
+  padding: .6rem 1rem;
+  transform: translateX(-50%);
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: .85rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.toast[hidden]{ display:none; }
+.toast button{
+  display:inline-flex;
+  align-items:center;
+  gap: .35rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 480px){
+  .edit-head{ grid-template-columns: 1fr; }
+  .pal-row{ grid-template-columns: 1fr; gap: .2rem; }
+}
+
+/* ---- Notes / fingering switch ------------------------------------------------------------- */
+/* Sticks to the top while scrolling so it is always at hand. */
+.viewbar{
+  position: sticky;
+  top: .6rem;
+  z-index: 6;
+  display:flex;
+  justify-content:center;
+  margin-bottom: 1.2rem;
+  pointer-events: none;
+}
+
+.segmented{
+  position: relative;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 3px;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px var(--shade);
+  font-family: var(--sans);
+  font-size: .82rem;
+  pointer-events: auto;
+}
+
+.segmented-thumb{
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 3);
+  border-radius: 999px;
+  background: var(--accent);
+  transition: transform .28s cubic-bezier(.4, 0, .2, 1);
+}
+[data-view="names"] .segmented-thumb{ transform: translateX(0); }
+[data-view="fingering"] .segmented-thumb{ transform: translateX(100%); }
+[data-view="both"] .segmented-thumb{ transform: translateX(200%); }
+@media (prefers-reduced-motion: reduce){ .segmented-thumb{ transition: none; } }
+
+.segmented label{
+  position: relative;
+  z-index: 1;
+  display:grid;
+  place-items:center;
+  padding: .4rem 1rem;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .2s;
+}
+.segmented label:hover{ color: var(--ink); }
+.segmented label:has(input:checked){ color: var(--paper); }
+.segmented label:has(input:focus-visible){ outline: 2px solid var(--accent); outline-offset: 2px; }
+.segmented input{ position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+
+@media (max-width: 480px){
+  .segmented label{ padding: .4rem .7rem; }
+}
+
+/* ---- Songs folder status ------------------------------------------------------------------ */
+.folder-slot{ display:flex; align-items:center; }
+.folder-btn{ border-color: var(--accent); color: var(--accent); }
+.folder-btn.is-alert{ background: var(--accent); color: var(--paper); }
+.folder-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: .45rem;
+  padding: .3rem .75rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: .78rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.folder-pill:hover{ border-color: var(--accent); color: var(--ink); }
+.folder-pill .icon{ color: #2fa866; }
+
+/* ---- Home: search, filters and the song list ---------------------------------------------- */
+[hidden]{ display: none !important; }
+
+/* The legend and the notes/fingering switch only make sense next to notes. */
+[data-route="home"] .viewbar,
+[data-route="home"] .legend{ display: none; }
+
+.filters{ display:grid; grid-template-columns: minmax(0, 1fr); gap: .8rem; margin-bottom: 1rem; padding: 1.1rem 1.2rem; }
+.filters .field, .filters .input{ min-width: 0; }
+.search{ position: relative; }
+.search .icon{
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  width: 1.155rem;
+  height: 1.155rem;
+  transform: translateY(-50%);
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+.search .input{ padding: .65rem .9rem .65rem 2.6rem; border-radius: 999px; font-size: 1rem; }
+.filter-row{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: .6rem;
+}
+.filters-foot{ display:flex; align-items:center; justify-content:space-between; gap: .6rem; min-height: 1.8rem; }
+.filters-actions{ display:flex; align-items:center; flex-wrap: wrap; justify-content:flex-end; gap: .6rem; }
+.field--inline{ display:flex; align-items:center; gap: .5rem; }
+.field--inline .input{ width: auto; padding: .3rem .6rem; font-size: .82rem; }
+.results{ margin: 0; font-family: var(--sans); font-size: .82rem; color: var(--ink-soft); }
+
+.song-list{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: .9rem;
+}
+.nomatch{ grid-column: 1 / -1; margin: 1.5rem 0; text-align:center; color: var(--ink-soft); font-style: italic; }
+
+.card{
+  position: relative;
+  display:flex;
+  flex-direction: column;
+  gap: .6rem;
+  padding: 1rem 1.1rem;
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow .18s, transform .18s;
+}
+.card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px var(--shade);
+}
+.card-link{ color: inherit; text-decoration: none; }
+.card-link::after{ content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.card-link:focus-visible{ outline: none; }
+.card-link:focus-visible::after{ outline: 2px solid var(--accent); outline-offset: 2px; }
+.card:has(.card-delete:hover){ border-color: var(--danger); }
+
+/* Edit and Delete on the song page: kept apart so one can't be hit by mistake for the other. */
+.song-actions{ display:flex; align-items:center; gap: .6rem; }
+.card-foot{ display:flex; align-items:center; justify-content:space-between; gap: .6rem; margin-top: auto; }
+.card-actions{ display:flex; align-items:center; gap: .6rem; }
+.card-edit, .card-delete{ position: relative; z-index: 1; }
+.card-head{ display:flex; align-items:baseline; justify-content:space-between; gap: .6rem; }
+.card h2{ margin: 0; font-size: 1.12rem; color: var(--accent); }
+.card-meta{ margin: 0; font-family: var(--sans); font-size: .76rem; color: var(--ink-soft); }
+@media (prefers-reduced-motion: reduce){ .card{ transition: none; } .card:hover{ transform: none; } }
+
+/* ---- Category and tag chips --------------------------------------------------------------- */
+.tags{ display:flex; flex-wrap: wrap; gap: .35rem; }
+.song .tags{ margin: -.4rem 0 .9rem; }
+
+.tag{
+  display:inline-flex;
+  align-items:center;
+  gap: .35rem;
+  padding: .15rem .6rem;
+  border-radius: 999px;
+  background: var(--mid);
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: .72rem;
+  line-height: 1.5;
+}
+.tag--difficulty::before,
+.tag--status::before{
+  content: "";
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: var(--dot, var(--ink-soft));
+}
+.tag--facil, .tag--dominada{ --dot: #2fa866; }
+.tag--media, .tag--aprendiendo{ --dot: #d1a53d; }
+.tag--dificil{ --dot: #c5473a; }
+.tag--por-aprender{ --dot: #8a8f98; }
+.tag--free::before{ content: "#"; opacity: .55; }
+
+/* ---- Song page ---------------------------------------------------------------------------- */
+.back{
+  display:inline-flex;
+  align-items:center;
+  gap: .35rem;
+  margin-bottom: .8rem;
+  font-family: var(--sans);
+  font-size: .85rem;
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.back:hover{ color: var(--accent); }
+
+.meta-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: .6rem;
+  margin-top: .6rem;
+}
+.field .tags-edit{
+  display:flex;
+  flex-wrap: wrap;
+  align-items:center;
+  gap: .4rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.tags-field, .field:has(.tags-edit){ margin-top: .6rem; }
+.tag-input{ flex: 1 1 10rem; width: auto; min-width: 8rem; }
+.tag--edit{ padding-right: .25rem; }
+.tag-x{
+  display:grid;
+  place-items:center;
+  width: 1.265rem;
+  height: 1.265rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.tag-x .icon{ width: 100%; height: 100%; }
+.tag-x:hover{ color: var(--danger); }
+
+/* ---- Page frame: top bar, framed content, footer ------------------------------------------ */
+/* Glass card: translucent, blurred, framed in the theme colour. Everything that is a "card" shares it. */
+.card, .song, .legend, .filters, .topbar, .site-footer, .shell{
+  border: 2px solid var(--accent);
+  background: var(--card);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  backdrop-filter: blur(10px) saturate(1.15);
+  box-shadow: var(--glass-shadow);
+}
+.card, .song, .legend, .filters{ border-radius: 20px; }
+
+.topbar{
+  /* Its backdrop blur makes it a stacking context of its own, so it must sit above the content
+     frame for the Color / Fuente menus that hang out of it to overlap the cards. */
+  position: relative;
+  z-index: 20;
+  display:flex;
+  flex-wrap: wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap: .8rem 1.4rem;
+  padding: .8rem 1.3rem .9rem;
+  border-top: 0;
+  border-bottom-width: 4px;
+  border-radius: 0 0 24px 24px;
+}
+.brand{ display:flex; align-items:center; gap: .8rem; color: inherit; text-decoration: none; }
+.brand:focus-visible{ outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
+.logo{ width: 50px; height: 50px; flex: none; filter: drop-shadow(0 2px 4px var(--shade)); }
+.brand-text h1{
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  letter-spacing: .02em;
+  color: var(--accent);
+}
+.brand-tag{ margin: .15rem 0 0; font-size: .8rem; font-style: italic; color: var(--ink-soft); }
+
+.shell{
+  flex: 1 0 auto;
+  margin: 1.2rem 0;
+  padding: 1.4rem;
+  border-width: 3px;
+  border-radius: 26px;
+  background: var(--shell);
+}
+
+.site-footer{
+  display:flex;
+  flex-wrap: wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap: .3rem 1rem;
+  padding: 1rem 1.3rem 1.1rem;
+  border-bottom: 0;
+  border-top-width: 4px;
+  border-radius: 24px 24px 0 0;
+  font-family: var(--sans);
+  font-size: .8rem;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 640px){
+  body{ padding: 0 .55rem; }
+  .topbar{ padding: .7rem .9rem .8rem; border-radius: 0 0 20px 20px; }
+  .brand-text h1{ font-size: 1.2rem; }
+  .brand-tag{ display: none; }
+  .logo{ width: 42px; height: 42px; }
+  .shell{ padding: .8rem; border-radius: 20px; margin: .9rem 0; }
+  .song{ padding: 1.1rem 1rem 1.3rem; }
+  .site-footer{ justify-content: center; text-align: center; }
+}
+
+/* On a phone the toolbar keeps only its icons, so it fits on the same row as the logo. */
+@media (max-width: 560px){
+  .picker > button > span:not([data-icon]),
+  .mode-toggle > span:not([data-icon]){ display: none; }
+  .picker > button, .mode-toggle{ padding: .5rem .65rem; }
+  .filters{ padding: .9rem; }
+  .filters-foot{ flex-wrap: wrap; }
+  .filters-actions{ width: 100%; flex-wrap: nowrap; justify-content: space-between; }
+  .field--inline{ flex: 1; min-width: 0; }
+  .field--inline .input{ flex: 1; min-width: 0; }
+}
+
+/* ---- Print: just the song, on plain paper ------------------------------------------------- */
+@media print{
+  :root[data-theme]{
+    color-scheme: light;
+    --bg:#fff; --paper:#fff; --ink:#2b2118; --accent:#8a4b22; --page:#fff;
+    --low:#3f6f7d; --low-ink:#fdfdfb; --high2:#b5502f; --high2-ink:#fdf3ea;
+  }
+  body{ padding: 0; background: none; display: block; }
+  body::before{ display: none; }
+  .topbar, .site-footer, .toolbar, .filters, .back, .no-print{ display: none !important; }
+  .shell, .card, .song, .legend{
+    border-color: #ccc;
+    background: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .shell{ margin: 0; padding: 0; border: 0; }
+  .song{ break-inside: avoid; }
+}
+
+/* ---- Background picker (js/background.js) ------------------------------------------------- */
+.menu--wide{ width: min(25rem, calc(100vw - 2rem)); padding: .8rem; }
+.bg-title{ margin: 0 0 .6rem; font-family: var(--sans); font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.bg-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.4rem, 1fr));
+  gap: .5rem;
+  max-height: 15.5rem;
+  overflow-y: auto;
+  padding: 3px;                       /* room for the selection ring */
+}
+.menu .bg-tile{
+  position: relative;
+  display:block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--mid) center / cover no-repeat;
+  overflow: hidden;
+  cursor: pointer;
+}
+.menu .bg-tile:hover{ border-color: var(--accent); }
+.menu .bg-tile.is-selected{ border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent); }
+.menu .bg-tile--flat{ background: var(--page); }
+.menu .bg-tile.is-broken{ background: repeating-linear-gradient(45deg, var(--mid), var(--mid) 6px, transparent 6px, transparent 12px); }
+.bg-tile-label{
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: .15rem .4rem;
+  overflow: hidden;
+  background: color-mix(in srgb, #000 62%, transparent);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: .68rem;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bg-note{ margin: .7rem 0 0; font-family: var(--sans); font-size: .78rem; color: var(--ink-soft); }
+.bg-controls{ display:grid; gap: .4rem; margin-top: .8rem; }
+.bg-slider{
+  display:grid;
+  grid-template-columns: 5.6rem 1fr 3rem;
+  align-items:center;
+  gap: .6rem;
+  font-family: var(--sans);
+  font-size: .78rem;
+  color: var(--ink-soft);
+}
+.bg-slider input{ width: 100%; accent-color: var(--accent); }
+.bg-slider output{ text-align: right; font-variant-numeric: tabular-nums; }
+.bg-actions{ display:flex; justify-content:flex-end; margin-top: .8rem; }
+
+@media (max-width: 640px){
+  /* On a phone the menu spans the top bar instead of hanging from its (off-centre) button. */
+  #background-picker{ position: static; }
+  #background-menu{ left: .6rem; right: .6rem; width: auto; }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "intro-ragnarok",
+  "title": "Intro Ragnarok",
+  "meter": "",
+  "difficulty": "",
+  "origin": "videojuegos",
+  "status": "",
+  "tags": ["ragnarok"],
+  "order": 1,
+  "lines": [
+    { "subtitle": "", "notes": ["Re", "Mi", "Fa", "Sol", "La", "Si"] },
+    { "subtitle": "", "notes": ["La", "Sol", "Fa"] },
+    { "subtitle": "", "notes": ["Mi", "Re"] },
+    { "subtitle": "", "notes": ["Re", "Mi", "Fa", "Sol", "La", "Si"] },
+    { "subtitle": "", "notes": ["Sol", "Fa^"] },
+    { "subtitle": "", "notes": ["Mi", "Re"] }
+  ]
+}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es" data-view="fingering" data-route="home">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cancionero de Ocarina</title>
+<link rel="icon" type="image/png" href="src/img/ocarina_title.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <!-- Holes, numbered right to left (h1 = top right, h12 = far left). Thumb holes sit outside the
+         body, so they follow the theme ink to stay visible; finger holes sit on the white body. -->
+      <circle id="h1" cx="165" cy="34.5" r="9.2" fill="#161616"/>
+      <circle id="h2" cx="146.5" cy="141.5" r="10.6" fill="currentColor"/>
+      <circle id="h3" cx="143" cy="52" r="9.9" fill="#161616"/>
+      <circle id="h4" cx="125.5" cy="74.5" r="8.3" fill="#161616"/>
+      <circle id="h5" cx="114.5" cy="96" r="8.8" fill="#161616"/>
+      <circle id="h6" cx="109.5" cy="59" r="6.3" fill="#161616"/>
+      <circle id="h7" cx="80" cy="71.5" r="9.2" fill="#161616"/>
+      <circle id="h8" cx="76.5" cy="175" r="10.3" fill="currentColor"/>
+      <circle id="h9" cx="68" cy="127" r="6.1" fill="#161616"/>
+      <circle id="h10" cx="65.5" cy="94.5" r="8.5" fill="#161616"/>
+      <circle id="h11" cx="50" cy="115" r="9" fill="#161616"/>
+      <circle id="h12" cx="30.5" cy="132" r="9.8" fill="#161616"/>
+
+    <!-- One symbol per note (middle octave): the base picture plus a <use> per covered hole.
+         The two small holes (h6, h9) stay open in the whole middle scale. -->
+    <symbol id="oc-do" viewBox="0 0 200 194">
+      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
+      <use href="#h1"/>
+      <use href="#h2"/>
+      <use href="#h3"/>
+      <use href="#h4"/>
+      <use href="#h5"/>
+      <use href="#h7"/>
+      <use href="#h8"/>
+      <use href="#h10"/>
+      <use href="#h11"/>
+      <use href="#h12"/>
+    </symbol>
+    <symbol id="oc-re" viewBox="0 0 200 194">
+      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
+      <use href="#h2"/>
+      <use href="#h3"/>
+      <use href="#h4"/>
+      <use href="#h5"/>
+      <use href="#h7"/>
+      <use href="#h8"/>
+      <use href="#h10"/>
+      <use href="#h11"/>
+      <use href="#h12"/>
+    </symbol>
+    <symbol id="oc-mi" viewBox="0 0 200 194">
+      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
+      <use href="#h2"/>
+      <use href="#h4"/>
+      <use href="#h5"/>
+      <use href="#h7"/>
+      <use href="#h8"/>
+      <use href="#h10"/>
+      <use href="#h11"/>
+      <use href="#h12"/>
+    </symbol>
+    <symbol id="oc-fa" viewBox="0 0 200 194">
+      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
+      <use href="#h2"/>
+      <use href="#h5"/>
+      <use href="#h7"/>
+      <use href="#h8"/>
+      <use href="#h10"/>
+      <use href="#h11"/>
+      <use href="#h12"/>
+    </symbol>
+    <symbol id="oc-sol" viewBox="0 0 200 194">
+      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
+      <use href="#h7"/>
+      <use href="#h10"/>
+      <use href="#h11"/>
+      <use href="#h12"/>
+    </symbol>
+    <symbol id="oc-la" viewBox="0 0 200 194">
+      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
+      <use href="#h7"/>
+      <use href="#h11"/>
+      <use href="#h12"/>
+    </symbol>
+    <symbol id="oc-si" viewBox="0 0 200 194">
+      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
+      <use href="#h7"/>
+      <use href="#h12"/>
+    </symbol>
+  </defs>
+</svg>
+<div class="wrap">
+
+  <header class="topbar">
+    <a class="brand" href="#/" aria-label="Cancionero de Ocarina: ir a la lista de canciones">
+      <img class="logo" src="src/img/ocarina_title.png" alt="" width="50" height="50">
+      <div class="brand-text">
+        <h1>Cancionero de Ocarina</h1>
+        <p class="brand-tag">Notas y digitación para practicar</p>
+      </div>
+    </a>
+    <div class="toolbar" hidden>
+      <div class="folder-slot" id="folder-slot"></div>
+      <div class="picker" id="theme-picker">
+        <button type="button" aria-label="Color del tema" aria-expanded="false" aria-controls="theme-menu">
+          <span data-icon="theme"></span><span>Color</span>
+        </button>
+        <div class="menu" id="theme-menu" hidden></div>
+      </div>
+      <div class="picker" id="font-picker">
+        <button type="button" aria-label="Fuente" aria-expanded="false" aria-controls="font-menu">
+          <span data-icon="font"></span><span>Fuente</span>
+        </button>
+        <div class="menu" id="font-menu" hidden></div>
+      </div>
+      <div class="picker" id="background-picker">
+        <button type="button" aria-label="Fondo de la página" aria-expanded="false" aria-controls="background-menu">
+          <span data-icon="image"></span><span>Fondo</span>
+        </button>
+        <div class="menu menu--wide" id="background-menu" hidden></div>
+      </div>
+      <button type="button" class="mode-toggle" id="mode-toggle" aria-label="Modo oscuro" aria-pressed="false" title="Cambiar entre tema claro y oscuro">
+        <span id="mode-icon" data-icon="light_mode"></span><span id="mode-label">Claro</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="viewbar no-print">
+      <div class="segmented" id="view-switch" role="radiogroup" aria-label="Mostrar las notas como">
+        <span class="segmented-thumb" aria-hidden="true"></span>
+        <label><input type="radio" name="view" value="names"><span>Nombre</span></label>
+        <label><input type="radio" name="view" value="fingering"><span>Digitación</span></label>
+        <label><input type="radio" name="view" value="both"><span>Ambas</span></label>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="note">Fa</span> octava media</span>
+      <span class="legend-item"><span class="note note--low">Fa</span> grave</span>
+      <span class="legend-item"><span class="note note--high">Fa</span> aguda</span>
+      <span class="legend-item"><span class="note note--high2">Fa</span> super aguda</span>
+      <span class="legend-item"><span class="note">Fa<sup>&#9839;</sup></span> sostenido</span>
+    </div>
+
+    <noscript><p class="empty">Esta página necesita JavaScript para mostrar las canciones.</p></noscript>
+    <div class="empty" id="empty" hidden></div>
+    <div id="songs"></div>
+  </main>
+
+  <footer class="site-footer">
+    <span>Cancionero personal &middot; hecho para practicar con la ocarina</span>
+    <span id="footer-count"></span>
+  </footer>
+
+</div>
+<dialog class="dialog" id="confirm-dialog" aria-labelledby="confirm-title">
+  <form method="dialog">
+    <h2 id="confirm-title" data-role="title"></h2>
+    <p data-role="text"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" value="cancel" autofocus>Cancelar</button>
+      <button type="button" class="btn btn--danger" value="ok">Aceptar</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast no-print" id="toast" role="status" hidden></div>
+
+<script src="js/notes.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/categories.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/menus.js"></script>
+<script src="js/store.js"></script>
+<script src="js/router.js"></script>
+<script src="js/home.js"></script>
+<script src="js/render.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/folder.js"></script>
+<script src="js/background.js"></script>
+<script src="js/preferences.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
