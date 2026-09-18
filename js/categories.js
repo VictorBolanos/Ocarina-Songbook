@@ -56,4 +56,4 @@
   }
 
   C.categories = { list: LIST, isValid: isValid, labelOf: labelOf, rank: rank };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

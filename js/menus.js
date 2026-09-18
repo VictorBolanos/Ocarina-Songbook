@@ -45,4 +45,4 @@
   });
 
   C.menus = { register: register, closeAll: closeAll };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

@@ -128,4 +128,4 @@
   }
 
   C.preferences = { init: init };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

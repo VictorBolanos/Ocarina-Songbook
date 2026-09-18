@@ -25,4 +25,4 @@
     e.preventDefault();
     e.returnValue = '';
   });
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

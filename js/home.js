@@ -228,4 +228,4 @@
   }
 
   C.home = { view: view, chips: chips, newSongButton: newSongButton, init: init };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

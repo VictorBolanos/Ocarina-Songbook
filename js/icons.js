@@ -54,4 +54,4 @@
   }
 
   C.icons = { create: create, mount: mount };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

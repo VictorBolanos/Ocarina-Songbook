@@ -316,4 +316,4 @@
     newLine: newLine,
     removeLine: removeLine
   };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

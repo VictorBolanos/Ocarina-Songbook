@@ -296,4 +296,4 @@
     hasFile: (id) => Object.keys(written).concat(Object.keys(foreign))
       .some((name) => name.toLowerCase() === (id + '.json').toLowerCase())
   };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

@@ -53,4 +53,4 @@
   ];
 
   C.notes = { parse: parse, describe: describe, fingeringId: fingeringId, PALETTE: PALETTE };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

@@ -92,7 +92,7 @@ ${lines.join(',\n')}
   }
 
   C.icons = { create: create, mount: mount };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});
 `;
 
 fs.writeFileSync(outFile, output, 'utf8');

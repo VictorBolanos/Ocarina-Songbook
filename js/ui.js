@@ -88,4 +88,4 @@
   }
 
   C.ui = { h: h, toast: toast, confirm: confirm };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

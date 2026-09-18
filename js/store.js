@@ -308,4 +308,4 @@
     redo: redo,
     replaceSongs: replaceSongs
   };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

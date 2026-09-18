@@ -64,4 +64,4 @@
   }
 
   C.router = { init: init, go: go };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});

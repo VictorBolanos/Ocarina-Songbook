@@ -356,7 +356,7 @@
     box.replaceChildren.apply(box, message || []);
     box.hidden = !message;
 
-    document.title = song && song.title ? song.title + ' · Cancionero de Ocarina' : 'Cancionero de Ocarina';
+    document.title = song && song.title ? song.title + ' · Ocarina Songbook' : 'Ocarina Songbook';
     document.getElementById('footer-count').textContent = state.folder.status === 'connected'
       ? state.songs.length + (state.songs.length === 1 ? ' canción' : ' canciones') + ' · ' + (state.folder.name || 'songs') + '/'
       : '';
@@ -381,4 +381,4 @@
   }
 
   C.render = { init: init, placeCaret: placeCaret };
-})(window.Cancionero = window.Cancionero || {});
+})(window.Songbook = window.Songbook || {});
