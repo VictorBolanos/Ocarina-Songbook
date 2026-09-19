@@ -3,9 +3,16 @@
   "title": "Gallo Robin",
   "meter": "",
   "bpm": 100,
+  "signature": "none",
   "difficulty": "",
   "origin": "tradicional",
   "status": "",
   "tags": ["infantil"],
-  "lines": []
+  "lines": [
+    { "subtitle": "", "notes": ["La:q.", "La", "Sol:e", "La:e", "Re", "Re", "R:s"] },
+    { "subtitle": "", "notes": ["Sol", "Sol", "Sol:e", "Fa:e", "Re", "Re", "Re:e", "R:s"] },
+    { "subtitle": "", "notes": ["Re", "Re^", "La:e", "La:e", "La:e", "La:e"] },
+    { "subtitle": "", "notes": ["Sol:e", "Fa:e", "Sol:e", "La:e", "Sol:e", "Fa:e", "Re:e", "Re:e", "Re:e"] },
+    { "subtitle": "", "notes": ["Re:e", "Fa:e", "Sol:e", "La:e", "Sol:e", "Fa:e", "Re"] }
+  ]
 }
