@@ -5,93 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ocarina Songbook</title>
 <link rel="icon" type="image/png" href="src/img/ocarina_title.png">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles.css?v=3e85ef8e">
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <!-- Holes, numbered right to left (h1 = top right, h12 = far left). Thumb holes sit outside the
-         body, so they follow the theme ink to stay visible; finger holes sit on the white body. -->
-      <circle id="h1" cx="165" cy="34.5" r="9.2" fill="#161616"/>
-      <circle id="h2" cx="146.5" cy="141.5" r="10.6" fill="currentColor"/>
-      <circle id="h3" cx="143" cy="52" r="9.9" fill="#161616"/>
-      <circle id="h4" cx="125.5" cy="74.5" r="8.3" fill="#161616"/>
-      <circle id="h5" cx="114.5" cy="96" r="8.8" fill="#161616"/>
-      <circle id="h6" cx="109.5" cy="59" r="6.3" fill="#161616"/>
-      <circle id="h7" cx="80" cy="71.5" r="9.2" fill="#161616"/>
-      <circle id="h8" cx="76.5" cy="175" r="10.3" fill="currentColor"/>
-      <circle id="h9" cx="68" cy="127" r="6.1" fill="#161616"/>
-      <circle id="h10" cx="65.5" cy="94.5" r="8.5" fill="#161616"/>
-      <circle id="h11" cx="50" cy="115" r="9" fill="#161616"/>
-      <circle id="h12" cx="30.5" cy="132" r="9.8" fill="#161616"/>
-
-    <!-- One symbol per note (middle octave): the base picture plus a <use> per covered hole.
-         The two small holes (h6, h9) stay open in the whole middle scale. -->
-    <symbol id="oc-do" viewBox="0 0 200 194">
-      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
-      <use href="#h1"/>
-      <use href="#h2"/>
-      <use href="#h3"/>
-      <use href="#h4"/>
-      <use href="#h5"/>
-      <use href="#h7"/>
-      <use href="#h8"/>
-      <use href="#h10"/>
-      <use href="#h11"/>
-      <use href="#h12"/>
-    </symbol>
-    <symbol id="oc-re" viewBox="0 0 200 194">
-      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
-      <use href="#h2"/>
-      <use href="#h3"/>
-      <use href="#h4"/>
-      <use href="#h5"/>
-      <use href="#h7"/>
-      <use href="#h8"/>
-      <use href="#h10"/>
-      <use href="#h11"/>
-      <use href="#h12"/>
-    </symbol>
-    <symbol id="oc-mi" viewBox="0 0 200 194">
-      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
-      <use href="#h2"/>
-      <use href="#h4"/>
-      <use href="#h5"/>
-      <use href="#h7"/>
-      <use href="#h8"/>
-      <use href="#h10"/>
-      <use href="#h11"/>
-      <use href="#h12"/>
-    </symbol>
-    <symbol id="oc-fa" viewBox="0 0 200 194">
-      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
-      <use href="#h2"/>
-      <use href="#h5"/>
-      <use href="#h7"/>
-      <use href="#h8"/>
-      <use href="#h10"/>
-      <use href="#h11"/>
-      <use href="#h12"/>
-    </symbol>
-    <symbol id="oc-sol" viewBox="0 0 200 194">
-      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
-      <use href="#h7"/>
-      <use href="#h10"/>
-      <use href="#h11"/>
-      <use href="#h12"/>
-    </symbol>
-    <symbol id="oc-la" viewBox="0 0 200 194">
-      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
-      <use href="#h7"/>
-      <use href="#h11"/>
-      <use href="#h12"/>
-    </symbol>
-    <symbol id="oc-si" viewBox="0 0 200 194">
-      <image href="src/img/ocarina_base.png" width="200" height="194" style="filter: var(--oc-halo)"/>
-      <use href="#h7"/>
-      <use href="#h12"/>
-    </symbol>
-  </defs>
+<svg id="fingering-sprite" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs id="fingering-defs"></defs>
 </svg>
 <div class="wrap">
 
@@ -105,6 +23,12 @@
     </a>
     <div class="toolbar" hidden>
       <div class="folder-slot" id="folder-slot"></div>
+      <button type="button" class="mode-toggle" id="lang-toggle" aria-label="Switch to English" title="Switch to English">
+        <img src="src/svg/spain.png" alt="" width="18" height="18"><span>Español</span>
+      </button>
+      <button type="button" class="mode-toggle" id="mode-toggle" aria-label="Modo oscuro" aria-pressed="false" title="Cambiar entre tema claro y oscuro">
+        <span id="mode-icon" data-icon="light_mode"></span><span id="mode-label">Claro</span>
+      </button>
       <div class="picker" id="theme-picker">
         <button type="button" aria-label="Color del tema" aria-expanded="false" aria-controls="theme-menu">
           <span data-icon="theme"></span><span>Color</span>
@@ -123,9 +47,17 @@
         </button>
         <div class="menu menu--wide" id="background-menu" hidden></div>
       </div>
-      <button type="button" class="mode-toggle" id="mode-toggle" aria-label="Modo oscuro" aria-pressed="false" title="Cambiar entre tema claro y oscuro">
-        <span id="mode-icon" data-icon="light_mode"></span><span id="mode-label">Claro</span>
-      </button>
+      <a class="mode-toggle" id="fingering-button" href="#/digitaciones" title="Ver las digitaciones de todas las notas">
+        <span data-icon="digitalization"></span><span>Digitaciones</span>
+      </a>
+      <div class="metro-split">
+        <button type="button" class="mode-toggle metro-open" id="metronome-button" aria-label="Abrir el metrónomo" title="Abrir el metrónomo">
+          <span data-icon="metronome"></span><span>Metrónomo</span>
+        </button>
+        <button type="button" class="mode-toggle metro-run" id="metronome-run" aria-label="Iniciar el metrónomo" aria-pressed="false" title="Iniciar el metrónomo">
+          <span data-icon="play"></span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -140,11 +72,11 @@
     </div>
 
     <div class="legend">
-      <span class="legend-item"><span class="note">Fa</span> octava media</span>
-      <span class="legend-item"><span class="note note--low">Fa</span> grave</span>
-      <span class="legend-item"><span class="note note--high">Fa</span> aguda</span>
-      <span class="legend-item"><span class="note note--sharp"><span class="note-label">Fa<span class="note-acc">&#9839;</span></span></span> sostenido</span>
-      <span class="legend-item"><span class="note note--flat"><span class="note-label">Si<span class="note-acc">&#9837;</span></span></span> bemol</span>
+      <span class="legend-item"><span class="note" data-solfege="Fa">Fa</span> octava media</span>
+      <span class="legend-item"><span class="note note--low" data-solfege="Fa">Fa</span> grave</span>
+      <span class="legend-item"><span class="note note--high" data-solfege="Fa">Fa</span> aguda</span>
+      <span class="legend-item"><span class="note note--sharp"><span class="note-label"><span data-solfege="Fa">Fa</span><span class="note-acc">&#9839;</span></span></span> sostenido</span>
+      <span class="legend-item"><span class="note note--flat"><span class="note-label"><span data-solfege="Si">Si</span><span class="note-acc">&#9837;</span></span></span> bemol</span>
     </div>
 
     <noscript><p class="empty">Esta página necesita JavaScript para mostrar las canciones.</p></noscript>
@@ -154,6 +86,11 @@
 
   <footer class="site-footer">
     <span>Ocarina Songbook &middot; cancionero personal para practicar con la ocarina</span>
+    <span class="footer-tools no-print">
+      <button type="button" class="link-button" id="backup-export" title="Guardar todas las canciones y digitaciones en un archivo" hidden>Exportar copia</button>
+      <button type="button" class="link-button" id="backup-import" title="Añadir las canciones de una copia guardada" hidden>Importar copia</button>
+      <input type="file" id="backup-file" accept="application/json,.json" hidden>
+    </span>
     <span id="footer-count"></span>
   </footer>
 
@@ -182,25 +119,38 @@
   </form>
 </dialog>
 
+<dialog class="dialog dialog--export" id="export-dialog" aria-label="Exportar la canción"></dialog>
+
+<dialog class="dialog dialog--fingering" id="fingering-dialog" aria-label="Editar las digitaciones"></dialog>
+
+<dialog class="dialog dialog--metronome" id="metronome-dialog" aria-label="Metrónomo"></dialog>
+
 <div class="toast no-print" id="toast" role="status" hidden></div>
 
-<script src="js/notes.js"></script>
-<script src="js/keys.js"></script>
-<script src="js/icons.js"></script>
-<script src="js/categories.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/menus.js"></script>
-<script src="js/store.js"></script>
-<script src="js/router.js"></script>
-<script src="js/home.js"></script>
-<script src="js/key-dialog.js"></script>
-<script src="js/audio.js"></script>
-<script src="js/player.js"></script>
-<script src="js/render.js"></script>
-<script src="js/editor.js"></script>
-<script src="js/folder.js"></script>
-<script src="js/background.js"></script>
-<script src="js/preferences.js"></script>
-<script src="js/app.js"></script>
+<script src="js/i18n.js?v=87dc15d3"></script>
+<script src="js/notes.js?v=14dee339"></script>
+<script src="js/keys.js?v=bfc69fc7"></script>
+<script src="js/fingering.js?v=3820bad8"></script>
+<script src="js/icons.js?v=138fa6bb"></script>
+<script src="js/categories.js?v=e4b6179c"></script>
+<script src="js/ui.js?v=81b71ef0"></script>
+<script src="js/menus.js?v=81224562"></script>
+<script src="js/store.js?v=a6adb113"></script>
+<script src="js/router.js?v=cafb81aa"></script>
+<script src="js/home.js?v=26c695a3"></script>
+<script src="js/key-dialog.js?v=051c6c0b"></script>
+<script src="js/metronome.js?v=0bd6d517"></script>
+<script src="js/audio.js?v=fca93399"></script>
+<script src="js/export.js?v=aa20c009"></script>
+<script src="js/player.js?v=4fdbbfe8"></script>
+<script src="js/render.js?v=a1789a57"></script>
+<script src="js/editor.js?v=6f680e28"></script>
+<script src="js/folder.js?v=bc073a36"></script>
+<script src="js/background.js?v=1efc275c"></script>
+<script src="js/preferences.js?v=672522c2"></script>
+<script src="js/fingering-editor.js?v=ebdd396e"></script>
+<script src="js/fingering-page.js?v=c95b12d3"></script>
+<script src="js/backup.js?v=002a093d"></script>
+<script src="js/app.js?v=a362b0d5"></script>
 </body>
 </html>

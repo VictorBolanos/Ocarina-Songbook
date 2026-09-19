@@ -47,7 +47,7 @@
 
   // Text of a spelled note: "La♭", "Fa♯", "Re".
   function label(note) {
-    return note.name + C.notes.glyph(note.accidental);
+    return C.i18n.noteName(note.name) + C.notes.glyph(note.accidental);
   }
 
   function pitchClass(note) {
@@ -131,18 +131,19 @@
     var signature = type === 'flat' ? -furthest : furthest;
 
     var tonics = TONICS[String(signature)];
-    var major = label(tonics[0]) + ' mayor';
-    var minor = label(tonics[1]) + ' menor';
+    var major = C.i18n.t('{note} mayor', { note: label(tonics[0]) });
+    var minor = C.i18n.t('{note} menor', { note: label(tonics[1]) });
     var last = lastPitchClass(song);
     var mode = last === pitchClass(tonics[0]) ? 'major' : (last === pitchClass(tonics[1]) ? 'minor' : null);
     var text = mode === 'major' ? major : (mode === 'minor' ? minor : major + ' / ' + minor);
     var custom = !complete;
     return {
+      signature: signature,
       major: major,
       minor: minor,
       mode: mode,
       custom: custom,
-      text: custom ? text + ' (personalizado)' : text
+      text: custom ? text + C.i18n.t(' (personalizado)') : text
     };
   }
 

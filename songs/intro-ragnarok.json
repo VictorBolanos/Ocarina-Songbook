@@ -8,7 +8,6 @@
   "origin": "videojuegos",
   "status": "dominada",
   "tags": ["ragnarok"],
-  "order": 1,
   "lines": [
     { "subtitle": "", "notes": ["Re:s", "Mi:s", "Fa:s", "Sol:s", "La:h", "Si:h"] },
     { "subtitle": "", "notes": ["La", "Sol", "Fa"] },

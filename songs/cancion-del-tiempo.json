@@ -10,10 +10,10 @@
   "tags": ["zelda"],
   "order": 2,
   "lines": [
-    { "subtitle": "", "notes": ["La", "Re"] },
-    { "subtitle": "", "notes": ["Fa", "La", "Re"] },
-    { "subtitle": "", "notes": ["Fa", "La", "Do^", "Si", "Sol", "Fa"] },
+    { "subtitle": "", "notes": ["La", "Re:q."] },
+    { "subtitle": "", "notes": ["Fa", "La", "Re:q."] },
+    { "subtitle": "", "notes": ["Fa", "La", "Do^:e", "Si:e", "Sol:e", "Fa:q."] },
     { "subtitle": "", "notes": ["Sol", "La", "Re"] },
-    { "subtitle": "", "notes": ["Do", "Mi", "Re"] }
+    { "subtitle": "", "notes": ["Do", "Mi", "Re:q."] }
   ]
 }

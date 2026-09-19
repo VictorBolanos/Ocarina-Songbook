@@ -7,7 +7,6 @@
   "origin": "cine",
   "status": "",
   "tags": ["señor de los anillos"],
-  "order": 6,
   "lines": [
     { "subtitle": "Línea 1", "notes": ["La", "Sol:q.", "La:e", "La#:e", "La:e", "Sol:e", "Fa", "Sol", "Mi:h", "R"] },
     { "subtitle": "", "notes": ["La", "Sol", "La", "La#", "La", "La#", "Do^", "R"] },

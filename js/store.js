@@ -11,9 +11,9 @@
   //   signature,                               // accidentals the song uses: 'none', 'flat' or 'sharp'
   //   difficulty, origin, status,              // one option key each (see categories.js) or ''
   //   tags,                                    // free-form labels, e.g. ['zelda', 'infantil']
-  //   lines: [{ subtitle, notes: ['Re', 'Fa#', 'Do^', ...], wait }]
-  //     A line is either a line of notes (wait = 0), which only breaks the text for easier reading and
-  //     adds no time when played, or a wait line: no notes, `wait` beats of silence.
+  //   lines: [{ subtitle, notes: ['Re', 'Fa#', 'Do^', ...] }]
+  //     A line only breaks the text for easier reading and adds no time when played. Silence is a rest
+  //     ('R', 'R:h'...) among the notes.
   // }
   //
   // The songs live in exactly one place: the JSON files of the connected songs/ folder (folder.js).
@@ -34,12 +34,13 @@
     route: { name: 'home', id: null },   // home = the song list, song = one open song (router.js)
     duration: { key: 'q', dotted: false },   // note value used for new notes when nothing is selected
     selectKey: null,               // data-key of a field whose text should be selected once rendered
-    folder: { status: 'checking', name: '' }   // checking | unsupported | disconnected | needs-permission | connected
+    folder: { status: 'checking', name: '' }   // checking | unsupported | disconnected | needs-permission | readonly | connected
   };
 
   var listeners = [];
   var pendingText = null;          // snapshot taken before the current burst of typing
   var saveTimer = null;
+  var writing = 0;                 // saves handed to the folder that have not finished
 
   function newId() {
     return 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -54,7 +55,7 @@
 
   // Id for a new song, with -2, -3... appended until it clashes with no song and no file in the folder.
   function uniqueId(title) {
-    var base = slug(title);
+    var base = slug(title).slice(0, 36);           // room for "-2", "-10"... within the 40 an id may have
     var id = base;
     for (var n = 2; find(id) || (C.folder && C.folder.hasFile(id)); n++) id = base + '-' + n;
     return id;
@@ -82,12 +83,6 @@
     return tags;
   }
 
-  // Beats of silence of a wait line: halves allowed, at most 64. 0 means "not a wait line".
-  function cleanWait(value) {
-    var n = Math.round(Number(value) * 2) / 2;
-    return isFinite(n) && n > 0 ? Math.min(64, n) : 0;
-  }
-
   // Tempo as a whole number of quarter notes per minute, kept in a musical range.
   function cleanBpm(value) {
     var n = Math.round(Number(value));
@@ -95,7 +90,7 @@
   }
 
   function blankSong(id) {
-    var song = { id: id, title: 'Nueva canción', meter: '', bpm: 100, signature: 'none', tags: [], lines: [{ subtitle: '', notes: [], wait: 0 }] };
+    var song = { id: id, title: C.i18n.t('Nueva canción'), meter: '', bpm: 100, signature: 'none', tags: [], lines: [{ subtitle: '', notes: [] }] };
     C.categories.list.forEach(function (category) { song[category.key] = ''; });
     return song;
   }
@@ -116,6 +111,14 @@
 
   // Cleans an array of songs read from disk. Anything malformed is dropped instead of trusted,
   // since the files may have been edited by hand.
+  var dropped = [];                // songs whose notes were ignored by the last sanitize: [{ title, count }]
+
+  function takeDropped() {
+    var list = dropped;
+    dropped = [];
+    return list;
+  }
+
   function sanitize(list) {
     if (!Array.isArray(list)) return null;
     var used = {};
@@ -124,17 +127,14 @@
       if (!item || typeof item !== 'object') return;
       var id = validId(item.id) && !used[item.id] ? item.id : newId();
       used[id] = true;
+      var ignored = 0;
       var lines = (Array.isArray(item.lines) ? item.lines : [])
         .filter(function (l) { return l && typeof l === 'object'; })
         .map(function (l) {
-          var wait = cleanWait(l.wait);
-          return {
-            subtitle: text(l.subtitle, MAX.subtitle),
-            notes: wait > 0 ? [] : (Array.isArray(l.notes) ? l.notes : []).filter(function (code) {
-              return typeof code === 'string' && C.notes.parse(code);
-            }),
-            wait: wait
-          };
+          var all = Array.isArray(l.notes) ? l.notes : [];
+          var valid = all.filter(function (code) { return typeof code === 'string' && C.notes.parse(code); });
+          ignored += all.length - valid.length;
+          return { subtitle: text(l.subtitle, MAX.subtitle), notes: valid };
         });
       // `tag` is the old name of `meter`; files written by earlier versions still use it.
       var song = {
@@ -150,6 +150,7 @@
         song[category.key] = C.categories.isValid(category.key, item[category.key]) ? item[category.key] : '';
       });
       songs.push(song);
+      if (ignored) dropped.push({ title: song.title || song.id, count: ignored });
     });
     return songs;
   }
@@ -164,6 +165,12 @@
   // A song by id, looking in the draft too (the draft is only stored once it is published).
   function songById(id) {
     return state.draft && state.draft.id === id ? state.draft : find(id);
+  }
+
+  // Songs can only be created, edited and deleted with the songs folder connected. Without it (a phone, or
+  // the page hosted on the web) the songs published in the site are shown read-only.
+  function canEdit() {
+    return state.folder.status === 'connected';
   }
 
   function editingSong() {
@@ -193,10 +200,13 @@
     clearTimeout(saveTimer);
     saveTimer = null;
     if (!C.folder.isConnected()) return Promise.resolve();
+    writing++;
     return C.folder.sync().then(function () {
       markSaved(true);
     }).catch(function (err) {
       markSaved(false, C.folder.describeFailure(err));
+    }).then(function () {
+      writing--;
     });
   }
 
@@ -205,8 +215,10 @@
     saveTimer = setTimeout(save, 250);
   }
 
+  // True from the edit until it is on disk: while the timer waits AND while the write is queued or running.
+  // Reading the folder in that window would bring back the old files and undo the edit.
   function hasPendingSave() {
-    return saveTimer !== null;
+    return saveTimer !== null || writing > 0;
   }
 
   // ---- Change notification ----------------------------------------------------------------------
@@ -227,44 +239,46 @@
       state.caret = { line: 0, pos: 0 };
       return;
     }
-    if (!song.lines.length) song.lines.push({ subtitle: '', notes: [], wait: 0 });
+    if (!song.lines.length) song.lines.push({ subtitle: '', notes: [] });
     var line = Math.min(Math.max(state.caret.line, 0), song.lines.length - 1);
-    if (song.lines[line].wait > 0) {                 // the caret lives in a line of notes, never in a wait line
-      var next = line;
-      while (next < song.lines.length && song.lines[next].wait > 0) next++;
-      if (next >= song.lines.length) {
-        next = line;
-        while (next >= 0 && song.lines[next].wait > 0) next--;
-      }
-      if (next < 0) {
-        song.lines.push({ subtitle: '', notes: [], wait: 0 });
-        next = song.lines.length - 1;
-      }
-      line = next;
-    }
     var pos = Math.min(Math.max(state.caret.pos, 0), song.lines[line].notes.length);
     state.caret = { line: line, pos: pos };
   }
 
   // ---- History ----------------------------------------------------------------------------------
+  // Undo only concerns the song being edited (a working copy, see editor.js), so the history keeps that
+  // copy alone: with a big library, a copy of every song per step would add up fast.
+  function draftJson() {
+    return JSON.stringify(state.draft);              // 'null' when nothing is being edited
+  }
+
+  // The whole state, only to tell whether an edit changed anything. It is never kept.
   function snapshot() {
     return JSON.stringify({ songs: state.songs, draft: state.draft });
   }
 
   function pushUndo(json) {
+    if (json === 'null') return;
     state.undo.push(json);
     if (state.undo.length > HISTORY_LIMIT) state.undo.shift();
     state.redo.length = 0;
+  }
+
+  // What is playing was scheduled from the song as it was, so an edit stops it.
+  function stopMusic() {
+    if (C.audio) C.audio.stop();
   }
 
   // Every edit goes through here: it snapshots for undo, saves, and redraws.
   function mutate(change, focusKeys) {
     flushText();
     var before = snapshot();
+    var beforeDraft = draftJson();
     state.selection = null;
     change();
     if (snapshot() !== before) {
-      pushUndo(before);
+      pushUndo(beforeDraft);
+      stopMusic();
       scheduleSave();
     }
     notify(focusKeys);
@@ -273,39 +287,37 @@
   // Typing in a text field changes the model on every keystroke but must be ONE undo step and must
   // not redraw (that would steal focus), so it has its own path.
   function typing(change) {
-    if (pendingText === null) pendingText = snapshot();
+    if (pendingText === null) pendingText = draftJson();
     change();
+    stopMusic();
     scheduleSave();
   }
 
   function flushText() {
     if (pendingText === null) return;
-    if (pendingText !== snapshot()) pushUndo(pendingText);
+    if (pendingText !== draftJson()) pushUndo(pendingText);
     pendingText = null;
   }
 
   function restore(json, focusKeys) {
-    var saved = JSON.parse(json);
     state.selection = null;
-    state.songs = saved.songs;
-    state.draft = saved.draft;
+    state.draft = JSON.parse(json);
     if (state.draft && state.editId !== state.draft.id) state.draft = null;   // never leave an unseen draft
     if (state.editId && !songById(state.editId)) state.editId = null;
-    scheduleSave();
     notify(focusKeys);
   }
 
   function undo() {
     flushText();
-    if (!state.undo.length) return;
-    state.redo.push(snapshot());
+    if (!state.undo.length || !state.draft) return;
+    state.redo.push(draftJson());
     restore(state.undo.pop(), ['undo', 'pal:Do']);
   }
 
   function redo() {
     flushText();
-    if (!state.redo.length) return;
-    state.undo.push(snapshot());
+    if (!state.redo.length || !state.draft) return;
+    state.undo.push(draftJson());
     restore(state.redo.pop(), ['redo', 'pal:Do']);
   }
 
@@ -331,12 +343,13 @@
     blankSong: blankSong,
     cleanTags: cleanTags,
     cleanBpm: cleanBpm,
-    cleanWait: cleanWait,
     allTags: allTags,
     sanitize: sanitize,
+    takeDropped: takeDropped,
     find: find,
     songById: songById,
     editingSong: editingSong,
+    canEdit: canEdit,
     discardLegacyStorage: discardLegacyStorage,
     save: save,
     hasPendingSave: hasPendingSave,

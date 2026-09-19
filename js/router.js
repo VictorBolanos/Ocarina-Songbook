@@ -12,7 +12,9 @@
 
   function parse() {
     var match = /^#\/song\/([\w-]+)$/.exec(location.hash);
-    return match ? { name: 'song', id: match[1] } : { name: 'home', id: null };
+    if (match) return { name: 'song', id: match[1] };
+    if (location.hash === '#/digitaciones') return { name: 'fingerings', id: null };
+    return { name: 'home', id: null };
   }
 
   function setRoute(route) {
@@ -48,7 +50,7 @@
     var focus = nextFocus;
     nextFocus = null;
     store.notify(focus || []);
-    if (next.name === 'song') window.scrollTo(0, 0);
+    if (next.name === 'song' || next.name === 'fingerings') window.scrollTo(0, 0);
     else if (cameFromSong) window.scrollTo(0, homeScroll);
   }
 
@@ -62,6 +64,23 @@
   function init() {
     setRoute(parse());
     window.addEventListener('hashchange', apply);
+    // The toolbar's Digitaciones button opens the fingerings page, and closes it (back to the songs) when
+    // pressed again.
+    var button = document.getElementById('fingering-button');
+    if (button) {
+      button.addEventListener('click', function (e) {
+        if (state.route.name !== 'fingerings') return;
+        e.preventDefault();
+        go('#/');
+      });
+    }
+    // Esc also closes the fingerings page, unless it is busy closing a window or a menu.
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || e.defaultPrevented || state.route.name !== 'fingerings') return;
+      if (document.querySelector('dialog[open], .menu:not([hidden])')) return;
+      e.preventDefault();
+      go('#/');
+    });
   }
 
   C.router = { init: init, go: go };

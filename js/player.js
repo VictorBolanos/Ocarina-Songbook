@@ -9,6 +9,11 @@
 
   var refs = null;         // the buttons of the bar currently on screen
 
+  // The stretch of the song to repeat (reading view only): pick its first and last note.
+  var stretchOn = false;   // "Tramo" is pressed: clicking notes picks the stretch instead of playing
+  var stretch = null;      // { a: {line, index}, b: {line, index} | null }
+  var stretchSong = null;  // id of the song the stretch belongs to
+
   function currentSong() {
     return state.route.name === 'song' ? C.store.songById(state.route.id) : null;
   }
@@ -19,6 +24,10 @@
     });
   }
 
+  function stretchReady() {
+    return !!(stretchOn && stretch && stretch.b);
+  }
+
   // Play / pause / resume, depending on what the audio is doing.
   function toggle() {
     var song = currentSong();
@@ -26,13 +35,74 @@
     var status = C.audio.status();
     if (status === 'playing') C.audio.pause();
     else if (status === 'paused') C.audio.resume();
+    else if (stretchReady()) C.audio.play(song, stretch.a, stretch.b);
     else C.audio.play(song, state.editId === song.id ? state.selection : null);   // from the picked note, if any
   }
 
-  // Starts from a given note (clicking a note on the page).
-  function playFrom(line, index) {
+  // A note was clicked on the page: it starts playing from there, or with "Tramo" on it picks the stretch.
+  function noteClicked(line, index) {
     var song = currentSong();
-    if (song) C.audio.play(song, { line: line, index: index });
+    if (!song) return;
+    if (!stretchOn) {
+      C.audio.play(song, { line: line, index: index });
+      return;
+    }
+    var point = { line: line, index: index };
+    if (!stretch || stretch.b) {
+      stretch = { a: point, b: null };
+    } else if (line < stretch.a.line || (line === stretch.a.line && index < stretch.a.index)) {
+      stretch = { a: point, b: stretch.a };
+    } else {
+      stretch.b = point;
+    }
+    stretchSong = song.id;
+    C.audio.stop();
+    markStretch();
+    syncStretch();
+  }
+
+  function before(x, y) {
+    return x.line < y.line || (x.line === y.line && x.index < y.index);
+  }
+
+  // Marks the picked notes on the page (called after every redraw too).
+  function markStretch() {
+    document.querySelectorAll('.in-stretch, .stretch-start, .stretch-end').forEach(function (el) {
+      el.classList.remove('in-stretch', 'stretch-start', 'stretch-end');
+    });
+    if (!stretchOn || !stretch) return;
+    document.querySelectorAll('.rows [data-note]').forEach(function (el) {
+      var at = el.getAttribute('data-note').split(':');
+      var point = { line: Number(at[0]), index: Number(at[1]) };
+      var isA = point.line === stretch.a.line && point.index === stretch.a.index;
+      var isB = stretch.b && point.line === stretch.b.line && point.index === stretch.b.index;
+      if (isA) el.classList.add('stretch-start');
+      if (isB) el.classList.add('stretch-end');
+      if (isA || isB || (stretch.b && before(stretch.a, point) && before(point, stretch.b))) el.classList.add('in-stretch');
+    });
+  }
+
+  function stretchHint() {
+    if (!stretchOn) return '';
+    if (!stretch) return 'Pulsa la primera nota del tramo.';
+    if (!stretch.b) return 'Ahora pulsa la última nota del tramo.';
+    return 'Se repetirá el tramo marcado. Pulsa otra nota para elegir otro.';
+  }
+
+  function syncStretch() {
+    if (!refs) return;
+    refs.stretch.setAttribute('aria-pressed', String(stretchOn));
+    refs.hint.textContent = stretchHint();
+    refs.hint.hidden = !stretchOn;
+  }
+
+  function setStretchMode(on) {
+    stretchOn = on;
+    if (!on) stretch = null;
+    if (on) stretchSong = currentSong() && currentSong().id;
+    C.audio.stop();
+    markStretch();
+    syncStretch();
   }
 
   // Keeps the bar's buttons in step with the audio state.
@@ -47,6 +117,11 @@
 
   function view(song) {
     refs = null;
+    if (stretchSong !== song.id || state.editId === song.id) {       // a stretch belongs to one song, in reading view
+      stretchOn = false;
+      stretch = null;
+      stretchSong = song.id;
+    }
     if (!C.audio.supported() || !playable(song)) return null;
 
     var play = h('button', { type: 'button', class: 'player-play', 'data-key': 'play', onclick: toggle });
@@ -81,8 +156,37 @@
       }
     }, 'Repetir');
 
-    refs = { play: play, stop: stop };
+    var countIn = h('button', {
+      type: 'button',
+      class: 'btn btn--sm player-countin',
+      'aria-pressed': String(C.audio.settings.countIn),
+      title: 'Oír una cuenta de clics (un compás) antes de que empiece la canción',
+      onclick: function () {
+        C.audio.setCountIn(!C.audio.settings.countIn);
+        countIn.setAttribute('aria-pressed', String(C.audio.settings.countIn));
+      }
+    }, 'Cuenta previa');
+
+    var stretchButton = h('button', {
+      type: 'button',
+      class: 'btn btn--sm player-stretch',
+      'aria-pressed': String(stretchOn),
+      title: 'Marcar un tramo de la canción y repetirlo',
+      onclick: function () { setStretchMode(!stretchOn); }
+    }, 'Tramo');
+    var hint = h('span', { class: 'player-hint', hidden: true });
+
+    var exportButton = h('button', {
+      type: 'button',
+      class: 'btn btn--sm player-export',
+      'data-key': 'export',
+      title: 'Guardar la canción como MIDI, WAV o MP4',
+      onclick: function () { C.exporter.open(currentSong()); }
+    }, 'Exportar');
+
+    refs = { play: play, stop: stop, stretch: stretchButton, hint: hint };
     sync();
+    syncStretch();
 
     return h('div', { class: 'player no-print', role: 'group', 'aria-label': 'Reproductor' },
       play,
@@ -90,7 +194,11 @@
       h('span', { class: 'player-tempo', title: 'Tempo de la canción' }, (song.bpm || 100) + ' BPM'),
       h('label', { class: 'player-field' }, h('span', null, 'Velocidad'), speed),
       h('label', { class: 'player-field player-volume' }, h('span', null, 'Volumen'), volume),
-      loop);
+      loop,
+      state.editId === song.id ? null : stretchButton,
+      countIn,
+      exportButton,
+      hint);
   }
 
   function init() {
@@ -112,5 +220,5 @@
     });
   }
 
-  C.player = { view: view, init: init, playFrom: playFrom };
+  C.player = { view: view, init: init, noteClicked: noteClicked, markStretch: markStretch };
 })(window.Songbook = window.Songbook || {});

@@ -3,6 +3,7 @@
 
   var h = C.ui.h;
   var state = C.store.state;
+  var tr = C.i18n.t;
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
   var caretEl = h('span', { class: 'caret', 'aria-hidden': 'true' });
@@ -18,6 +19,13 @@
     use.setAttribute('href', '#' + id);
     svg.appendChild(use);
     return svg;
+  }
+
+  // "1/4" as a diagonal fraction (small numerator up, small denominator down); anything else as plain text.
+  function fraction(text) {
+    var parts = /^(\d+)\/(\d+)$/.exec(text);
+    if (!parts) return text;
+    return [h('span', { class: 'frac-n' }, parts[1]), h('span', { class: 'frac-s' }, '/'), h('span', { class: 'frac-d' }, parts[2])];
   }
 
   // options.button: render as a <button> (editor). options.text: never draw the fingering (palette).
@@ -41,21 +49,16 @@
       // Both the diagram and the name are in the DOM; html[data-view] decides which one shows.
       el.classList.add('note--oc');
       el.appendChild(diagram(fingering));
-      el.appendChild(h('span', { class: 'note-name', 'aria-hidden': 'true' }, note.name + C.notes.glyph(note.accidental)));
+      el.appendChild(h('span', { class: 'note-name', 'aria-hidden': 'true' }, C.i18n.noteName(note.name) + C.notes.glyph(note.accidental)));
     } else {
       // The accidental sits to the right of the name, on the same line.
       el.appendChild(h('span', { class: 'note-label' },
-        note.name,
+        C.i18n.noteName(note.name),
         note.accidental ? h('span', { class: 'note-acc' }, C.notes.glyph(note.accidental)) : null));
     }
     var length = options.text ? '' : C.notes.badge(note);
-    if (length) el.appendChild(h('span', { class: 'note-dur', 'aria-hidden': 'true' }, length));
+    if (length) el.appendChild(h('span', { class: 'note-dur', 'aria-hidden': 'true' }, fraction(length)));
     return el;
-  }
-
-  // "Espera · 4 tiempos"
-  function waitText(beats) {
-    return 'Espera \u00B7 ' + String(beats).replace('.', ',') + (beats === 1 ? ' tiempo' : ' tiempos');
   }
 
   function pending() {
@@ -66,22 +69,14 @@
   function rows(song) {
     var box = h('div', { class: 'rows' });
     song.lines.forEach(function (line, li) {
-      if (line.wait > 0) {
-        var bar = h('div', { class: 'wait-bar', 'data-note': li + ':0', title: 'Reproducir desde aquí' },
-          C.icons.create('pause'), waitText(line.wait));
-        bar.addEventListener('click', function () { C.player.playFrom(li, 0); });
-        box.appendChild(h('div', { class: 'row row--wait' + (line.subtitle ? ' has-title' : '') },
-          line.subtitle ? h('h3', null, line.subtitle) : null, bar));
-        return;
-      }
       if (!line.notes.length && !line.subtitle) return;    // blank lines only exist while editing
       box.appendChild(h('div', { class: 'row' + (line.subtitle ? ' has-title' : '') },
-        line.subtitle ? h('h3', null, line.subtitle) : null,
+        line.subtitle ? h('h3', { translate: 'no' }, line.subtitle) : null,
         line.notes.length
           ? h('div', { class: 'line' }, line.notes.map(function (code, ni) {
             var el = chip(code, { ref: { line: li, index: ni } });
             el.title = 'Reproducir desde aquí';
-            el.addEventListener('click', function () { C.player.playFrom(li, ni); });
+            el.addEventListener('click', function () { C.player.noteClicked(li, ni); });
             return el;
           }))
           : pending()));
@@ -99,11 +94,18 @@
   function readingSong(song) {
     return h('section', { class: 'song', id: song.id },
       h('div', { class: 'song-head' },
-        h('h2', null, song.title || 'Sin título',
+        h('h2', null, h('span', { translate: 'no' }, song.title || tr('Sin título')),
           song.meter ? h('span', { class: 'badge' }, song.meter) : null,
           h('span', { class: 'badge', title: 'Tempo' }, (song.bpm || 100) + ' BPM'),
           keyBadge(song)),
-        h('div', { class: 'song-actions no-print' },
+        !C.store.canEdit() ? null : h('div', { class: 'song-actions no-print' },
+          h('button', {
+            type: 'button',
+            class: 'btn btn--ghost',
+            'data-key': 'duplicate:' + song.id,
+            title: 'Duplicar para hacer una variante',
+            onclick: function () { C.editor.duplicateSong(song.id); }
+          }, C.icons.create('copy'), 'Duplicar'),
           h('button', {
             type: 'button',
             class: 'btn btn--ghost btn--danger',
@@ -138,47 +140,107 @@
       maxlength: 80,
       value: line.subtitle,
       placeholder: 'Subtítulo de la línea (opcional)',
-      'aria-label': 'Subtítulo de la línea ' + (i + 1),
+      'aria-label': tr('Subtítulo de la línea {n}', { n: i + 1 }),
       'data-key': 'sub:' + i
     }, function (value) { line.subtitle = value; });
     subtitle.addEventListener('focus', function () { C.editor.activateLine(i); });
     return subtitle;
   }
 
-  function removeLineButton(i) {
+  function iconButton(icon, label, key, disabled, run) {
     return h('button', {
       type: 'button',
-      class: 'btn btn--ghost btn--sm',
-      'data-key': 'dl:' + i,
-      onclick: function () { C.editor.removeLine(i); }
-    }, C.icons.create('remove'), 'Quitar línea');
+      class: 'btn btn--ghost btn--sm btn--icon',
+      'data-key': key,
+      title: label,
+      'aria-label': label,
+      disabled: disabled,
+      onclick: run
+    }, C.icons.create(icon));
   }
 
-  // A wait line: no notes, just how many beats of silence.
-  function editWaitLine(line, i) {
-    var beats = textField({
-      type: 'number',
-      class: 'input',
-      min: 0.5,
-      max: 64,
-      step: 0.5,
-      value: line.wait,
-      'aria-label': 'Tiempos de espera',
-      'data-key': 'wait:' + i
-    }, function (value) { line.wait = C.store.cleanWait(value) || 0.5; });
-    return h('div', { class: 'eline eline--wait', 'data-line': i },
-      h('div', { class: 'eline-top' }, subtitleField(line, i), removeLineButton(i)),
-      h('div', { class: 'wait-edit' }, C.icons.create('pause'), h('span', null, 'Línea de espera:'), beats, h('span', null, 'tiempos de silencio')));
+  // Move up, move down, duplicate and remove, for line `i` of `total`.
+  function lineControls(i, total) {
+    return h('span', { class: 'eline-tools' },
+      iconButton('arrow-up', 'Subir la línea (Alt + ↑)', 'up:' + i, i === 0, function () { C.editor.moveLine(i, i - 1); }),
+      iconButton('arrow-down', 'Bajar la línea (Alt + ↓)', 'down:' + i, i === total - 1, function () { C.editor.moveLine(i, i + 1); }),
+      iconButton('copy', 'Duplicar la línea (Alt + Mayús + ↓)', 'dup:' + i, false, function () { C.editor.duplicateLine(i); }),
+      h('button', {
+        type: 'button',
+        class: 'btn btn--ghost btn--sm',
+        'data-key': 'dl:' + i,
+        onclick: function () { C.editor.removeLine(i); }
+      }, C.icons.create('remove'), 'Quitar línea'));
+  }
+
+  // ---- Dragging lines to reorder them ------------------------------------------------------------
+  // The line number is the handle. While dragging, the line under the pointer shows a bar above or below
+  // it, depending on which half the pointer is in; dropping there moves the line.
+  var dragFrom = null;
+  var dropTarget = null;      // { row, before }
+
+  function clearDrop() {
+    document.querySelectorAll('.eline.drop-before, .eline.drop-after').forEach(function (el) {
+      el.classList.remove('drop-before', 'drop-after');
+    });
+    dropTarget = null;
+  }
+
+  function lineHandle(i, row) {
+    var handle = h('span', {
+      class: 'eline-num',
+      draggable: 'true',
+      title: 'Arrastra para mover la línea',
+      'aria-hidden': 'true'
+    }, String(i + 1));
+    handle.addEventListener('dragstart', function (e) {
+      dragFrom = i;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', 'line ' + (i + 1));
+      if (e.dataTransfer.setDragImage) e.dataTransfer.setDragImage(row, 24, 24);
+      setTimeout(function () { row.classList.add('is-dragging'); }, 0);
+    });
+    handle.addEventListener('dragend', function () {
+      dragFrom = null;
+      row.classList.remove('is-dragging');
+      clearDrop();
+    });
+    return handle;
+  }
+
+  function makeDropZone(row, i) {
+    row.addEventListener('dragover', function (e) {
+      if (dragFrom === null) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      var box = row.getBoundingClientRect();
+      var before = e.clientY < box.top + box.height / 2;
+      if (dropTarget && dropTarget.row === row && dropTarget.before === before) return;
+      clearDrop();
+      row.classList.add(before ? 'drop-before' : 'drop-after');
+      dropTarget = { row: row, before: before };
+    });
+    row.addEventListener('dragleave', function (e) {
+      if (!row.contains(e.relatedTarget)) row.classList.remove('drop-before', 'drop-after');
+    });
+    row.addEventListener('drop', function (e) {
+      if (dragFrom === null) return;
+      e.preventDefault();
+      var from = dragFrom;
+      var slot = i + (dropTarget && !dropTarget.before ? 1 : 0);     // the gap the line is dropped into
+      dragFrom = null;
+      clearDrop();
+      C.editor.moveLine(from, slot > from ? slot - 1 : slot);
+    });
   }
 
   function editLine(song, line, i) {
-    if (line.wait > 0) return editWaitLine(line, i);
     var notes = h('div', { class: 'eline-notes' });
     line.notes.forEach(function (code, j) {
       var note = C.notes.parse(code);
       var body = chip(code, { button: true, ref: { line: i, index: j } });
       body.setAttribute('data-key', 'chip:' + i + ':' + j);
-      body.setAttribute('aria-label', C.notes.describe(note) + '. Colocar el cursor detrás');
+      body.setAttribute('aria-label', tr('{note}. Colocar el cursor detrás', { note: C.notes.describe(note) }));
       body.addEventListener('click', function () { C.editor.setCaret(i, j + 1, true); });
       notes.appendChild(h('span', { class: 'ec' },
         body,
@@ -186,7 +248,7 @@
           type: 'button',
           class: 'ec-x',
           'data-key': 'x:' + i + ':' + j,
-          'aria-label': 'Quitar ' + C.notes.describe(note),
+          'aria-label': tr('Quitar {note}', { note: C.notes.describe(note) }),
           onclick: function () { C.editor.removeNote(i, j); }
         }, C.icons.create('close'))));
     });
@@ -195,9 +257,10 @@
       notes.appendChild(h('span', { class: 'hint hint--off' }, 'Línea vacía'));
     }
 
-    var row = h('div', { class: 'eline', 'data-line': i },
-      h('div', { class: 'eline-top' }, subtitleField(line, i), removeLineButton(i)),
-      notes);
+    var row = h('div', { class: 'eline', 'data-line': i });
+    row.appendChild(h('div', { class: 'eline-top' }, lineHandle(i, row), subtitleField(line, i), lineControls(i, song.lines.length)));
+    row.appendChild(notes);
+    makeDropZone(row, i);
 
     // Clicking the empty part of a line puts the caret at its end.
     row.addEventListener('click', function (e) {
@@ -211,18 +274,18 @@
     if (state.draft && state.editId === state.draft.id) {
       var folder = state.folder.name || 'songs';
       return C.editor.isNewDraft()
-        ? 'Canción nueva: se guardará en la carpeta ' + folder + '/ cuando pulses Listo (necesita título y al menos una nota).'
-        : 'Los cambios no se guardan en la carpeta ' + folder + '/ hasta que pulses Listo. Cancelar (o Esc) los descarta.';
+        ? tr('Canción nueva: se guardará en la carpeta {folder}/ cuando pulses Listo (necesita título y al menos una nota).', { folder: folder })
+        : tr('Los cambios no se guardan en la carpeta {folder}/ hasta que pulses Listo. Cancelar (o Esc) los descarta.', { folder: folder });
     }
     return state.saved
-      ? 'Los cambios se guardan solos en la carpeta ' + (state.folder.name || 'songs') + '/.'
+      ? tr('Los cambios se guardan solos en la carpeta {folder}/.', { folder: state.folder.name || 'songs' })
       : state.saveError;
   }
 
   function paletteButton(code) {
     var button = chip(code, { button: true, text: true });
     button.setAttribute('data-key', 'pal:' + code);
-    button.setAttribute('aria-label', 'Añadir ' + C.notes.describe(C.notes.parse(code)));
+    button.setAttribute('aria-label', tr('Añadir {note}', { note: C.notes.describe(C.notes.parse(code)) }));
     button.addEventListener('click', function () { C.editor.add(code); });
     return button;
   }
@@ -231,21 +294,65 @@
   function accidentalsRow(group, song) {
     var codes = C.keys.accidentalCodes(song.signature, 'mid');
     return h('div', { class: 'pal-row' },
-      h('span', { class: 'pal-label' }, group.label),
+      h('span', { class: 'pal-label' }, group.octave ? C.i18n.octave(group.octave) : group.label),
       h('div', { class: 'pal-notes' },
         codes.length ? codes.map(paletteButton) : h('span', { class: 'pal-empty' }, 'La canción no usa alteraciones. Puedes cambiarlo con «Tonalidad».')));
+  }
+
+  // The "i" next to the palette's title: hovering (or focusing) it lists how to write with the keyboard.
+  var KEYBOARD_HELP = [
+    ['1 – 7', 'Do Re Mi Fa Sol La Si, en la octava de la nota anterior'],
+    ['0', 'Silencio'],
+    ['+  o  #', 'Sostenido en la nota anterior (si la canción usa sostenidos)'],
+    ['-  o  b', 'Bemol en la nota anterior (si la canción usa bemoles)'],
+    ['↑  ↓', 'Subir o bajar una octava la nota anterior'],
+    ['s  e  q  h  w', 'Duración: semicorchea, corchea, negra, blanca, redonda'],
+    ['.', 'Puntillo'],
+    ['←  →', 'Mover el cursor (y elegir la nota para Reproducir)'],
+    ['Inicio  Fin', 'Ir al principio o al final de la línea'],
+    ['Retroceso  Supr', 'Borrar una nota'],
+    ['Enter', 'Nueva línea'],
+    ['Alt + ↑  ↓', 'Mover la línea (Alt + Mayús + ↓ la duplica)'],
+    ['Ctrl + Z  /  Ctrl + Y', 'Deshacer y rehacer'],
+    ['Ctrl + Enter', 'Listo (guardar)'],
+    ['Esc', 'Cancelar y descartar los cambios']
+  ];
+
+  function keyboardHelp() {
+    var tip = h('span', { class: 'info-tip', tabindex: '0', 'data-key': 'keyboard-help', 'aria-label': 'Cómo escribir con el teclado' });
+    // Opens upwards (the palette sits at the bottom of the screen), or downwards when there is no room above.
+    function place() {
+      var pop = tip.querySelector('.info-pop');
+      tip.classList.remove('is-below');
+      if (tip.getBoundingClientRect().top < (pop.offsetHeight || 340) + 24) tip.classList.add('is-below');
+    }
+    tip.addEventListener('mouseenter', place);
+    tip.addEventListener('focus', place);
+    return append(tip,
+      C.icons.create('info'),
+      h('span', { class: 'info-pop', role: 'tooltip' },
+        h('strong', null, 'Escribir con el teclado'),
+        h('dl', null, KEYBOARD_HELP.map(function (row) {
+          return [h('dt', null, row[0]), h('dd', null, row[1])];
+        }))));
+  }
+
+  function append(parent) {
+    for (var i = 1; i < arguments.length; i++) parent.appendChild(arguments[i]);
+    return parent;
   }
 
   function dock(song) {
     var paletteRows = [durationRow()].concat(C.notes.PALETTE.map(function (group) {
       if (group.accidentals) return accidentalsRow(group, song);
       return h('div', { class: 'pal-row' },
-        h('span', { class: 'pal-label' }, group.label),
+        h('span', { class: 'pal-label' }, group.octave ? C.i18n.octave(group.octave) : group.label),
         h('div', { class: 'pal-notes' }, group.codes.map(paletteButton)));
     }));
 
     var head = h('div', { class: 'dock-head' },
       h('strong', { class: 'dock-title' }, 'Botonera de notas'),
+      keyboardHelp(),
       h('span', { class: 'dock-key', title: 'Tonalidad' }, keyText(song)),
       h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'undo', disabled: !state.undo.length, onclick: C.store.undo }, C.icons.create('undo'), 'Deshacer'),
       h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'redo', disabled: !state.redo.length, onclick: C.store.redo }, C.icons.create('redo'), 'Rehacer'),
@@ -253,10 +360,6 @@
         type: 'button', class: 'btn btn--sm', 'data-key': 'newline', onclick: C.editor.newLine,
         title: 'Salto de línea, para leer mejor: no añade tiempo al reproducir. Si el cursor está en medio, las notas siguientes pasan a la línea nueva.'
       }, C.icons.create('enter'), 'Nueva línea'),
-      h('button', {
-        type: 'button', class: 'btn btn--sm', 'data-key': 'wait', onclick: C.editor.addWait,
-        title: 'Línea de espera: varios tiempos de silencio (los tiempos se cambian en la propia línea).'
-      }, C.icons.create('pause'), 'Espera'),
       h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'backspace', onclick: C.editor.backspace }, C.icons.create('remove'), 'Borrar nota'),
       h('button', {
         type: 'button', class: 'btn btn--sm', 'data-key': 'fold', 'aria-expanded': String(!dockFolded),
@@ -316,13 +419,13 @@
     });
 
     var labels = song.tags.map(function (tag, i) {
-      return h('span', { class: 'tag tag--free tag--edit' },
+      return h('span', { class: 'tag tag--free tag--edit', translate: 'no' },
         tag,
         h('button', {
           type: 'button',
           class: 'tag-x',
           'data-key': 'tagx:' + i,
-          'aria-label': 'Quitar la etiqueta ' + tag,
+          'aria-label': tr('Quitar la etiqueta {tag}', { tag: tag }),
           onclick: function () { C.editor.removeTag(i); }
         }, C.icons.create('close')));
     });
@@ -422,7 +525,7 @@
   }
 
   // ---- Note values ------------------------------------------------------------------------------
-  var BEAT_TEXT = { 0.25: '\u00BC', 0.5: '\u00BD', 1: '1', 2: '2', 4: '4' };
+  var BEAT_TEXT = { 0.25: '1/4', 0.5: '1/2', 1: '1', 2: '2', 4: '4' };
 
   function durationRow() {
     var current = C.editor.currentDuration();
@@ -433,9 +536,9 @@
         'data-key': 'dur:' + d.key,
         'data-dur': d.key,
         'aria-pressed': String(current.key === d.key),
-        title: d.label + ' (' + (d.beats === 1 ? '1 tiempo' : BEAT_TEXT[d.beats] + ' tiempos') + ')',
+        title: tr('{label} ({beats})', { label: tr(d.label), beats: d.beats === 1 ? tr('1 tiempo') : tr('{n} tiempos', { n: BEAT_TEXT[d.beats] }) }),
         onclick: function () { C.editor.setDuration(d.key); }
-      }, h('span', { class: 'dur-val' }, BEAT_TEXT[d.beats]), h('span', { class: 'dur-name' }, d.label));
+      }, h('span', { class: 'dur-val' }, fraction(BEAT_TEXT[d.beats])), h('span', { class: 'dur-name' }, d.label));
     });
     var dot = h('button', {
       type: 'button',
@@ -476,7 +579,10 @@
       case 'disconnected':
         return [
           h('p', null, 'Las canciones son archivos .json de la carpeta songs. Conéctala para verlas y editarlas.'),
-          h('button', { type: 'button', class: 'btn btn--primary', onclick: C.folder.connect }, C.icons.create('open'), 'Conectar carpeta')
+          h('button', { type: 'button', class: 'btn btn--primary', onclick: C.folder.connect }, C.icons.create('open'), 'Conectar carpeta'),
+          h('p', { class: 'empty-note' }, location.protocol === 'file:'
+            ? 'La página está abierta desde el disco (file://): así solo puede leer las canciones si conectas la carpeta. Publicada en la web (por ejemplo en GitHub Pages) las muestra sola, en modo solo lectura.'
+            : 'No se han encontrado canciones publicadas junto a la página (falta songs/index.json).')
         ];
       case 'needs-permission':
         return [
@@ -485,6 +591,7 @@
         ];
       case 'unsupported':
         return [h('p', null, 'Este navegador no puede leer carpetas del disco. Abre la página con Chrome o Edge.')];
+      case 'readonly':
       case 'connected':
         if (state.route.name === 'song') {
           return [
@@ -492,6 +599,7 @@
             h('a', { class: 'btn btn--primary', href: '#/' }, C.icons.create('arrow-back'), 'Ver todas las canciones')
           ];
         }
+        if (state.folder.status === 'readonly') return [h('p', null, 'Todavía no hay canciones publicadas.')];
         return [h('p', null, 'La carpeta no tiene canciones todavía. Crea la primera.'), C.home.newSongButton()];
       default:
         return null;                        // still checking
@@ -508,7 +616,9 @@
 
     var route = state.route;
     var song = route.name === 'song' ? C.store.songById(route.id) : null;
-    var page = route.name === 'song' ? (song ? songPage(song) : null) : (state.songs.length ? C.home.view() : null);
+    var page = route.name === 'song' ? (song ? songPage(song) : null)
+      : route.name === 'fingerings' ? C.fingeringPage.view()
+      : (state.songs.length ? C.home.view() : null);
 
     var content = document.getElementById('songs');
     content.replaceChildren.apply(content, page ? [page] : []);
@@ -518,12 +628,15 @@
     box.replaceChildren.apply(box, message || []);
     box.hidden = !message;
 
-    document.title = song && song.title ? song.title + ' · Ocarina Songbook' : 'Ocarina Songbook';
+    document.title = song && song.title ? song.title + ' · Ocarina Songbook'
+      : (route.name === 'fingerings' ? tr('Digitaciones · Ocarina Songbook') : 'Ocarina Songbook');
+    var count = state.songs.length === 1 ? tr('1 canción') : tr('{n} canciones', { n: state.songs.length });
     document.getElementById('footer-count').textContent = state.folder.status === 'connected'
-      ? state.songs.length + (state.songs.length === 1 ? ' canción' : ' canciones') + ' · ' + (state.folder.name || 'songs') + '/'
-      : '';
+      ? count + ' · ' + (state.folder.name || 'songs') + '/'
+      : (state.folder.status === 'readonly' ? count + tr(' · solo lectura') : '');
     placeCaret();
     C.audio.refreshHighlight();
+    C.player.markStretch();
 
     for (var i = 0; i < keys.length; i++) {
       var target = document.querySelector('[data-key="' + keys[i] + '"]');

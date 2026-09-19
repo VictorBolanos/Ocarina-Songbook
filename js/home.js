@@ -3,16 +3,16 @@
 
   var h = C.ui.h;
   var state = C.store.state;
+  var tr = C.i18n.t;
 
   var NONE = '__none';       // filter value meaning "songs where this is not set"
 
   // The current search and filters. They live here, not in the DOM, so they survive redraws and
   // opening a song and coming back.
-  var filters = { query: '', tag: '', sort: 'manual' };
+  var filters = { query: '', tag: '', sort: 'title' };
   C.categories.list.forEach(function (category) { filters[category.key] = ''; });
 
   var SORTS = [
-    ['manual', 'Orden del cancionero'],
     ['title', 'Título A-Z'],
     ['difficulty', 'Dificultad (fácil primero)']
   ];
@@ -59,12 +59,12 @@
 
   function sorted(list) {
     var copy = list.slice();
-    if (filters.sort === 'title') copy.sort(byTitle);
-    else if (filters.sort === 'difficulty') {
+    if (filters.sort === 'difficulty') {
       copy.sort(function (a, b) {
         return C.categories.rank('difficulty', a.difficulty) - C.categories.rank('difficulty', b.difficulty) || byTitle(a, b);
       });
     }
+    else copy.sort(byTitle);
     return copy;
   }
 
@@ -89,7 +89,7 @@
       if (!value) return;
       box.appendChild(h('span', { class: 'tag tag--' + category.key + ' tag--' + value }, C.categories.labelOf(category.key, value)));
     });
-    song.tags.forEach(function (tag) { box.appendChild(h('span', { class: 'tag tag--free' }, tag)); });
+    song.tags.forEach(function (tag) { box.appendChild(h('span', { class: 'tag tag--free', translate: 'no' }, tag)); });
     return box.children.length ? box : null;
   }
 
@@ -100,33 +100,42 @@
       if (line.notes.length) lines++;
       notes += line.notes.length;
     });
-    return notes ? lines + (lines === 1 ? ' línea · ' : ' líneas · ') + notes + (notes === 1 ? ' nota' : ' notas') : 'Sin notas todavía';
+    if (!notes) return tr('Sin notas todavía');
+    return (lines === 1 ? tr('1 línea') : tr('{n} líneas', { n: lines })) + ' · ' + (notes === 1 ? tr('1 nota') : tr('{n} notas', { n: notes }));
   }
 
   // The title is the link; CSS stretches it over the whole card so the card opens the song, while the
   // edit and delete buttons (separate controls, not nested in the link) stay on top of it.
   function card(song) {
-    var title = song.title || 'Sin título';
+    var title = song.title || tr('Sin título');
     return h('div', { class: 'card' },
       h('div', { class: 'card-head' },
-        h('h2', null, h('a', { class: 'card-link', href: '#/song/' + song.id, 'data-key': 'song:' + song.id }, title)),
+        h('h2', null, h('a', { class: 'card-link', translate: 'no', href: '#/song/' + song.id, 'data-key': 'song:' + song.id }, title)),
         song.meter ? h('span', { class: 'badge' }, song.meter) : null),
       chips(song, true),
       h('div', { class: 'card-foot' },
         h('p', { class: 'card-meta' }, counts(song)),
-        h('div', { class: 'card-actions' },
+        !C.store.canEdit() ? null : h('div', { class: 'card-actions' },
           h('button', {
             type: 'button',
             class: 'btn btn--ghost btn--sm card-edit',
             'data-key': 'cardedit:' + song.id,
-            'aria-label': 'Editar «' + title + '»',
+            'aria-label': tr('Editar «{name}»', { name: title }),
             onclick: function () { C.editor.edit(song.id); }
           }, C.icons.create('edit'), 'Editar'),
           h('button', {
             type: 'button',
+            class: 'btn btn--ghost btn--sm card-duplicate',
+            'data-key': 'cardcopy:' + song.id,
+            'aria-label': tr('Duplicar «{name}» para hacer una variante', { name: title }),
+            title: 'Duplicar para hacer una variante',
+            onclick: function () { C.editor.duplicateSong(song.id); }
+          }, C.icons.create('copy'), 'Duplicar'),
+          h('button', {
+            type: 'button',
             class: 'btn btn--ghost btn--danger btn--sm card-delete',
             'data-key': 'delete:' + song.id,
-            'aria-label': 'Borrar «' + title + '»',
+            'aria-label': tr('Borrar «{name}»', { name: title }),
             onclick: function () { C.editor.removeSong(song.id); }
           }, C.icons.create('trash'), 'Borrar'))));
   }
@@ -169,8 +178,8 @@
     function update() {
       var found = sorted(state.songs.filter(matches));
       results.textContent = isFiltering()
-        ? found.length + ' de ' + state.songs.length + ' canciones'
-        : state.songs.length + (state.songs.length === 1 ? ' canción' : ' canciones');
+        ? tr('{n} de {total} canciones', { n: found.length, total: state.songs.length })
+        : (state.songs.length === 1 ? tr('1 canción') : tr('{n} canciones', { n: state.songs.length }));
       clear.hidden = !isFiltering();
       if (found.length) {
         list.replaceChildren.apply(list, found.map(card));
@@ -214,7 +223,7 @@
         h('div', { class: 'search' }, C.icons.create('magnifier'), search),
         h('div', { class: 'filter-row' }, dropdowns),
         h('div', { class: 'filters-foot' }, results, h('div', { class: 'filters-actions' }, clear, sort))),
-      newSongButton(),
+      C.store.canEdit() ? newSongButton() : null,
       list);
   }
 

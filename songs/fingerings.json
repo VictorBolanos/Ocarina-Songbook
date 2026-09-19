@@ -1,0 +1,21 @@
+{
+  "fingerings": {
+    "Do^": { "holes": [1, 2, 3, 4, 5, 7, 10, 11, 12], "done": true },
+    "Re^": { "holes": [2, 3, 4, 5, 7, 10, 11, 12], "done": true },
+    "Mi^": { "holes": [2, 4, 5, 7, 10, 11, 12], "done": true },
+    "Fa^": { "holes": [2, 5, 7, 10, 11, 12], "done": true },
+    "Sol^": { "holes": [2, 7, 10, 11, 12], "done": true },
+    "La^": { "holes": [2, 7, 11, 12], "done": true },
+    "Si^": { "holes": [2, 7, 12], "done": true },
+    "Do": { "holes": [1, 2, 3, 4, 5, 7, 8, 10, 11, 12], "done": true },
+    "Do#": { "holes": [], "done": false },
+    "Sol": { "holes": [2, 7, 8, 10, 11, 12], "done": true },
+    "La": { "holes": [2, 7, 8, 11, 12], "done": true },
+    "Si": { "holes": [2, 7, 8, 12], "done": true },
+    "Sib": { "holes": [2, 3, 7, 8, 12], "done": true },
+    "La_": { "holes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "done": true },
+    "Lab_": { "holes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], "done": false },
+    "Si_": { "holes": [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12], "done": true },
+    "Sib_": { "holes": [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12], "done": false }
+  }
+}

@@ -32,7 +32,7 @@
     reverbWet: 0.16
   };
 
-  var settings = { volume: 0.8, speed: 1, loop: false };
+  var settings = { volume: 0.8, speed: 1, loop: false, countIn: false };
 
   var ctx = null;              // the AudioContext (created on the first click: browsers require that)
   var master = null;           // volume
@@ -42,6 +42,7 @@
   var active = [];             // voices that are sounding or about to
   var shown = null;            // { line, index } of the note highlighted on the page
   var listeners = [];
+  var startToken = 0;          // changes whenever playback is stopped or restarted, to cancel a start still pending
 
   var supported = function () { return !!(window.AudioContext || window.webkitAudioContext); };
 
@@ -53,6 +54,7 @@
         if (isFinite(saved.volume)) settings.volume = Math.min(1, Math.max(0, saved.volume));
         if (isFinite(saved.speed) && saved.speed > 0) settings.speed = saved.speed;
         settings.loop = !!saved.loop;
+        settings.countIn = !!saved.countIn;
       }
     } catch (e) { /* keep the defaults */ }
   }
@@ -74,6 +76,11 @@
 
   function setLoop(value) {
     settings.loop = !!value;
+    save();
+  }
+
+  function setCountIn(value) {
+    settings.countIn = !!value;
     save();
   }
 
@@ -196,36 +203,109 @@
     return handle;
   }
 
-  function ensure() {
-    if (ctx) return ctx;
-    var Context = window.AudioContext || window.webkitAudioContext;
-    ctx = new Context();
-
-    var compressor = ctx.createDynamicsCompressor();       // keeps chords of overlapping tails from clipping
+  // Voices -> dry + reverb -> volume -> compressor -> speakers. Returns the node voices connect to and the
+  // volume node.
+  function buildChain(context, volume) {
+    var compressor = context.createDynamicsCompressor();   // keeps chords of overlapping tails from clipping
     compressor.threshold.value = -14;
     compressor.knee.value = 20;
     compressor.ratio.value = 4;
     compressor.attack.value = 0.005;
     compressor.release.value = 0.2;
-    compressor.connect(ctx.destination);
+    compressor.connect(context.destination);
 
-    master = ctx.createGain();
-    master.gain.value = settings.volume * MASTER_GAIN;
-    master.connect(compressor);
+    var level = context.createGain();
+    level.gain.value = volume * MASTER_GAIN;
+    level.connect(compressor);
 
-    bus = ctx.createGain();
-    var dry = ctx.createGain();
+    var input = context.createGain();
+    var dry = context.createGain();
     dry.gain.value = 0.9;
-    bus.connect(dry);
-    dry.connect(master);
-    var room = ctx.createConvolver();
-    room.buffer = impulse(ctx, 1.5, 3.2);
-    var wet = ctx.createGain();
+    input.connect(dry);
+    dry.connect(level);
+    var room = context.createConvolver();
+    room.buffer = impulse(context, 1.5, 3.2);
+    var wet = context.createGain();
     wet.gain.value = TIMBRE.reverbWet;
-    bus.connect(room);
+    input.connect(room);
     room.connect(wet);
-    wet.connect(master);
+    wet.connect(level);
+    return { input: input, level: level };
+  }
+
+  function ensure() {
+    if (ctx) return ctx;
+    var Context = window.AudioContext || window.webkitAudioContext;
+    ctx = new Context();
+    var chain = buildChain(ctx, settings.volume);
+    master = chain.level;
+    bus = chain.input;
     return ctx;
+  }
+
+  // ---- Exporting to a WAV file -------------------------------------------------------------------------
+  // The song is rendered offline (faster than real time) with the same voices, at its own tempo, and written
+  // as a plain PCM WAV: 16 bit, mono, 22.05 kHz. That is about 2.6 MB a minute, and an ocarina has nothing
+  // worth keeping above 11 kHz.
+  var EXPORT_RATE = 22050;
+  var EXPORT_TAIL = 1.5;          // seconds after the last note, for its release and the reverb
+
+  function encodeWav(samples, rate) {
+    var bytes = new ArrayBuffer(44 + samples.length * 2);
+    var view = new DataView(bytes);
+    function text(at, value) { for (var i = 0; i < value.length; i++) view.setUint8(at + i, value.charCodeAt(i)); }
+    text(0, 'RIFF');
+    view.setUint32(4, 36 + samples.length * 2, true);
+    text(8, 'WAVE');
+    text(12, 'fmt ');
+    view.setUint32(16, 16, true);            // size of this block
+    view.setUint16(20, 1, true);             // PCM
+    view.setUint16(22, 1, true);             // mono
+    view.setUint32(24, rate, true);
+    view.setUint32(28, rate * 2, true);      // bytes per second
+    view.setUint16(32, 2, true);             // bytes per sample frame
+    view.setUint16(34, 16, true);            // bits per sample
+    text(36, 'data');
+    view.setUint32(40, samples.length * 2, true);
+    for (var i = 0; i < samples.length; i++) {
+      var s = clamp(samples[i], -1, 1);
+      view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    }
+    return bytes;
+  }
+
+  // Resolves with the whole song as mono samples (Float32Array) at `rate`, as loud as they can be without
+  // clipping, or rejects if there is nothing to play.
+  function renderSamples(song, rate) {
+    var Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    var events = sequence(song);
+    if (!Offline || !events.some(function (e) { return e.midi !== null; })) return Promise.reject(new Error('nothing to render'));
+    var bpm = song.bpm || 100;
+    var total = events.reduce(function (sum, e) { return sum + e.beats * 60 / bpm; }, 0);
+    var context = new Offline(1, Math.ceil((total + EXPORT_TAIL) * rate), rate);
+    var chain = buildChain(context, 0.8);
+    var cursor = 0.05;
+    events.forEach(function (e) {
+      var dur = e.beats * 60 / bpm;
+      if (e.midi !== null) voice(context, chain.input, C.notes.frequency(e.midi), cursor, dur);
+      cursor += dur;
+    });
+    return context.startRendering().then(function (buffer) {
+      var samples = buffer.getChannelData(0);
+      var peak = 0;
+      for (var i = 0; i < samples.length; i++) peak = Math.max(peak, Math.abs(samples[i]));
+      var gain = peak > 0 ? 0.9 / peak : 1;          // as loud as it can be without clipping
+      var scaled = new Float32Array(samples.length);
+      for (var j = 0; j < samples.length; j++) scaled[j] = samples[j] * gain;
+      return scaled;
+    });
+  }
+
+  // Resolves with a Blob (audio/wav) of the whole song.
+  function renderWav(song) {
+    return renderSamples(song, EXPORT_RATE).then(function (samples) {
+      return new Blob([encodeWav(samples, EXPORT_RATE)], { type: 'audio/wav' });
+    });
   }
 
   // ---- Playing a sequence ----------------------------------------------------------------------------
@@ -260,7 +340,7 @@
     }
     follow(ctx.currentTime);
     if (run.next >= run.events.length && ctx.currentTime >= run.cursor) {
-      if (settings.loop) {
+      if (settings.loop || run.forceLoop) {
         run.next = run.first;
         run.cursor = ctx.currentTime + 0.05;
       } else {
@@ -286,7 +366,7 @@
 
   function highlight(ref) {
     if ((ref && shown && ref.line === shown.line && ref.index === shown.index) || (!ref && !shown)) return;
-    var previous = document.querySelector('.note.is-playing');
+    var previous = document.querySelector('.is-playing');
     if (previous) previous.classList.remove('is-playing');
     shown = ref ? { line: ref.line, index: ref.index } : null;
     var el = elementFor(shown);
@@ -304,21 +384,47 @@
     if (el) el.classList.add('is-playing');
   }
 
-  // Plays `song`, from its first note or from `from` ({ line, index }).
-  function play(song, from) {
+  // Beats to count before the song starts: the top number of a x/4 time signature, otherwise 4.
+  function countInBeats(song) {
+    var match = /^\s*(\d{1,2})\s*\/\s*4\s*$/.exec(song.meter || '');
+    return match ? clamp(Number(match[1]), 1, 12) : 4;
+  }
+
+  // Plays `song`, from its first note or from `from` ({ line, index }). With `to` it plays only up to that
+  // note, and repeats that stretch until stopped. If the count-in is on, clicks are heard first.
+  function play(song, from, to) {
     if (!supported()) return Promise.resolve();
     stop();
+    var token = ++startToken;
     var events = sequence(song);
     var first = 0;
     if (from) {
       first = events.findIndex(function (e) { return e.line > from.line || (e.line === from.line && e.index >= from.index); });
       if (first < 0) first = 0;
     }
+    var stretch = false;
+    if (to) {
+      var last = -1;
+      events.forEach(function (e, i) {
+        if (e.line < to.line || (e.line === to.line && e.index <= to.index)) last = i;
+      });
+      if (last >= first) { events = events.slice(0, last + 1); stretch = true; }
+    }
     if (!events.length) return Promise.resolve();
     var context = ensure();
     return context.resume().then(function () {
-      run = { songId: song.id, bpm: song.bpm || 100, events: events, first: first, next: first,
-              cursor: context.currentTime + 0.08, scheduled: [], timer: null };
+      if (token !== startToken) return;               // stopped, or another song started, meanwhile
+      var bpm = song.bpm || 100;
+      var start = context.currentTime + 0.08;
+      var lead = 0;
+      if (settings.countIn) {
+        var count = countInBeats(song);
+        var beat = 60 / (bpm * settings.speed);
+        for (var c = 0; c < count; c++) active.push(C.metronome.clickAt(context, master, start + c * beat, c === 0 ? 'accent' : 'beat'));
+        lead = count * beat;
+      }
+      run = { songId: song.id, bpm: bpm, events: events, first: first, next: first, forceLoop: stretch,
+              cursor: start + lead, scheduled: [], timer: null };
       run.timer = setInterval(tick, TICK_MS);
       setStatus('playing');
       tick();
@@ -338,6 +444,7 @@
   }
 
   function stop() {
+    startToken++;
     if (!run && status === 'stopped') return;
     if (run) {
       clearInterval(run.timer);
@@ -364,6 +471,7 @@
     setVolume: setVolume,
     setSpeed: setSpeed,
     setLoop: setLoop,
+    setCountIn: setCountIn,
     play: play,
     pause: pause,
     resume: resume,
@@ -371,6 +479,8 @@
     refreshHighlight: refreshHighlight,
     // exposed for offline rendering and tests
     voice: voice,
-    sequence: sequence
+    sequence: sequence,
+    renderWav: renderWav,
+    renderSamples: renderSamples
   };
 })(window.Songbook = window.Songbook || {});

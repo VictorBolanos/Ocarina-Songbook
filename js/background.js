@@ -251,10 +251,10 @@
       note = 'Enlaza una carpeta con tus imágenes para usarlas de fondo.';
       action = h('button', { type: 'button', class: 'btn btn--primary btn--sm', onclick: link }, C.icons.create('open'), 'Enlazar carpeta de fondos');
     } else if (folderState === 'needs-permission') {
-      note = 'El navegador necesita tu permiso para leer «' + (dir.name || 'la carpeta') + '».';
+      note = C.i18n.t('El navegador necesita tu permiso para leer «{name}».', { name: dir.name || C.i18n.t('la carpeta') });
       action = h('button', { type: 'button', class: 'btn btn--primary btn--sm', onclick: reconnect }, C.icons.create('open'), 'Reconectar carpeta');
     } else if (!listing.length) {
-      note = 'No hay imágenes en «' + dir.name + '» (png, jpg, webp, gif o avif).';
+      note = C.i18n.t('No hay imágenes en «{name}» (png, jpg, webp, gif o avif).', { name: dir.name });
       action = h('button', { type: 'button', class: 'btn btn--sm', onclick: link }, C.icons.create('open'), 'Cambiar carpeta');
     } else {
       action = h('button', { type: 'button', class: 'btn btn--ghost btn--sm', onclick: link, title: 'Elegir otra carpeta' },

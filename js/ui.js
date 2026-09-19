@@ -33,8 +33,8 @@
     document.getElementById('toast').hidden = true;
   }
 
-  // toast('Saved') or toast('Deleted', { label: 'Deshacer', run: fn })
-  function toast(message, action) {
+  // toast('Saved') or toast('Deleted', { label: 'Deshacer', run: fn }); `ms` overrides how long it stays
+  function toast(message, action, ms) {
     var box = document.getElementById('toast');
     box.textContent = '';
     box.appendChild(h('span', null, message));
@@ -46,7 +46,7 @@
     }
     box.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(hideToast, action ? 8000 : 4000);
+    toastTimer = setTimeout(hideToast, ms || (action ? 8000 : 4000));
   }
 
   // ---- Confirmation dialog ----------------------------------------------------------------------

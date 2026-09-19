@@ -659,7 +659,9 @@ button.note{
 
 /* The legend and the notes/fingering switch only make sense next to notes. */
 [data-route="home"] .viewbar,
-[data-route="home"] .legend{ display: none; }
+[data-route="home"] .legend,
+[data-route="fingerings"] .viewbar,
+[data-route="fingerings"] .legend{ display: none; }
 
 .filters{ display:grid; grid-template-columns: minmax(0, 1fr); gap: .8rem; margin-bottom: 1rem; padding: 1.1rem 1.2rem; }
 .filters .field, .filters .input{ min-width: 0; }
@@ -715,8 +717,9 @@ button.note{
 
 /* Edit and Delete on the song page: kept apart so one can't be hit by mistake for the other. */
 .song-actions{ display:flex; align-items:center; gap: .6rem; }
-.card-foot{ display:flex; align-items:center; justify-content:space-between; gap: .6rem; margin-top: auto; }
-.card-actions{ display:flex; align-items:center; gap: .6rem; }
+.card-foot{ display:flex; flex-direction: column; align-items: stretch; gap: .6rem; margin-top: auto; }
+.card-actions{ display:flex; flex-wrap: wrap; align-items:center; gap: .4rem; }
+.card-actions .btn{ flex: 1 1 auto; justify-content: center; }
 .card-edit, .card-delete{ position: relative; z-index: 1; }
 .card-head{ display:flex; align-items:baseline; justify-content:space-between; gap: .6rem; }
 .card h2{ margin: 0; font-size: 1.12rem; color: var(--accent); }
@@ -971,15 +974,29 @@ button.note{
 /* Length in beats, shown only when it isn't a plain quarter note. */
 .note-dur{
   position: absolute;
-  top: -7px;
-  left: -7px;
+  bottom: -16px;                /* bottom right: the top corners belong to the remove button */
+  right: -10px;
   z-index: 1;
-  padding: .14rem .34rem;
-  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 1.7rem;                /* a circle, whatever the text */
+  height: 1.7rem;
+  padding: 0;
+  border-radius: 50%;
   background: var(--accent);
   color: var(--paper);
-  font: 700 .66rem/1 var(--sans);
+  font: 800 .88rem/1 var(--sans);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
 }
+
+/* A diagonal fraction: numerator raised, denominator lowered, tucked around a slash. */
+.frac-n, .frac-d{ font-size: .88em; }
+.frac-n{ transform: translateY(-.24em); }
+.frac-d{ transform: translateY(.26em); }
+.frac-s{ margin: 0 -.1em; font-size: 1.05em; font-weight: 400; }
 
 .note--rest{
   min-width: 2.4em;
@@ -1065,39 +1082,6 @@ button.note{
   .player-volume input{ width: 5rem; }
 }
 
-/* ---- Wait lines: silence of a given number of beats ---------------------------------------- */
-.wait-bar{
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .5rem .85rem;
-  border: 2px dashed var(--line);
-  border-radius: 12px;
-  color: var(--ink-soft);
-  font-family: var(--sans);
-  font-size: .85rem;
-  cursor: pointer;
-}
-.wait-bar .icon{ width: 1.3em; height: 1.3em; }
-.wait-bar.is-playing{
-  border-color: var(--accent);
-  border-style: solid;
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  color: var(--accent);
-}
-.eline--wait{ border-style: dashed; cursor: default; }
-.wait-edit{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: .5rem;
-  margin-top: .55rem;
-  font-family: var(--sans);
-  font-size: .85rem;
-  color: var(--ink-soft);
-}
-.wait-edit .input{ width: 5rem; }
-
 /* ---- Key signature -------------------------------------------------------------------------- */
 .dialog--wide{ width: min(38rem, calc(100vw - 2rem)); }
 .key-types{ display: flex; flex-wrap: wrap; gap: .5rem; margin: .2rem 0 .9rem; }
@@ -1141,3 +1125,245 @@ button.note{
 }
 .btn--done:active:not(:disabled){ transform: translateY(0); }
 .btn--done .icon{ width: 1.3em; height: 1.3em; }
+
+/* The "i" that explains the keyboard shortcuts. */
+.dock-title{ margin-right: 0; }
+.dock-key{ margin-right: auto; }
+.info-tip{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink-soft);
+  border-radius: 50%;
+  cursor: help;
+}
+.info-tip .icon{ width: 1.35rem; height: 1.35rem; }
+.info-tip:hover, .info-tip:focus-visible{ color: var(--accent); }
+.info-pop{
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + .6rem);
+  z-index: 30;
+  display: none;
+  width: min(24rem, calc(100vw - 2.5rem));
+  padding: .8rem .95rem;
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--glass-shadow);
+  font-family: var(--sans);
+  font-size: .78rem;
+  line-height: 1.35;
+  text-align: left;
+  cursor: default;
+}
+.info-tip.is-below .info-pop{ bottom: auto; top: calc(100% + .6rem); }
+.info-tip:hover .info-pop, .info-tip:focus .info-pop, .info-tip:focus-within .info-pop{ display: block; }
+.info-pop strong{ display: block; margin-bottom: .45rem; font-size: .8rem; color: var(--accent); }
+.info-pop dl{ display: grid; grid-template-columns: max-content 1fr; gap: .25rem .8rem; margin: 0; }
+.info-pop dt{ font-weight: 700; white-space: nowrap; }
+.info-pop dd{ margin: 0; color: var(--ink-soft); }
+
+/* Lines: number handle, tools, and the bar that shows where a dragged line will land. */
+.eline-num{
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.7rem;
+  height: 1.7rem;
+  padding: 0 .35rem;
+  border-radius: 999px;
+  background: var(--mid);
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: grab;
+  user-select: none;
+}
+.eline-num:active{ cursor: grabbing; }
+.eline.is-active .eline-num{ background: var(--accent); color: var(--paper); }
+.eline-tools{ display: inline-flex; align-items: center; gap: .15rem; margin-left: auto; }
+.eline-top{ flex-wrap: wrap; row-gap: .35rem; }
+.eline-top .input--sub{ flex: 1 1 9rem; min-width: 0; }
+.btn--icon{ padding: .3rem; }
+.btn--icon .icon{ width: 1.15em; height: 1.15em; }
+.eline.is-dragging{ opacity: .4; }
+.eline.drop-before{ box-shadow: 0 -4px 0 -1px var(--accent); }
+.eline.drop-after{ box-shadow: 0 4px 0 -1px var(--accent); }
+
+/* ---- Metronome ----------------------------------------------------------------------------- */
+.dialog--metronome{ width: min(25rem, calc(100vw - 2rem)); }
+.metro-display{ display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin: .4rem 0 .8rem; }
+.metro-center{ display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.metro-bpm{
+  width: 5.2rem;
+  border: 0;
+  border-bottom: 2px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.metro-bpm:focus{ outline: none; border-bottom-color: var(--accent); }
+.metro-bpm::-webkit-outer-spin-button, .metro-bpm::-webkit-inner-spin-button{ -webkit-appearance: none; margin: 0; }
+.metro-unit{ margin-top: .15rem; font-size: .68rem; font-weight: 700; letter-spacing: .12em; color: var(--ink-soft); }
+.metro-name{ min-height: 1.2em; font-family: var(--font); font-style: italic; color: var(--accent); }
+.metro-step{ width: 2.6rem; height: 2.6rem; justify-content: center; padding: 0; }
+.metro-step .icon{ width: 1.3rem; height: 1.3rem; }
+.dialog--metronome input[type="range"]{ width: 100%; accent-color: var(--accent); }
+.metro-dots{ display: flex; flex-wrap: wrap; justify-content: center; gap: .55rem; margin: 1rem 0; min-height: 1.4rem; }
+.metro-dot{
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--mid);
+  transition: background .06s, transform .06s, border-color .06s;
+}
+.metro-dot.is-first{ border-color: var(--accent); }
+.metro-dot.is-on{ background: var(--accent); border-color: var(--accent); transform: scale(1.18); }
+.metro-fields{ display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin-bottom: .9rem; }
+.metro-fields .field:last-child{ grid-column: 1 / -1; }
+.metro-extras{ display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.1rem; }
+.metro-toggle{ padding: .5rem 1.4rem; font-weight: 700; }
+.metro-toggle.is-running{ background: var(--danger); border-color: var(--danger); }
+
+/* the toolbar button while it ticks */
+#metronome-button.is-running{ border-color: var(--accent); }
+#metronome-button.is-running [data-icon]{ color: var(--accent); }
+#metronome-button.is-tick [data-icon]{ animation: metro-tick .16s ease-out; }
+@keyframes metro-tick{ from{ transform: rotate(-16deg) scale(1.25); } to{ transform: none; } }
+
+/* ---- Stretch to repeat, count-in ------------------------------------------------------------ */
+.player-hint{ flex-basis: 100%; font-size: .78rem; color: var(--ink-soft); }
+.player-hint[hidden]{ display: none; }
+.rows .in-stretch{ box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent); }
+.rows .stretch-start, .rows .stretch-end{ box-shadow: 0 0 0 3px var(--accent); }
+
+.folder-readonly{ display: inline-flex; align-items: center; gap: .5rem; }
+.folder-pill.is-readonly{ cursor: default; color: var(--accent); border-color: var(--accent); font-weight: 700; }
+
+/* The metronome button and its play / stop button, joined. */
+.metro-split{ display: inline-flex; }
+.metro-open{ border-top-right-radius: 0; border-bottom-right-radius: 0; border-right-width: 0; }
+.metro-run{ border-top-left-radius: 0; border-bottom-left-radius: 0; padding-left: .7rem; padding-right: .7rem; }
+.metro-run [data-icon]{ color: var(--accent); }
+.metro-run.is-running{ background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.metro-run.is-running [data-icon]{ color: var(--paper); }
+
+.empty-note{ max-width: 34rem; margin: 1rem auto 0; font-size: .82rem; font-style: normal; }
+
+/* ---- Fingering editor ------------------------------------------------------------------------ */
+.dialog--fingering{ width: min(46rem, calc(100vw - 2rem)); }
+.dialog--fingering form{ max-height: calc(100vh - 3rem); overflow-y: auto; }
+.fp-help{ margin-bottom: .9rem; }
+.fp-body{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 17rem); gap: 1.2rem; align-items: start; margin-bottom: 1.1rem; }
+.fp-side{ display: grid; gap: .8rem; min-width: 0; }
+.fp-side .field{ display: grid; gap: .35rem; }
+.fp-choice{ display: flex; flex-wrap: wrap; gap: .35rem; }
+.fp-choice .dur-btn{ min-width: 3rem; padding: .3rem .6rem; }
+.fp-choice .dur-btn.has-fingering{ box-shadow: inset 0 -3px 0 var(--accent); }
+.fp-tools{ display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.fp-stage{ display: grid; gap: .5rem; justify-items: center; }
+.fp-caption{ display: grid; justify-items: center; gap: .1rem; text-align: center; }
+.fp-title{ font-family: var(--font); font-size: 1.05rem; color: var(--accent); }
+.fp-status{ font-size: .78rem; color: var(--ink-soft); }
+.fp-count{ font-size: .78rem; font-weight: 700; }
+.fp-ocarina{ width: 100%; height: auto; overflow: visible; }
+.fp-hole{ cursor: pointer; outline: none; }
+.fp-ring{ fill: transparent; stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 3 2.2; opacity: .85; }
+.fp-fill{ opacity: 0; transition: opacity .1s; }
+.fp-hole.is-on .fp-fill{ opacity: 1; }
+.fp-hole.is-on .fp-ring{ opacity: 0; }
+.fp-hole:hover .fp-ring, .fp-hole:focus-visible .fp-ring{ fill: color-mix(in srgb, var(--accent) 28%, transparent); stroke-width: 2.6; opacity: 1; }
+.fp-hole.is-on:hover .fp-ring, .fp-hole.is-on:focus-visible .fp-ring{ fill: transparent; }
+@media (max-width: 640px){ .fp-body{ grid-template-columns: minmax(0, 1fr); } .fp-stage{ order: -1; } .fp-ocarina{ max-width: 15rem; } }
+
+/* The "completed" switch and the marker of a note still being drawn. */
+.fp-choice .dur-btn.is-draft{ box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--accent) 45%, transparent); border-style: dashed; }
+.fp-finished{ display: grid; gap: .25rem; }
+.fp-hint{ margin: 0 !important; font-size: .74rem !important; color: var(--ink-soft); }
+.fp-switch{ display: inline-flex; align-items: center; gap: .6rem; cursor: pointer; font-weight: 700; font-size: .85rem; }
+.fp-switch-input{ position: absolute; opacity: 0; width: 0; height: 0; }
+.fp-switch-track{
+  position: relative;
+  flex: none;
+  width: 2.7rem;
+  height: 1.5rem;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
+  transition: background .15s, border-color .15s;
+}
+.fp-switch-track::after{
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: .2rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  transform: translateY(-50%);
+  transition: left .15s;
+}
+.fp-switch-input:checked + .fp-switch-track{ background: var(--accent); border-color: var(--accent); }
+.fp-switch-input:checked + .fp-switch-track::after{ left: calc(100% - 1.25rem); }
+.fp-switch-input:focus-visible + .fp-switch-track{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* The toolbar's Digitaciones link looks like its neighbours. */
+a.mode-toggle{ text-decoration: none; }
+[data-route="fingerings"] #fingering-button{ border-color: var(--accent); }
+
+/* ---- Fingerings page ------------------------------------------------------------------------- */
+.fpage-head{ display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .8rem 1.2rem; }
+.fpage-head h2{ margin: 0 0 .2rem; font-size: 1.3rem; color: var(--accent); }
+.foctave{ margin-top: 1.4rem; }
+.foctave h3{ margin: 0 0 .5rem; font-size: 1.1rem; color: var(--accent); }
+.fgroup{ margin-bottom: 1rem; }
+.fgroup h4{ margin: 0 0 .5rem; font-family: var(--sans); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.fgrid{ display: grid; grid-template-columns: repeat(auto-fill, minmax(8.2rem, 1fr)); gap: .8rem; }
+.fcell{ align-items: center; gap: .3rem; padding: .7rem .6rem; text-align: center; }
+.fcell-diagram{ width: 5.6rem; height: auto; }
+.fcell--none .fcell-diagram{ opacity: .35; }
+.fcell--draft .fcell-diagram{ opacity: .7; }
+.fcell-name{ font-size: 1.05rem; }
+.fcell-status{ font-family: var(--sans); font-size: .72rem; color: var(--ink-soft); }
+.fcell--done .fcell-status{ color: #2fa866; font-weight: 700; }
+.fcell--draft{ border-style: dashed; }
+
+/* ---- Export window, backup links ------------------------------------------------------------ */
+.dialog--export{ width: min(30rem, calc(100vw - 2rem)); }
+.export-options{ display: grid; gap: .55rem; margin-bottom: .9rem; }
+.export-option{
+  display: grid;
+  gap: .15rem;
+  padding: .7rem .9rem;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--sans);
+  text-align: left;
+  cursor: pointer;
+}
+.export-option:hover:not(:disabled){ border-color: var(--accent); }
+.export-option:disabled{ opacity: .5; cursor: default; }
+.export-option strong{ color: var(--accent); }
+.export-option span{ font-size: .8rem; color: var(--ink-soft); }
+.export-status{ min-height: 1.3em; margin: 0 0 .8rem !important; font-size: .82rem !important; }
+.footer-tools{ display: inline-flex; gap: 1rem; }
+.link-button{ padding: 0; border: 0; background: none; color: var(--ink-soft); font: inherit; text-decoration: underline; cursor: pointer; }
+.link-button:hover{ color: var(--accent); }
+
+/* The language button: the flag of the language the page is in. */
+#lang-toggle img{ display: block; width: 1.15rem; height: 1.15rem; border-radius: 50%; object-fit: cover; }

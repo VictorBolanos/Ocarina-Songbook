@@ -3,13 +3,12 @@
   "title": "Bonavista Harbor",
   "meter": "",
   "bpm": 100,
-  "signature": "none",
+  "signature": "sharp",
   "difficulty": "",
   "origin": "tradicional",
   "status": "",
   "tags": ["folk"],
-  "order": 5,
   "lines": [
-    { "subtitle": "", "notes": ["Do"] }
+    { "subtitle": "", "notes": ["Re"] }
   ]
 }
