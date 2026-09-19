@@ -548,6 +548,7 @@
       h('div', { class: 'edit-actions' },
         h('button', { type: 'button', class: 'btn btn--danger btn--sm', 'data-key': 'delsong', onclick: function () { C.editor.removeSong(); } },
           C.icons.create('trash'), C.editor.isNewDraft() ? 'Descartar' : 'Borrar canción')),
+      C.player.view(song),
       h('div', { class: 'elines' }, song.lines.map(function (line, i) { return editLine(song, line, i); })),
       inlineDock(song));
   }
@@ -649,7 +650,7 @@
   function songPage(song) {
     return h('div', { class: 'song-page' },
       h('a', { class: 'back', href: '#/', 'data-key': 'back' }, C.icons.create('arrow-back'), 'Canciones'),
-      C.player.view(song),
+      song.id === state.editId ? null : C.player.view(song),
       song.id === state.editId ? editableSong(song) : readingSong(song));
   }
 

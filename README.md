@@ -11,7 +11,7 @@
 
 **Your songs as plain JSON files, shown as note names or fingering diagrams, played back with a synthesized ocarina — no server, no account, no build step**
 
-[Features](#-features) • [Demo](#-demo) • [Technologies](#-technologies) • [Installation](#-installation) • [User Guide](#-user-guide)
+[Screenshots](#-screenshots) • [Features](#-features) • [Demo](#-demo) • [Technologies](#-technologies) • [Installation](#-installation) • [User Guide](#-user-guide)
 
 Live application: https://victorbolanos.github.io/Ocarina-Songbook
 
@@ -34,6 +34,31 @@ The interface comes in **Spanish and English**: the flag button in the top bar (
 - ✅ **Made for your phone too** - A layout designed for touch screens, and on Android Chrome you can even connect a folder and edit; publish it on GitHub Pages to read your songs anywhere
 - ✅ **Two languages** - Spanish and English, with a one-click switch
 - ✅ **Free & Open Source** - No paywalls, no ads
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+| Reading a song | The song list |
+|:---:|:---:|
+| <a href="docs/screenshots/song-view.png"><img src="docs/screenshots/song-view.png" alt="A song shown as fingering diagrams and note names" width="420"></a> | <a href="docs/screenshots/song-list.png"><img src="docs/screenshots/song-list.png" alt="The searchable song list" width="420"></a> |
+| **Note names, fingerings or both**, with the player above | **Search and filters**, one card per song |
+
+| Writing a song | The fingerings page |
+|:---:|:---:|
+| <a href="docs/screenshots/editor.png"><img src="docs/screenshots/editor.png" alt="The song editor with its note palette" width="420"></a> | <a href="docs/screenshots/fingerings-page.png"><img src="docs/screenshots/fingerings-page.png" alt="Every note with its fingering" width="420"></a> |
+| **The editor**, with the player right above the score and the note palette below it | **Every note's fingering**, editable |
+
+| The fingering editor |
+|:---:|
+| <a href="docs/screenshots/fingering-editor.png"><img src="docs/screenshots/fingering-editor.png" alt="Drawing a fingering by covering holes" width="420"></a> |
+| **Cover the holes** of the ocarina to teach the page a fingering |
+
+</div>
+
+The pictures show the green theme in dark mode over a forest picture: the colour, the light or dark mode and the background are all yours to change (see [Customization Options](#-customization-options)).
 
 ---
 
@@ -157,11 +182,21 @@ Opened on the web, the page shows the published songs read-only. To create and e
 
 ### 🎨 Customization Options
 
-- 🌙 **Light/Dark mode** - Combines with every color
+Everything in the top bar makes the page yours, and it is remembered by the browser:
+
+- 🌙 **Light / Dark mode** - One button; it combines with every colour
+- 🎨 **Colour theme** - The *Color* button picks the accent colour of the whole page (buttons, notes, fingering holes, borders): Neutral, Red, Yellow, Green, Cinnamon, Purple, Pink or Blue
+- 🔤 **Font** - Six typefaces, from classic to monospaced
+- 🖼️ **Background** - The *Background* button lays a picture of your own over the page (see below)
 - 🌍 **Language** - Spanish or English
-- 🎨 **Color themes** - 8 colors: Neutral, Red, Yellow, Green, Cinnamon, Purple, Pink and Blue
-- 🔤 **Fonts** - 6 typefaces, from classic to monospaced
-- 🖼️ **Background** - A flat color or a picture from a folder you link (`bg/` has samples), with intensity and blur
+
+**Setting a background picture**
+
+1. Open **Background** and press **Link a backgrounds folder**, then pick a folder that holds your pictures (`png`, `jpg`, `webp`, `gif`, `avif` or `bmp`). The `bg/` folder of this project has three samples.
+2. Click one of the thumbnails. **Intensity** sets how strongly it shows over the theme colour, and **Blur** softens it so the score stays easy to read.
+3. **Flat color** goes back to the plain theme colour.
+
+The picture in use is copied into the browser, so it is there the next time without asking for the folder again; the folder is only needed to pick a different picture (the page may ask you to **Reconnect folder**). Linking the folder needs Chrome or Edge.
 
 ---
 
@@ -212,6 +247,28 @@ python -m http.server 8000
 Then click **Connect folder** and pick the `songs/` folder (or the project root that contains it). The browser remembers it; occasionally it asks for permission again — click **Reconnect folder**.
 
 > Opened straight from disk (`file://`) the page can only read songs after you connect the folder. Served over `http(s)`, it also shows the published songs read-only when no folder is connected.
+
+### **Setting up your songs folder**
+
+The page keeps every song as a file, so before you can create or edit songs it needs a folder to keep them in. You do this once per browser:
+
+```
+1. Open the page in Chrome or Edge (on a computer, or Chrome on Android)
+2. Press "Connect folder" in the top bar
+3. Pick the folder that holds your songs and allow the page to edit its files
+```
+
+Which folder to pick:
+
+- **The `songs/` folder of this project** - the one you cloned, already with a few songs in it. Picking the project folder itself also works: the page finds the `songs/` inside.
+- **A new, empty folder** - Pick any folder. If it has no `songs/` inside, the page asks whether to create one there, and your first saved song fills it in. (Chrome does not allow linking system folders such as Documents, Desktop or Downloads themselves; make a folder inside them, like `Documents/Ocarina`.)
+
+What happens next:
+
+- The top bar shows the folder's name and the footer counts your songs. Each song you save is a `.json` file; the page also keeps `index.json` (the list the web version reads) and `fingerings.json` (your fingerings) up to date.
+- The browser remembers the folder. From time to time it asks for permission again: press **Reconnect folder**.
+- Files you add or change by hand are picked up when you return to the tab. With several tabs open, they stay in sync.
+- Not seeing **Connect folder**? The browser does not support it (Firefox, Safari, iPhone): the page still shows the published songs, read-only.
 
 ---
 
@@ -441,7 +498,7 @@ Ocarina-Songbook/
 ### **🌍 Browser support**
 - Editing needs the File System Access API: **Chrome and Edge on desktop**
 - Any modern browser, phones included, can read the published songs; Chrome on Android can also connect a folder and edit
-- **Phone layout**: on narrow screens the note palette is a compact bottom sheet (closed to a slim bar until you open it, and a panel on the right when the phone is held sideways, so it never covers the score), the player and the filters fold away, and every control has a finger-sized target
+- **Phone layout**: on narrow screens the note palette is a compact sheet at the bottom (closed to a slim bar until you open it, and a side panel when the phone is held sideways, so it never covers the score), the player and the filters fold away, and every control has a finger-sized target
 - MP4 export needs the WebCodecs AAC encoder (current Chrome and Edge)
 
 ---

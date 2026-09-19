@@ -1,6 +1,6 @@
 {
   "id": "cancion-del-tiempo",
-  "title": "Canción del Tiempo",
+  "title": "Song of time",
   "meter": "",
   "bpm": 100,
   "signature": "none",
@@ -8,7 +8,6 @@
   "origin": "videojuegos",
   "status": "",
   "tags": ["zelda"],
-  "order": 2,
   "lines": [
     { "subtitle": "", "notes": ["La", "Re:q."] },
     { "subtitle": "", "notes": ["Fa", "La", "Re:q."] },
