@@ -7,7 +7,11 @@
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
   var caretEl = h('span', { class: 'caret', 'aria-hidden': 'true' });
-  var dockFolded = false;
+  var dockFolded = null;       // null until the first time the palette is drawn: closed on a phone, open elsewhere
+
+  // The layout of a phone (narrow screens, or short ones such as a phone held sideways). The same query is in the CSS.
+  var PHONE = window.matchMedia('(max-width: 640px), (max-height: 560px)');
+  function phone() { return PHONE.matches; }
 
   // ---- Note chips -------------------------------------------------------------------------------
   function diagram(id) {
@@ -30,6 +34,9 @@
 
   // options.button: render as a <button> (editor). options.text: never draw the fingering (palette).
   // options.ref: { line, index }, the note's place in the song, so playback can find and highlight it.
+  // How the octave is written after a note's name: C' is high, C'' very high, C, low.
+  var OCTAVE_MARK = { high: "'", high2: "''", low: ',' };
+
   function chip(code, options) {
     options = options || {};
     var note = C.notes.parse(code);
@@ -49,12 +56,13 @@
       // Both the diagram and the name are in the DOM; html[data-view] decides which one shows.
       el.classList.add('note--oc');
       el.appendChild(diagram(fingering));
-      el.appendChild(h('span', { class: 'note-name', 'aria-hidden': 'true' }, C.i18n.noteName(note.name) + C.notes.glyph(note.accidental)));
+      el.appendChild(h('span', { class: 'note-name', 'aria-hidden': 'true' }, C.i18n.noteName(note.name) + C.notes.glyph(note.accidental) + (OCTAVE_MARK[note.octave] || '')));
     } else {
       // The accidental sits to the right of the name, on the same line.
       el.appendChild(h('span', { class: 'note-label' },
         C.i18n.noteName(note.name),
-        note.accidental ? h('span', { class: 'note-acc' }, C.notes.glyph(note.accidental)) : null));
+        note.accidental ? h('span', { class: 'note-acc' }, C.notes.glyph(note.accidental)) : null,
+        OCTAVE_MARK[note.octave] ? h('span', { class: 'note-oct' }, OCTAVE_MARK[note.octave]) : null));
     }
     var length = options.text ? '' : C.notes.badge(note);
     if (length) el.appendChild(h('span', { class: 'note-dur', 'aria-hidden': 'true' }, fraction(length)));
@@ -169,8 +177,9 @@
         type: 'button',
         class: 'btn btn--ghost btn--sm',
         'data-key': 'dl:' + i,
+        'aria-label': 'Quitar línea',
         onclick: function () { C.editor.removeLine(i); }
-      }, C.icons.create('remove'), 'Quitar línea'));
+      }, C.icons.create('remove'), label('Quitar línea')));
   }
 
   // ---- Dragging lines to reorder them ------------------------------------------------------------
@@ -291,12 +300,13 @@
   }
 
   // The "Alteraciones" row offers the accidentals of the song's kind (flats or sharps), in the middle octave.
-  function accidentalsRow(group, song) {
+  function accidentalsRow(group, song, withRest) {
     var codes = C.keys.accidentalCodes(song.signature, 'mid');
     return h('div', { class: 'pal-row' },
       h('span', { class: 'pal-label' }, group.octave ? C.i18n.octave(group.octave) : group.label),
-      h('div', { class: 'pal-notes' },
-        codes.length ? codes.map(paletteButton) : h('span', { class: 'pal-empty' }, 'La canción no usa alteraciones. Puedes cambiarlo con «Tonalidad».')));
+      h('div', { class: 'pal-notes' + (withRest ? ' pal-notes--rest' : '') },
+        codes.length ? codes.map(paletteButton) : h('span', { class: 'pal-empty' }, 'La canción no usa alteraciones. Puedes cambiarlo con «Tonalidad».'),
+        withRest ? paletteButton('R') : null));
   }
 
   // The "i" next to the palette's title: hovering (or focusing) it lists how to write with the keyboard.
@@ -342,35 +352,71 @@
     return parent;
   }
 
+  // On a phone the palette is fixed to the bottom of the screen. The glass cards of the page (backdrop filter)
+  // would make a fixed element sit inside them, so there it is drawn in #dock-root, outside the page.
+  var phoneDock = null;
+
+  function inlineDock(song) {
+    var element = dock(song);
+    if (phone()) {
+      phoneDock = element;
+      return null;
+    }
+    phoneDock = null;
+    return element;
+  }
+
+  // A text next to an icon; on a phone the text is hidden and the button keeps its name for screen readers.
+  function label(text) {
+    return h('span', { class: 'btn-label' }, text);
+  }
+
+  function phoneIcon(name) {
+    var icon = C.icons.create(name);
+    icon.setAttribute('class', 'icon phone-only');
+    return icon;
+  }
+
   function dock(song) {
-    var paletteRows = [durationRow()].concat(C.notes.PALETTE.map(function (group) {
-      if (group.accidentals) return accidentalsRow(group, song);
-      return h('div', { class: 'pal-row' },
-        h('span', { class: 'pal-label' }, group.octave ? C.i18n.octave(group.octave) : group.label),
-        h('div', { class: 'pal-notes' }, group.codes.map(paletteButton)));
-    }));
+    if (dockFolded === null) dockFolded = phone();
+    var onPhone = phone();
+    var paletteRows = [durationRow()];
+    C.notes.PALETTE.forEach(function (group) {
+      if (group.accidentals) {
+        paletteRows.push(accidentalsRow(group, song, onPhone));
+      } else if (onPhone && group.codes.length === 1 && group.codes[0] === 'R') {
+        return;                                                  // the rest button is in the accidentals row
+      } else {
+        paletteRows.push(h('div', { class: 'pal-row' },
+          h('span', { class: 'pal-label' }, group.octave ? C.i18n.octave(group.octave) : group.label),
+          h('div', { class: 'pal-notes' }, group.codes.map(paletteButton))));
+      }
+    });
 
     var head = h('div', { class: 'dock-head' },
-      h('strong', { class: 'dock-title' }, 'Botonera de notas'),
-      keyboardHelp(),
-      h('span', { class: 'dock-key', title: 'Tonalidad' }, keyText(song)),
-      h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'undo', disabled: !state.undo.length, onclick: C.store.undo }, C.icons.create('undo'), 'Deshacer'),
-      h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'redo', disabled: !state.redo.length, onclick: C.store.redo }, C.icons.create('redo'), 'Rehacer'),
-      h('button', {
-        type: 'button', class: 'btn btn--sm', 'data-key': 'newline', onclick: C.editor.newLine,
-        title: 'Salto de línea, para leer mejor: no añade tiempo al reproducir. Si el cursor está en medio, las notas siguientes pasan a la línea nueva.'
-      }, C.icons.create('enter'), 'Nueva línea'),
-      h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'backspace', onclick: C.editor.backspace }, C.icons.create('remove'), 'Borrar nota'),
-      h('button', {
-        type: 'button', class: 'btn btn--sm', 'data-key': 'fold', 'aria-expanded': String(!dockFolded),
-        onclick: function () { dockFolded = !dockFolded; C.store.notify(['fold']); }
-      }, C.icons.create(dockFolded ? 'arrow-up' : 'arrow-down'), dockFolded ? 'Mostrar notas' : 'Ocultar notas'),
-      h('span', { class: 'dock-finish' },
-        h('button', { type: 'button', class: 'btn btn--sm btn--ghost', 'data-key': 'cancel-edit', onclick: C.editor.cancel }, 'Cancelar'),
+      h('div', { class: 'dock-info' },
+        h('strong', { class: 'dock-title' }, 'Botonera de notas'),
+        keyboardHelp(),
+        h('span', { class: 'dock-key', title: 'Tonalidad' }, keyText(song))),
+      h('div', { class: 'dock-tools' },
+        h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'undo', 'aria-label': 'Deshacer', disabled: !state.undo.length, onclick: C.store.undo }, C.icons.create('undo'), label('Deshacer')),
+        h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'redo', 'aria-label': 'Rehacer', disabled: !state.redo.length, onclick: C.store.redo }, C.icons.create('redo'), label('Rehacer')),
         h('button', {
-          type: 'button', class: 'btn btn--done', 'data-key': 'done', onclick: C.editor.stop,
+          type: 'button', class: 'btn btn--sm', 'data-key': 'newline', 'aria-label': 'Nueva línea', onclick: C.editor.newLine,
+          title: 'Salto de línea, para leer mejor: no añade tiempo al reproducir. Si el cursor está en medio, las notas siguientes pasan a la línea nueva.'
+        }, C.icons.create('enter'), label('Nueva línea')),
+        h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'backspace', 'aria-label': 'Borrar nota', onclick: C.editor.backspace }, C.icons.create('remove'), label('Borrar nota')),
+        h('button', {
+          type: 'button', class: 'btn btn--sm dock-fold', 'data-key': 'fold', 'aria-expanded': String(!dockFolded),
+          'aria-label': dockFolded ? 'Mostrar notas' : 'Ocultar notas',
+          onclick: function () { dockFolded = !dockFolded; C.store.notify(['fold']); }
+        }, C.icons.create(dockFolded ? 'arrow-up' : 'arrow-down'), label(dockFolded ? 'Mostrar notas' : 'Ocultar notas'))),
+      h('span', { class: 'dock-finish' },
+        h('button', { type: 'button', class: 'btn btn--sm btn--ghost', 'data-key': 'cancel-edit', 'aria-label': 'Cancelar', onclick: C.editor.cancel }, phoneIcon('close'), label('Cancelar')),
+        h('button', {
+          type: 'button', class: 'btn btn--done', 'data-key': 'done', 'aria-label': 'Listo', onclick: C.editor.stop,
           title: 'Guardar la canción en la carpeta'
-        }, C.icons.create('check'), 'Listo')));
+        }, C.icons.create('check'), label('Listo'))));
 
     return h('div', { class: 'dock no-print', role: 'group', 'aria-label': 'Botonera de notas' },
       head,
@@ -503,7 +549,7 @@
         h('button', { type: 'button', class: 'btn btn--danger btn--sm', 'data-key': 'delsong', onclick: function () { C.editor.removeSong(); } },
           C.icons.create('trash'), C.editor.isNewDraft() ? 'Descartar' : 'Borrar canción')),
       h('div', { class: 'elines' }, song.lines.map(function (line, i) { return editLine(song, line, i); })),
-      dock(song));
+      inlineDock(song));
   }
 
   // ---- Caret ------------------------------------------------------------------------------------
@@ -522,6 +568,29 @@
     document.querySelectorAll('.ec.is-selected').forEach(function (el) { el.classList.remove('is-selected'); });
     if (state.caret.pos > 0 && chips[state.caret.pos - 1]) chips[state.caret.pos - 1].classList.add('is-selected');
     syncDuration();
+    keepCaretInView();
+  }
+
+  // The palette covers the bottom of the screen: if the line being written is under it, scroll it clear.
+  function keepCaretInView() {
+    var dock = document.querySelector('.dock');
+    var line = document.querySelector('.eline.is-active');
+    if (!dock || !line) return;
+    var covered = line.getBoundingClientRect().bottom - (dock.getBoundingClientRect().top - 12);
+    if (covered > 0) window.scrollBy({ top: covered + 8, behavior: 'instant' });
+  }
+
+  // The height of the palette, for the page's bottom padding and the position of the messages.
+  var dockObserver = null;
+
+  function syncDockHeight() {
+    var dock = document.querySelector('.dock');
+    document.documentElement.style.setProperty('--dock-h', dock && getComputedStyle(dock).position === 'fixed' ? dock.offsetHeight + 'px' : '0px');
+    if (dockObserver) dockObserver.disconnect();
+    if (dock && window.ResizeObserver) {
+      dockObserver = dockObserver || new ResizeObserver(syncDockHeight);
+      dockObserver.observe(dock);
+    }
   }
 
   // ---- Note values ------------------------------------------------------------------------------
@@ -634,7 +703,10 @@
     document.getElementById('footer-count').textContent = state.folder.status === 'connected'
       ? count + ' · ' + (state.folder.name || 'songs') + '/'
       : (state.folder.status === 'readonly' ? count + tr(' · solo lectura') : '');
+    var dockRoot = document.getElementById('dock-root');
+    dockRoot.replaceChildren.apply(dockRoot, phoneDock && song && song.id === state.editId ? [phoneDock] : []);
     placeCaret();
+    syncDockHeight();
     C.audio.refreshHighlight();
     C.player.markStretch();
 
@@ -654,6 +726,9 @@
 
   function init() {
     C.store.subscribe(all);
+    // Crossing into or out of the phone layout (turning the phone, resizing the window) redraws the palette.
+    if (PHONE.addEventListener) PHONE.addEventListener('change', function () { dockFolded = null; C.store.notify(); });
+    window.addEventListener('resize', syncDockHeight);
   }
 
   C.render = { init: init, placeCaret: placeCaret };

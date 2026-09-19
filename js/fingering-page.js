@@ -47,7 +47,7 @@
     var note = C.notes.parse(key);
     var status = statusOf(key);
     var entry = C.fingering.entryOf(key);
-    var name = C.i18n.noteName(note.name) + C.notes.glyph(note.accidental);
+    var name = C.i18n.noteName(note.name) + C.notes.glyph(note.accidental) + C.notes.displayMark(note.octave);
     return h('div', { class: 'card fcell fcell--' + status, 'data-fingering': key },
       C.fingering.diagram(entry ? entry.holes : [], 'fcell-diagram'),
       h('strong', { class: 'fcell-name' }, name),

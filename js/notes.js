@@ -13,6 +13,9 @@
     high:  { label: 'aguda',       mark: '^',  shift: 12  },
     high2: { label: 'súper aguda', mark: '^^', shift: 24  }
   };
+  // Written after a note's name wherever it is shown by name or letter: F' is high, F, is low.
+  var DISPLAY_MARK = { high: "'", high2: "''", low: ',' };
+  function displayMark(octave) { return DISPLAY_MARK[octave] || ''; }
   var OCTAVE_BY_MARK = { '': 'mid', '_': 'low', '^': 'high', '^^': 'high2' };
 
   var SEMITONE = { Do: 0, Re: 2, Mi: 4, Fa: 5, Sol: 7, La: 9, Si: 11 };
@@ -204,6 +207,7 @@
     parse: parse,
     format: format,
     build: build,
+    displayMark: displayMark,
     respell: respell,
     shiftOctave: shiftOctave,
     withAccidental: withAccidental,

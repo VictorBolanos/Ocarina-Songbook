@@ -10,6 +10,7 @@
   // The current search and filters. They live here, not in the DOM, so they survive redraws and
   // opening a song and coming back.
   var filters = { query: '', tag: '', sort: 'title' };
+  var filtersOpen = false;     // phone layout: the drop-downs are shown
   C.categories.list.forEach(function (category) { filters[category.key] = ''; });
 
   var SORTS = [
@@ -218,11 +219,23 @@
     sort.classList.add('field--inline');
 
     update();
-    return h('div', { class: 'home' },
-      h('div', { class: 'filters' },
-        h('div', { class: 'search' }, C.icons.create('magnifier'), search),
+    var panel = null;
+    var toggle = h('button', {
+      type: 'button',
+      class: 'btn filters-toggle',
+      'aria-expanded': String(filtersOpen),
+      onclick: function () {
+        filtersOpen = !filtersOpen;
+        panel.classList.toggle('is-open', filtersOpen);
+        toggle.setAttribute('aria-expanded', String(filtersOpen));
+      }
+    }, C.icons.create('arrow-down'), 'Filtros');
+    panel = h('div', { class: 'filters' + (filtersOpen ? ' is-open' : '') },
+        h('div', { class: 'search-row' }, h('div', { class: 'search' }, C.icons.create('magnifier'), search), toggle),
         h('div', { class: 'filter-row' }, dropdowns),
-        h('div', { class: 'filters-foot' }, results, h('div', { class: 'filters-actions' }, clear, sort))),
+        h('div', { class: 'filters-foot' }, results, h('div', { class: 'filters-actions' }, clear, sort)));
+    return h('div', { class: 'home' },
+      panel,
       C.store.canEdit() ? newSongButton() : null,
       list);
   }

@@ -96,7 +96,9 @@
   }
 
   function holeCircle(hole, id) {
-    var attrs = { cx: hole.cx, cy: hole.cy, r: hole.r, fill: hole.fill };
+    // A covered hole is painted with the theme's own colour and a dark outline, so it stands out from an
+    // open one on the white body and, for the thumb holes, on the page around it (light or dark).
+    var attrs = { cx: hole.cx, cy: hole.cy, r: hole.r, class: 'oc-hole', style: 'fill: var(--hole, #161616); stroke: #161616; stroke-width: 1.6' };
     if (id) attrs.id = id;
     return svgEl('circle', attrs);
   }

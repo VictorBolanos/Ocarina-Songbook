@@ -67,7 +67,7 @@
 
   function label(key) {
     var note = C.notes.parse(key);
-    return C.i18n.noteName(note.name) + C.notes.glyph(note.accidental) + ' · ' + C.i18n.octave(note.octave).toLowerCase();
+    return C.i18n.noteName(note.name) + C.notes.glyph(note.accidental) + C.notes.displayMark(note.octave) + ' · ' + C.i18n.octave(note.octave).toLowerCase();
   }
 
   // ---- The picture ---------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@
       title.textContent = tr('Agujero {n}', { n: hole.n });
       group.appendChild(title);
       group.appendChild(svg('circle', { class: 'fp-ring', cx: hole.cx, cy: hole.cy, r: hole.r + 2.4 }));
-      group.appendChild(svg('circle', { class: 'fp-fill', cx: hole.cx, cy: hole.cy, r: hole.r, fill: hole.fill }));
+      group.appendChild(svg('circle', { class: 'fp-fill', cx: hole.cx, cy: hole.cy, r: hole.r, style: 'fill: var(--hole, #161616); stroke: #161616; stroke-width: 1.6' }));
       group.addEventListener('click', function () { toggleHole(hole.n); });
       group.addEventListener('keydown', function (e) {
         if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleHole(hole.n); }
@@ -146,6 +146,7 @@
     refs.names.querySelectorAll('button').forEach(function (b) {
       var name = b.getAttribute('data-value');
       var k = C.notes.build(name, sel.accidental, sel.octave);
+      b.querySelector('.dur-val').textContent = C.i18n.noteName(name) + C.notes.displayMark(sel.octave);   // C' D' E' in the high octave
       b.classList.toggle('has-fingering', isDone(k));                  // finished
       b.classList.toggle('is-draft', !!entryOf(k) && !isDone(k));      // started, not finished
     });

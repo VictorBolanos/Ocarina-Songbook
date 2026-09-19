@@ -71,6 +71,9 @@
     'Deshacer': 'Undo',
     'Rehacer': 'Redo',
     'Todas': 'All',
+    'Filtros': 'Filters',
+    'Menos controles': 'Fewer controls',
+    'Más controles': 'More controls',
     'Sin definir': 'Not set',
     'Sin título': 'Untitled',
 

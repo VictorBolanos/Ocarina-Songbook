@@ -2,10 +2,11 @@
 <html lang="es" data-view="fingering" data-route="home">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#3a2a1c">
 <title>Ocarina Songbook</title>
 <link rel="icon" type="image/png" href="src/img/ocarina_title.png">
-<link rel="stylesheet" href="css/styles.css?v=3e85ef8e">
+<link rel="stylesheet" href="css/styles.css?v=28ba6c7c">
 </head>
 <body>
 <svg id="fingering-sprite" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -73,8 +74,8 @@
 
     <div class="legend">
       <span class="legend-item"><span class="note" data-solfege="Fa">Fa</span> octava media</span>
-      <span class="legend-item"><span class="note note--low" data-solfege="Fa">Fa</span> grave</span>
-      <span class="legend-item"><span class="note note--high" data-solfege="Fa">Fa</span> aguda</span>
+      <span class="legend-item"><span class="note note--low"><span class="note-label"><span data-solfege="Fa">Fa</span><span class="note-oct">,</span></span></span> grave</span>
+      <span class="legend-item"><span class="note note--high"><span class="note-label"><span data-solfege="Fa">Fa</span><span class="note-oct">'</span></span></span> aguda</span>
       <span class="legend-item"><span class="note note--sharp"><span class="note-label"><span data-solfege="Fa">Fa</span><span class="note-acc">&#9839;</span></span></span> sostenido</span>
       <span class="legend-item"><span class="note note--flat"><span class="note-label"><span data-solfege="Si">Si</span><span class="note-acc">&#9837;</span></span></span> bemol</span>
     </div>
@@ -125,31 +126,33 @@
 
 <dialog class="dialog dialog--metronome" id="metronome-dialog" aria-label="Metrónomo"></dialog>
 
+<div class="dock-root" id="dock-root"></div>
+
 <div class="toast no-print" id="toast" role="status" hidden></div>
 
-<script src="js/i18n.js?v=87dc15d3"></script>
-<script src="js/notes.js?v=14dee339"></script>
+<script src="js/i18n.js?v=863b7080"></script>
+<script src="js/notes.js?v=65ba6424"></script>
 <script src="js/keys.js?v=bfc69fc7"></script>
-<script src="js/fingering.js?v=3820bad8"></script>
+<script src="js/fingering.js?v=7f323d44"></script>
 <script src="js/icons.js?v=138fa6bb"></script>
 <script src="js/categories.js?v=e4b6179c"></script>
 <script src="js/ui.js?v=81b71ef0"></script>
 <script src="js/menus.js?v=81224562"></script>
 <script src="js/store.js?v=a6adb113"></script>
 <script src="js/router.js?v=cafb81aa"></script>
-<script src="js/home.js?v=26c695a3"></script>
+<script src="js/home.js?v=3af6b94a"></script>
 <script src="js/key-dialog.js?v=051c6c0b"></script>
 <script src="js/metronome.js?v=0bd6d517"></script>
 <script src="js/audio.js?v=fca93399"></script>
 <script src="js/export.js?v=aa20c009"></script>
-<script src="js/player.js?v=4fdbbfe8"></script>
-<script src="js/render.js?v=a1789a57"></script>
+<script src="js/player.js?v=c0f48d0c"></script>
+<script src="js/render.js?v=008a10cb"></script>
 <script src="js/editor.js?v=6f680e28"></script>
 <script src="js/folder.js?v=bc073a36"></script>
 <script src="js/background.js?v=1efc275c"></script>
 <script src="js/preferences.js?v=672522c2"></script>
-<script src="js/fingering-editor.js?v=ebdd396e"></script>
-<script src="js/fingering-page.js?v=c95b12d3"></script>
+<script src="js/fingering-editor.js?v=225b2afc"></script>
+<script src="js/fingering-page.js?v=0c6c6b65"></script>
 <script src="js/backup.js?v=002a093d"></script>
 <script src="js/app.js?v=a362b0d5"></script>
 </body>

@@ -31,7 +31,7 @@ The interface comes in **Spanish and English**: the flag button in the top bar (
 - ✅ **Zero setup** - Plain HTML, CSS and JavaScript: no server, no dependencies, no build step
 - ✅ **Private** - Nothing is uploaded anywhere and there is no tracking
 - ✅ **Made for the ocarina** - Fingering diagrams, an ocarina-like synthesized voice, key signatures
-- ✅ **Works on your phone** - Publish it on GitHub Pages and read your songs anywhere
+- ✅ **Made for your phone too** - A layout designed for touch screens, and on Android Chrome you can even connect a folder and edit; publish it on GitHub Pages to read your songs anywhere
 - ✅ **Two languages** - Spanish and English, with a one-click switch
 - ✅ **Free & Open Source** - No paywalls, no ads
 
@@ -440,7 +440,8 @@ Ocarina-Songbook/
 
 ### **🌍 Browser support**
 - Editing needs the File System Access API: **Chrome and Edge on desktop**
-- Any modern browser, phones included, can read the published songs
+- Any modern browser, phones included, can read the published songs; Chrome on Android can also connect a folder and edit
+- **Phone layout**: on narrow screens the note palette is a bottom sheet (closed to a slim bar until you open it), the player and the filters fold away, and every control has a finger-sized target
 - MP4 export needs the WebCodecs AAC encoder (current Chrome and Edge)
 
 ---
