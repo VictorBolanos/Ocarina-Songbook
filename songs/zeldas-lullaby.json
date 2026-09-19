@@ -2,6 +2,8 @@
   "id": "zeldas-lullaby",
   "title": "Zelda's Lullaby",
   "meter": "3/4",
+  "bpm": 100,
+  "signature": "none",
   "difficulty": "",
   "origin": "videojuegos",
   "status": "",
@@ -9,10 +11,10 @@
   "order": 3,
   "lines": [
     { "subtitle": "Parte 1", "notes": ["Mi", "Sol", "Re"] },
-    { "subtitle": "", "notes": ["Do", "Re", "Mi"] },
+    { "subtitle": "", "notes": ["Do:h", "Re", "Mi"] },
     { "subtitle": "", "notes": ["Sol", "Re"] },
-    { "subtitle": "", "notes": ["Mi", "Sol", "Re^^", "Do^^", "Sol"] },
-    { "subtitle": "", "notes": ["Fa", "Mi", "Re"] },
+    { "subtitle": "", "notes": ["Mi", "Sol", "Re^^:h", "Do^^", "Sol"] },
+    { "subtitle": "", "notes": ["Fa:e", "Mi:e", "Re:h"] },
     { "subtitle": "Parte 2", "notes": [] }
   ]
 }

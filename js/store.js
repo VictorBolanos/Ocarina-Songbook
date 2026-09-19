@@ -7,9 +7,13 @@
   // Song: {
   //   id, title,
   //   meter,                                   // time signature shown as a badge, e.g. "3/4"
+  //   bpm,                                     // tempo in quarter notes per minute (30-240)
+  //   signature,                               // accidentals the song uses: 'none', 'flat' or 'sharp'
   //   difficulty, origin, status,              // one option key each (see categories.js) or ''
   //   tags,                                    // free-form labels, e.g. ['zelda', 'infantil']
-  //   lines: [{ subtitle, notes: ['Re', 'Fa#', 'Do^', ...] }]
+  //   lines: [{ subtitle, notes: ['Re', 'Fa#', 'Do^', ...], wait }]
+  //     A line is either a line of notes (wait = 0), which only breaks the text for easier reading and
+  //     adds no time when played, or a wait line: no notes, `wait` beats of silence.
   // }
   //
   // The songs live in exactly one place: the JSON files of the connected songs/ folder (folder.js).
@@ -17,14 +21,18 @@
   // Undo history and the caret are per session and never saved.
   var state = {
     songs: [],
-    draft: null,                   // a new song that is still being written: not in `songs`, not in the folder
+    draft: null,                   // the song being edited: a working copy (or a brand-new song) that is not in
+                                   // `songs` until Listo, so nothing reaches the folder before that
     editId: null,                  // id of the song being edited (a saved song or the draft), if any
     caret: { line: 0, pos: 0 },    // insertion point inside the edited song
+    selection: null,               // { line, index } of the note picked by clicking or with the arrow keys:
+                                   // Play starts from it. Any edit (or undo) clears it.
     undo: [],
     redo: [],
     saved: true,                   // false when the last write to the folder failed
     saveError: '',                 // why, in words for the user
     route: { name: 'home', id: null },   // home = the song list, song = one open song (router.js)
+    duration: { key: 'q', dotted: false },   // note value used for new notes when nothing is selected
     selectKey: null,               // data-key of a field whose text should be selected once rendered
     folder: { status: 'checking', name: '' }   // checking | unsupported | disconnected | needs-permission | connected
   };
@@ -74,8 +82,20 @@
     return tags;
   }
 
+  // Beats of silence of a wait line: halves allowed, at most 64. 0 means "not a wait line".
+  function cleanWait(value) {
+    var n = Math.round(Number(value) * 2) / 2;
+    return isFinite(n) && n > 0 ? Math.min(64, n) : 0;
+  }
+
+  // Tempo as a whole number of quarter notes per minute, kept in a musical range.
+  function cleanBpm(value) {
+    var n = Math.round(Number(value));
+    return isFinite(n) && n > 0 ? Math.min(240, Math.max(30, n)) : 100;
+  }
+
   function blankSong(id) {
-    var song = { id: id, title: 'Nueva canción', meter: '', tags: [], lines: [{ subtitle: '', notes: [] }] };
+    var song = { id: id, title: 'Nueva canción', meter: '', bpm: 100, signature: 'none', tags: [], lines: [{ subtitle: '', notes: [], wait: 0 }] };
     C.categories.list.forEach(function (category) { song[category.key] = ''; });
     return song;
   }
@@ -107,11 +127,13 @@
       var lines = (Array.isArray(item.lines) ? item.lines : [])
         .filter(function (l) { return l && typeof l === 'object'; })
         .map(function (l) {
+          var wait = cleanWait(l.wait);
           return {
             subtitle: text(l.subtitle, MAX.subtitle),
-            notes: (Array.isArray(l.notes) ? l.notes : []).filter(function (code) {
+            notes: wait > 0 ? [] : (Array.isArray(l.notes) ? l.notes : []).filter(function (code) {
               return typeof code === 'string' && C.notes.parse(code);
-            })
+            }),
+            wait: wait
           };
         });
       // `tag` is the old name of `meter`; files written by earlier versions still use it.
@@ -119,6 +141,8 @@
         id: id,
         title: text(item.title, MAX.title),
         meter: text(item.meter !== undefined ? item.meter : item.tag, MAX.meter),
+        bpm: cleanBpm(item.bpm),
+        signature: C.keys.clean(item.signature) || C.keys.infer(lines),
         tags: cleanTags(item.tags),
         lines: lines
       };
@@ -203,8 +227,21 @@
       state.caret = { line: 0, pos: 0 };
       return;
     }
-    if (!song.lines.length) song.lines.push({ subtitle: '', notes: [] });
+    if (!song.lines.length) song.lines.push({ subtitle: '', notes: [], wait: 0 });
     var line = Math.min(Math.max(state.caret.line, 0), song.lines.length - 1);
+    if (song.lines[line].wait > 0) {                 // the caret lives in a line of notes, never in a wait line
+      var next = line;
+      while (next < song.lines.length && song.lines[next].wait > 0) next++;
+      if (next >= song.lines.length) {
+        next = line;
+        while (next >= 0 && song.lines[next].wait > 0) next--;
+      }
+      if (next < 0) {
+        song.lines.push({ subtitle: '', notes: [], wait: 0 });
+        next = song.lines.length - 1;
+      }
+      line = next;
+    }
     var pos = Math.min(Math.max(state.caret.pos, 0), song.lines[line].notes.length);
     state.caret = { line: line, pos: pos };
   }
@@ -224,6 +261,7 @@
   function mutate(change, focusKeys) {
     flushText();
     var before = snapshot();
+    state.selection = null;
     change();
     if (snapshot() !== before) {
       pushUndo(before);
@@ -248,6 +286,7 @@
 
   function restore(json, focusKeys) {
     var saved = JSON.parse(json);
+    state.selection = null;
     state.songs = saved.songs;
     state.draft = saved.draft;
     if (state.draft && state.editId !== state.draft.id) state.draft = null;   // never leave an unseen draft
@@ -274,6 +313,7 @@
   // so there is nothing to undo back to and nothing to write.
   function replaceSongs(songs) {
     flushText();
+    state.selection = null;
     state.songs = songs;
     state.draft = null;
     state.editId = null;
@@ -290,6 +330,8 @@
     uniqueId: uniqueId,
     blankSong: blankSong,
     cleanTags: cleanTags,
+    cleanBpm: cleanBpm,
+    cleanWait: cleanWait,
     allTags: allTags,
     sanitize: sanitize,
     find: find,

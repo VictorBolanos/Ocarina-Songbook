@@ -2,6 +2,8 @@
   "id": "cancion-del-tiempo",
   "title": "Canción del Tiempo",
   "meter": "",
+  "bpm": 100,
+  "signature": "none",
   "difficulty": "",
   "origin": "videojuegos",
   "status": "",

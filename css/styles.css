@@ -10,7 +10,8 @@
   --danger: #b3261e;
   --low: #3f6f7d;       --low-ink: #fdfdfb;
   --high: #d1a53d;      --high-ink: #3a2a08;
-  --high2: #b5502f;     --high2-ink: #fdf3ea;
+  --flat: #b5502f;      --flat-ink: #fdf3ea;
+  --sharp: #4c8a4a;     --sharp-ink: #f3fbf1;
   --font: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
 
@@ -41,7 +42,7 @@
 [data-theme="azul"]    { --bg:#e5eef9; --paper:#f5f9fe; --ink:#101f33; --accent:#1f5fa8; }
 
 [data-mode="oscuro"]{
-  --low:#5b93a4; --low-ink:#0d1a1e; --high2:#d9694a; --high2-ink:#240f07;
+  --low:#5b93a4; --low-ink:#0d1a1e; --flat:#d9694a; --flat-ink:#240f07; --sharp:#6db56a; --sharp-ink:#0d1f0c;
   --danger: #ff8a80;
   --shade: rgba(0, 0, 0, .5);
   --shadow: rgba(0, 0, 0, .4);
@@ -269,7 +270,8 @@ button:focus-visible{
   gap: .4rem;
 }
 
-/* A note is just its name; octave dots (::before) and the sharp sign (<sup>) are decoration */
+/* A note is its name with the accidental to its right; octave dots (::before) are decoration. Sharps and
+   flats have their own colours (they win over the octave's). */
 .note{
   display:inline-flex;
   flex-direction: column;
@@ -277,7 +279,7 @@ button:focus-visible{
   justify-content:flex-end;
   background: var(--mid);
   color: var(--ink);
-  border-radius: 10px;
+  border-radius: 15px;
   min-width: 2.4em;
   padding: 0 .5em .35em;
   font-weight: 700;
@@ -295,11 +297,11 @@ button:focus-visible{
 .note--high::before{ content: "\2022"; }
 .note--high2::before{ content: "\2022\2022"; }
 
-.note sup{
-  font-size: .6em;
-  line-height: 0;
-  margin-left: 2px;
-  opacity: .85;
+.note-label{ display: inline-flex; align-items: baseline; white-space: nowrap; }
+.note-acc{
+  font-size: 1em;
+  line-height: 1;
+  margin-left: .05em;
 }
 
 button.note{
@@ -327,7 +329,9 @@ button.note{
 
 .note--low{ background: var(--low); color: var(--low-ink); }
 .note--high{ background: var(--high); color: var(--high-ink); }
-.note--high2{ background: var(--high2); color: var(--high2-ink); }
+.note--high2{ background: var(--high); color: var(--high-ink); }      /* only in old songs: not offered any more */
+.note--flat{ background: var(--flat); color: var(--flat-ink); }
+.note--sharp{ background: var(--sharp); color: var(--sharp-ink); }
 
 .tbd{
   font-family: var(--sans);
@@ -385,7 +389,7 @@ button.note{
 
 .edit-head{
   display:grid;
-  grid-template-columns: 1fr 8rem;
+  grid-template-columns: 1fr 8rem 7rem;
   gap: .6rem;
 }
 .field{
@@ -884,7 +888,7 @@ button.note{
   :root[data-theme]{
     color-scheme: light;
     --bg:#fff; --paper:#fff; --ink:#2b2118; --accent:#8a4b22; --page:#fff;
-    --low:#3f6f7d; --low-ink:#fdfdfb; --high2:#b5502f; --high2-ink:#fdf3ea;
+    --low:#3f6f7d; --low-ink:#fdfdfb; --flat:#b5502f; --flat-ink:#fdf3ea; --sharp:#4c8a4a; --sharp-ink:#f3fbf1;
   }
   body{ padding: 0; background: none; display: block; }
   body::before{ display: none; }
@@ -960,3 +964,180 @@ button.note{
   #background-picker{ position: static; }
   #background-menu{ left: .6rem; right: .6rem; width: auto; }
 }
+
+/* ---- Note values, rests and playback ------------------------------------------------------ */
+.note{ position: relative; }
+
+/* Length in beats, shown only when it isn't a plain quarter note. */
+.note-dur{
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  z-index: 1;
+  padding: .14rem .34rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--paper);
+  font: 700 .66rem/1 var(--sans);
+}
+
+.note--rest{
+  min-width: 2.4em;
+  border: 2px dashed var(--line);
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink-soft);
+}
+
+.rows .note{ cursor: pointer; }
+
+/* The note that is sounding, and the note the editor's duration buttons are acting on. */
+.note.is-playing{
+  border-radius: 12px;
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  transform: scale(1.07);
+}
+.ec.is-selected .note{ border-radius: 17px; outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference){ .note{ transition: transform .12s; } }
+
+/* Note-value buttons in the editor's palette */
+.dur-row{ gap: .3rem; }
+.dur-btn{
+  display: grid;
+  justify-items: center;
+  gap: .05rem;
+  min-width: 3.7rem;
+  padding: .3rem .5rem;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  color: var(--ink);
+  font-family: var(--sans);
+  cursor: pointer;
+}
+.dur-btn:hover{ border-color: var(--accent); }
+.dur-val{ font-size: 1.05rem; font-weight: 700; line-height: 1.1; }
+.dur-name{ font-size: .62rem; color: var(--ink-soft); }
+.dur-btn[aria-pressed="true"]{ background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.dur-btn[aria-pressed="true"] .dur-name{ color: inherit; opacity: .85; }
+
+/* Player bar: play / pause / stop, speed, volume, repeat. Sticks under the notes/fingering switch. */
+.player{
+  position: sticky;
+  top: 4.4rem;
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem .9rem;
+  margin: 0 0 1rem;
+  padding: .5rem .9rem;
+  border: 2px solid var(--accent);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--glass-shadow);
+  font-family: var(--sans);
+}
+.player-play, .player-stop{
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.player-play{ color: var(--accent); }
+.player-stop{ color: var(--ink-soft); }
+.player-stop:disabled{ opacity: .4; cursor: default; }
+.player-play .icon, .player-stop .icon{ width: 2.5rem; height: 2.5rem; }
+.player-play:hover, .player-stop:hover:not(:disabled){ color: var(--ink); }
+.player-tempo{ font-size: .78rem; font-weight: 700; color: var(--ink-soft); }
+.player-field{ display: flex; align-items: center; gap: .4rem; font-size: .75rem; color: var(--ink-soft); }
+.input--mini{ width: auto; padding: .2rem .4rem; font-size: .78rem; }
+.player-volume input{ width: 6.5rem; accent-color: var(--accent); }
+.player-loop[aria-pressed="true"]{ background: var(--accent); border-color: var(--accent); color: var(--paper); }
+
+@media (max-width: 640px){
+  .player{ gap: .4rem .7rem; padding: .45rem .7rem; }
+  .player-volume input{ width: 5rem; }
+}
+
+/* ---- Wait lines: silence of a given number of beats ---------------------------------------- */
+.wait-bar{
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .85rem;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: .85rem;
+  cursor: pointer;
+}
+.wait-bar .icon{ width: 1.3em; height: 1.3em; }
+.wait-bar.is-playing{
+  border-color: var(--accent);
+  border-style: solid;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+.eline--wait{ border-style: dashed; cursor: default; }
+.wait-edit{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  margin-top: .55rem;
+  font-family: var(--sans);
+  font-size: .85rem;
+  color: var(--ink-soft);
+}
+.wait-edit .input{ width: 5rem; }
+
+/* ---- Key signature -------------------------------------------------------------------------- */
+.dialog--wide{ width: min(38rem, calc(100vw - 2rem)); }
+.key-types{ display: flex; flex-wrap: wrap; gap: .5rem; margin: .2rem 0 .9rem; }
+.key-opt{ white-space: normal; text-align: center; }
+.key-opt .dur-val{ font-size: 1.1rem; }
+.key-preview{ min-height: 3.2em; margin: 0 0 1rem; font-size: .85rem; }
+
+.badge--key{ background: var(--accent); color: var(--paper); }
+.tag--key{ background: color-mix(in srgb, var(--accent) 22%, var(--paper)); color: var(--ink); font-weight: 700; }
+.dock-key{ font-family: var(--sans); font-size: .78rem; font-weight: 700; color: var(--accent); }
+
+.key-button{ display: flex; align-items: center; gap: .6rem; text-align: left; cursor: pointer; }
+.key-name{ font-weight: 700; }
+.key-acc{ color: var(--ink-soft); font-size: .8rem; }
+.key-change{ display: inline-flex; align-items: center; gap: .3rem; margin-left: auto; color: var(--accent); font-size: .8rem; }
+.pal-empty{ font-family: var(--sans); font-size: .8rem; font-style: italic; color: var(--ink-soft); align-self: center; }
+
+/* The way out of the editor: set apart from the tool buttons, and the only filled one. */
+.dock-finish{
+  display:inline-flex;
+  align-items:center;
+  gap: .5rem;
+  margin-left: auto;
+  padding-left: .75rem;
+  border-left: 2px solid var(--line);
+}
+.btn--done{
+  padding: .5rem 1.35rem;
+  border: 0;
+  background: var(--accent);
+  color: var(--paper);
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  box-shadow: 0 3px 8px rgba(0,0,0,.28);
+  transition: transform .12s, box-shadow .12s;
+}
+.btn--done:hover:not(:disabled){
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(0,0,0,.34);
+}
+.btn--done:active:not(:disabled){ transform: translateY(0); }
+.btn--done .icon{ width: 1.3em; height: 1.3em; }

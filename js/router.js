@@ -25,11 +25,12 @@
     var target = location.hash;
     var risky = C.editor.draftAtRisk();
     if (risky && !(next.name === 'song' && next.id === risky.id)) {
-      // Going away would lose the new song's notes: put the address back, ask, and only then go on.
+      // Going away would lose what was written: put the address back, ask, and only then go on.
       history.replaceState(null, '', '#/song/' + risky.id);      // does not fire hashchange
+      var message = C.editor.discardMessage(risky);
       C.ui.confirm({
-        title: 'Descartar la canción nueva',
-        text: '«' + (risky.title || 'Sin título') + '» todavía no se ha guardado. Si sales, se perderán sus notas.',
+        title: message.title,
+        text: message.text,
         ok: 'Descartar',
         danger: true
       }).then(function (yes) {

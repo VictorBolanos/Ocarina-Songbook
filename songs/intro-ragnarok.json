@@ -2,16 +2,18 @@
   "id": "intro-ragnarok",
   "title": "Intro Ragnarok",
   "meter": "",
-  "difficulty": "",
+  "bpm": 100,
+  "signature": "none",
+  "difficulty": "media",
   "origin": "videojuegos",
-  "status": "",
+  "status": "dominada",
   "tags": ["ragnarok"],
   "order": 1,
   "lines": [
-    { "subtitle": "", "notes": ["Re", "Mi", "Fa", "Sol", "La", "Si"] },
+    { "subtitle": "", "notes": ["Re:s", "Mi:s", "Fa:s", "Sol:s", "La:h", "Si:h"] },
     { "subtitle": "", "notes": ["La", "Sol", "Fa"] },
-    { "subtitle": "", "notes": ["Mi", "Re"] },
-    { "subtitle": "", "notes": ["Re", "Mi", "Fa", "Sol", "La", "Si"] },
+    { "subtitle": "", "notes": ["Mi:s", "Re:s"] },
+    { "subtitle": "", "notes": ["Mi:s", "Fa:s", "Sol:s", "La:h", "Si:h"] },
     { "subtitle": "", "notes": ["Sol", "Fa^"] },
     { "subtitle": "", "notes": ["Mi", "Re"] }
   ]

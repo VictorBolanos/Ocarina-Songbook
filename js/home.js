@@ -24,6 +24,8 @@
 
   function searchText(song) {
     var parts = [song.title, song.meter].concat(song.tags);
+    var key = C.keys.describe(song.signature, song);
+    parts.push(key.major, key.minor);
     C.categories.list.forEach(function (category) {
       parts.push(C.categories.labelOf(category.key, song[category.key]));
     });
@@ -79,8 +81,9 @@
 
   // ---- Song cards -------------------------------------------------------------------------------
   // The category and tag chips of a song, shared by the list and the song page.
-  function chips(song) {
+  function chips(song, withKey) {
     var box = h('div', { class: 'tags' });
+    if (withKey) box.appendChild(h('span', { class: 'tag tag--key', title: 'Tonalidad' }, C.keys.describe(song.signature, song).text));
     C.categories.list.forEach(function (category) {
       var value = song[category.key];
       if (!value) return;
@@ -108,7 +111,7 @@
       h('div', { class: 'card-head' },
         h('h2', null, h('a', { class: 'card-link', href: '#/song/' + song.id, 'data-key': 'song:' + song.id }, title)),
         song.meter ? h('span', { class: 'badge' }, song.meter) : null),
-      chips(song),
+      chips(song, true),
       h('div', { class: 'card-foot' },
         h('p', { class: 'card-meta' }, counts(song)),
         h('div', { class: 'card-actions' },

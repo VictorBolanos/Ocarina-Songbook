@@ -53,12 +53,15 @@
   function serialize(song, order) {
     const q = (value) => JSON.stringify(value);
     const lines = song.lines.map((line) =>
-      '    { "subtitle": ' + q(line.subtitle) + ', "notes": [' + line.notes.map(q).join(', ') + '] }');
+      '    { "subtitle": ' + q(line.subtitle) + ', "notes": [' + line.notes.map(q).join(', ') + ']' +
+      (line.wait > 0 ? ', "wait": ' + line.wait : '') + ' }');
     const categories = C.categories.list.map((c) => '  "' + c.key + '": ' + q(song[c.key]) + ',\n').join('');
     return '{\n' +
       '  "id": ' + q(song.id) + ',\n' +
       '  "title": ' + q(song.title) + ',\n' +
       '  "meter": ' + q(song.meter) + ',\n' +
+      '  "bpm": ' + song.bpm + ',\n' +
+      '  "signature": ' + q(song.signature) + ',\n' +
       categories +
       '  "tags": [' + song.tags.map(q).join(', ') + '],\n' +
       '  "order": ' + order + ',\n' +

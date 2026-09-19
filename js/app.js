@@ -6,6 +6,7 @@
   C.render.init();
   C.editor.init();
   C.preferences.init();
+  C.player.init();
   C.background.init();                                     // async: puts back the chosen picture
   C.home.init();
   C.router.init();

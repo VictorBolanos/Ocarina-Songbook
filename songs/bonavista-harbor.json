@@ -2,10 +2,14 @@
   "id": "bonavista-harbor",
   "title": "Bonavista Harbor",
   "meter": "",
+  "bpm": 100,
+  "signature": "none",
   "difficulty": "",
   "origin": "tradicional",
   "status": "",
   "tags": ["folk"],
   "order": 5,
-  "lines": []
+  "lines": [
+    { "subtitle": "", "notes": ["Do"] }
+  ]
 }

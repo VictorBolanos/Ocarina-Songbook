@@ -143,8 +143,8 @@
       <span class="legend-item"><span class="note">Fa</span> octava media</span>
       <span class="legend-item"><span class="note note--low">Fa</span> grave</span>
       <span class="legend-item"><span class="note note--high">Fa</span> aguda</span>
-      <span class="legend-item"><span class="note note--high2">Fa</span> super aguda</span>
-      <span class="legend-item"><span class="note">Fa<sup>&#9839;</sup></span> sostenido</span>
+      <span class="legend-item"><span class="note note--sharp"><span class="note-label">Fa<span class="note-acc">&#9839;</span></span></span> sostenido</span>
+      <span class="legend-item"><span class="note note--flat"><span class="note-label">Si<span class="note-acc">&#9837;</span></span></span> bemol</span>
     </div>
 
     <noscript><p class="empty">Esta página necesita JavaScript para mostrar las canciones.</p></noscript>
@@ -169,9 +169,23 @@
   </form>
 </dialog>
 
+<dialog class="dialog dialog--wide" id="key-dialog" aria-labelledby="key-title">
+  <form method="dialog" onsubmit="return false">
+    <h2 id="key-title" data-role="title"></h2>
+    <p data-role="help"></p>
+    <div class="key-types" data-role="types" role="group" aria-label="Alteraciones de la canción"></div>
+    <p class="key-preview" data-role="preview" role="status"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn" data-role="cancel">Cancelar</button>
+      <button type="button" class="btn btn--primary" data-role="ok" disabled>Aceptar</button>
+    </div>
+  </form>
+</dialog>
+
 <div class="toast no-print" id="toast" role="status" hidden></div>
 
 <script src="js/notes.js"></script>
+<script src="js/keys.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/categories.js"></script>
 <script src="js/ui.js"></script>
@@ -179,6 +193,9 @@
 <script src="js/store.js"></script>
 <script src="js/router.js"></script>
 <script src="js/home.js"></script>
+<script src="js/key-dialog.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/player.js"></script>
 <script src="js/render.js"></script>
 <script src="js/editor.js"></script>
 <script src="js/folder.js"></script>

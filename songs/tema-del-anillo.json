@@ -2,21 +2,22 @@
   "id": "tema-del-anillo",
   "title": "Tema del Anillo",
   "meter": "",
+  "bpm": 100,
   "difficulty": "",
   "origin": "cine",
   "status": "",
   "tags": ["señor de los anillos"],
   "order": 6,
   "lines": [
-    { "subtitle": "Línea 1", "notes": ["La", "Sol", "La", "La#", "La", "Sol", "Fa", "Sol", "Mi"] },
-    { "subtitle": "", "notes": ["La", "Sol", "La", "La#", "La", "La#", "Do#"] },
-    { "subtitle": "Línea 2", "notes": ["Do#", "Re^"] },
-    { "subtitle": "", "notes": ["Do#", "Re^", "Do#", "Si", "Re^", "Do#", "Fa#"] },
-    { "subtitle": "", "notes": ["Do#", "Re^"] },
-    { "subtitle": "", "notes": ["Do#", "Re^", "Do#", "Si", "Re^", "Do#"] },
-    { "subtitle": "Línea 3", "notes": ["Do", "Do#"] },
-    { "subtitle": "", "notes": ["Do", "Do#", "Do", "La#", "Do#", "Do", "Mi"] },
-    { "subtitle": "", "notes": ["Do", "Do#"] },
-    { "subtitle": "", "notes": ["Do", "Do#", "Do", "La#", "Do#", "Do"] }
+    { "subtitle": "Línea 1", "notes": ["La", "Sol:q.", "La:e", "La#:e", "La:e", "Sol:e", "Fa", "Sol", "Mi:h", "R"] },
+    { "subtitle": "", "notes": ["La", "Sol", "La", "La#", "La", "La#", "Do^", "R"] },
+    { "subtitle": "Línea 2", "notes": ["Do#", "Re^", "R"] },
+    { "subtitle": "", "notes": ["Do#", "Re^", "Do#", "Si", "Re^", "Do#", "Fa#", "R"] },
+    { "subtitle": "", "notes": ["Do#", "Re^", "R"] },
+    { "subtitle": "", "notes": ["Do#", "Re^", "Do#", "Si", "Re^", "Do#", "R"] },
+    { "subtitle": "Línea 3", "notes": ["Do", "Do#", "R"] },
+    { "subtitle": "", "notes": ["Do", "Do#", "Do", "La#", "Do#", "Do", "Mi", "R"] },
+    { "subtitle": "", "notes": ["Do", "Do#", "R"] },
+    { "subtitle": "", "notes": ["Do", "Do#", "Do", "La#", "Do#", "Do", "R"] }
   ]
 }
