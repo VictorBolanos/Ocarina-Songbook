@@ -418,7 +418,7 @@
           title: 'Guardar la canción en la carpeta'
         }, C.icons.create('check'), label('Listo'))));
 
-    return h('div', { class: 'dock no-print', role: 'group', 'aria-label': 'Botonera de notas' },
+    return h('div', { class: 'dock no-print' + (dockFolded ? ' is-folded' : ''), role: 'group', 'aria-label': 'Botonera de notas' },
       head,
       dockFolded ? null : h('div', { class: 'pal' }, paletteRows),
       h('p', { class: 'dock-status' + (state.saved ? '' : ' is-error'), role: 'status' }, saveStatus()));
@@ -571,23 +571,35 @@
     keepCaretInView();
   }
 
-  // The palette covers the bottom of the screen: if the line being written is under it, scroll it clear.
+  // A phone held sideways puts the open palette in a panel on the right instead of across the bottom.
+  function dockIsSide(dock) {
+    return getComputedStyle(dock).position === 'fixed' && dock.offsetWidth < window.innerWidth - 2;
+  }
+
+  // The palette covers part of the screen: if the line being written is under it, scroll it clear.
   function keepCaretInView() {
     var dock = document.querySelector('.dock');
     var line = document.querySelector('.eline.is-active');
     if (!dock || !line) return;
-    var covered = line.getBoundingClientRect().bottom - (dock.getBoundingClientRect().top - 12);
+    var limit = dockIsSide(dock) ? window.innerHeight : dock.getBoundingClientRect().top - 12;
+    var covered = line.getBoundingClientRect().bottom - limit;
     if (covered > 0) window.scrollBy({ top: covered + 8, behavior: 'instant' });
   }
 
-  // The height of the palette, for the page's bottom padding and the position of the messages.
+  // The size of the palette, for the page's padding and the position of the messages.
   var dockObserver = null;
+  var observedDock = null;
 
   function syncDockHeight() {
     var dock = document.querySelector('.dock');
-    document.documentElement.style.setProperty('--dock-h', dock && getComputedStyle(dock).position === 'fixed' ? dock.offsetHeight + 'px' : '0px');
+    var fixed = !!dock && getComputedStyle(dock).position === 'fixed';
+    var side = fixed && dockIsSide(dock);
+    document.documentElement.style.setProperty('--dock-h', fixed && !side ? dock.offsetHeight + 'px' : '0px');
+    document.documentElement.style.setProperty('--dock-w', side ? dock.offsetWidth + 'px' : '0px');
+    if (dock === observedDock || !window.ResizeObserver) return;
     if (dockObserver) dockObserver.disconnect();
-    if (dock && window.ResizeObserver) {
+    observedDock = dock;
+    if (dock) {
       dockObserver = dockObserver || new ResizeObserver(syncDockHeight);
       dockObserver.observe(dock);
     }

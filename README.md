@@ -441,7 +441,7 @@ Ocarina-Songbook/
 ### **🌍 Browser support**
 - Editing needs the File System Access API: **Chrome and Edge on desktop**
 - Any modern browser, phones included, can read the published songs; Chrome on Android can also connect a folder and edit
-- **Phone layout**: on narrow screens the note palette is a bottom sheet (closed to a slim bar until you open it), the player and the filters fold away, and every control has a finger-sized target
+- **Phone layout**: on narrow screens the note palette is a compact bottom sheet (closed to a slim bar until you open it, and a panel on the right when the phone is held sideways, so it never covers the score), the player and the filters fold away, and every control has a finger-sized target
 - MP4 export needs the WebCodecs AAC encoder (current Chrome and Edge)
 
 ---
