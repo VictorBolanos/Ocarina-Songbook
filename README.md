@@ -11,7 +11,7 @@
 
 **Your songs as plain JSON files, shown as note names or fingering diagrams, played back with a synthesized ocarina — no server, no account, no build step**
 
-[Screenshots](#-screenshots) • [Features](#-features) • [Demo](#-demo) • [Technologies](#-technologies) • [Installation](#-installation) • [User Guide](#-user-guide)
+[Features](#-features) • [Demo](#-demo) • [Technologies](#-technologies) • [Installation](#-installation) • [User Guide](#-user-guide)
 
 Live application: https://victorbolanos.github.io/Ocarina-Songbook
 
@@ -37,37 +37,20 @@ The interface comes in **Spanish and English**: the flag button in the top bar (
 
 ---
 
-## 📸 Screenshots
-
-<div align="center">
-
-| Reading a song | The song list |
-|:---:|:---:|
-| <a href="docs/screenshots/song-view.png"><img src="docs/screenshots/song-view.png" alt="A song shown as fingering diagrams and note names" width="420"></a> | <a href="docs/screenshots/song-list.png"><img src="docs/screenshots/song-list.png" alt="The searchable song list" width="420"></a> |
-| **Note names, fingerings or both**, with the player above | **Search and filters**, one card per song |
-
-| Writing a song | The fingerings page |
-|:---:|:---:|
-| <a href="docs/screenshots/editor.png"><img src="docs/screenshots/editor.png" alt="The song editor with its note palette" width="420"></a> | <a href="docs/screenshots/fingerings-page.png"><img src="docs/screenshots/fingerings-page.png" alt="Every note with its fingering" width="420"></a> |
-| **The editor**, with the player right above the score and the note palette below it | **Every note's fingering**, editable |
-
-| The fingering editor |
-|:---:|
-| <a href="docs/screenshots/fingering-editor.png"><img src="docs/screenshots/fingering-editor.png" alt="Drawing a fingering by covering holes" width="420"></a> |
-| **Cover the holes** of the ocarina to teach the page a fingering |
-
-</div>
-
-The pictures show the green theme in dark mode over a forest picture: the colour, the light or dark mode and the background are all yours to change (see [Customization Options](#-customization-options)).
-
----
-
 ## ✨ Features
 
 ### 🎼 **Song Library**
 > **Status:** ✅ **FULLY IMPLEMENTED**
 
 A searchable list of your songs, with categories and tags.
+
+<div align="center">
+
+<a href="docs/screenshots/song-list.png"><img src="docs/screenshots/song-list.png" alt="The song list with its search box, filters and one card per song" width="640"></a>
+
+<sub>Search, filter and sort; every card shows the song's key, categories and tags, and lets you edit, duplicate or delete it.</sub>
+
+</div>
 
 **Key Features:**
 - 🔎 **Search** - By title, tag, category, key or line subtitle (accent and case insensitive)
@@ -96,12 +79,28 @@ Write songs with a note palette or straight from the keyboard.
 3. The key of the song updates as you write
 4. Press **Done** to save it as a `.json` file (or `Esc` to discard)
 
+<div align="center">
+
+<a href="docs/screenshots/editor.png"><img src="docs/screenshots/editor.png" alt="The song editor: form, player, lines of notes and note palette" width="600"></a>
+
+<sub>The form on top, the player right above the lines of the score, and the note palette below it.</sub>
+
+</div>
+
 ---
 
 ### 🔊 **Playback**
 > **Status:** ✅ **FULLY IMPLEMENTED**
 
 An ocarina-like voice synthesized in the browser — nothing to download.
+
+<div align="center">
+
+<a href="docs/screenshots/song-view.png"><img src="docs/screenshots/song-view.png" alt="A song open in Both view, with the player bar above it" width="640"></a>
+
+<sub>A song with its player bar: every note shows its fingering and its name, and the badge on the corner is its length.</sub>
+
+</div>
 
 **Key Features:**
 - ▶️ **Play, pause, stop** - The note that is sounding lights up
@@ -110,6 +109,14 @@ An ocarina-like voice synthesized in the browser — nothing to download.
 - 🐢 **Speed** - Slow the song down for practice without changing its saved tempo
 - 🥁 **Count-in** - A bar of clicks before the song starts
 - 📤 **Export** - MIDI, WAV or MP4
+
+<div align="center">
+
+<a href="docs/screenshots/export.png"><img src="docs/screenshots/export.png" alt="The export dialog with the MIDI, WAV and MP4 options" width="380"></a>
+
+<sub>Export: MIDI for score editors, WAV for the best quality, MP4 for phones and players.</sub>
+
+</div>
 
 ---
 
@@ -124,6 +131,14 @@ A metronome in the top bar that keeps ticking while you read.
 - ➗ **Subdivisions** - Quarters, eighths, triplets or sixteenths
 - ⏯️ **Quick play/stop** - A small button next to it, without opening the window
 
+<div align="center">
+
+<a href="docs/screenshots/metronome.png"><img src="docs/screenshots/metronome.png" alt="The metronome window with the tempo, the beats of the bar and the subdivision" width="340"></a>
+
+<sub>The metronome: tempo with its Italian name, the beats of the bar, the subdivision and a tap-tempo button.</sub>
+
+</div>
+
 ---
 
 ### 🖐️ **Fingerings**
@@ -137,12 +152,36 @@ Fingering diagrams for the 12-hole ocarina, and a tool to draw the ones that are
 - 🖱️ **Fingering editor** - Pick a note and click the holes that are covered
 - ✅ **Finished switch** - Until a fingering is marked as finished, songs keep showing that note by its name
 
+<div align="center">
+
+<a href="docs/screenshots/fingerings-page.png"><img src="docs/screenshots/fingerings-page.png" alt="The fingerings page, with every note and its diagram" width="560"></a>
+
+<sub>The fingerings page: finished fingerings in full colour, the ones in progress with a dashed border.</sub>
+
+</div>
+
+<div align="center">
+
+<a href="docs/screenshots/fingering-editor.png"><img src="docs/screenshots/fingering-editor.png" alt="The fingering editor with an ocarina whose holes can be clicked" width="520"></a>
+
+<sub>The fingering editor: pick the note, click the covered holes, and mark it as finished.</sub>
+
+</div>
+
 ---
 
 ### 🎵 **Key Signatures**
 > **Status:** ✅ **FULLY IMPLEMENTED**
 
 The key is worked out from the accidentals you actually use.
+
+<div align="center">
+
+<a href="docs/screenshots/new-song.png"><img src="docs/screenshots/new-song.png" alt="The window shown when a song is created, asking for none, flats or sharps" width="520"></a>
+
+<sub>Every new song starts by choosing its accidentals; the palette then offers only those.</sub>
+
+</div>
 
 **Key Features:**
 - ♭♯ **Flats, sharps or none** - The palette only offers the accidentals of the kind you chose
@@ -189,6 +228,15 @@ Everything in the top bar makes the page yours, and it is remembered by the brow
 - 🔤 **Font** - Six typefaces, from classic to monospaced
 - 🖼️ **Background** - The *Background* button lays a picture of your own over the page (see below)
 - 🌍 **Language** - Spanish or English
+
+<div align="center">
+
+| The colour menu | The background menu |
+|:---:|:---:|
+| <img src="docs/screenshots/themes.png" alt="The colour menu with the eight themes"> | <img src="docs/screenshots/bg.png" alt="The background menu with pictures, intensity and blur"> |
+| Eight themes, each with its own accent colour | Pictures from your folder, with intensity and blur |
+
+</div>
 
 **Setting a background picture**
 
