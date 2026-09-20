@@ -21,7 +21,7 @@ Live application: https://victorbolanos.github.io/Ocarina-Songbook
 
 ## 📖 Overview
 
-Ocarina Songbook is a small, self-contained web page for learning and practising songs on the 12-hole ocarina. You keep your songs in a folder on your computer, browse them from a searchable list, and open any song to read it as note names, as fingering diagrams, or both — and to hear it. It also comes with a step-by-step song editor, a metronome, a fingering editor and export to MIDI, WAV, MP4 and a score image (PNG).
+Ocarina Songbook is a small, self-contained web page for learning and practising songs on the 12-hole ocarina. You keep your songs in a folder on your computer, browse them from a searchable list, and open any song to read it as note names, as fingering diagrams, or both — and to hear it. It also comes with a step-by-step song editor, a metronome, a fingering editor, a note detector that listens to your ocarina, and export to MIDI, WAV, MP4 and a score image (PNG).
 
 The interface comes in **Spanish and English**: the flag button in the top bar (next to the folder name) switches it (in English the notes are shown as `C D E F G A B`).
 
@@ -156,10 +156,10 @@ Your song as a printed-style score, in one PNG.
 
 ---
 
-### 🎚️ **Metronome**
+### 🎚️ **Metronome & Note Detector**
 > **Status:** ✅ **FULLY IMPLEMENTED**
 
-A metronome in the top bar that keeps ticking while you read.
+A metronome in the top bar that keeps ticking while you read — and, in the same window, a second tab that listens to you play and tells you which note it hears.
 
 **Key Features:**
 - 🎵 **Tempo** - Arrows, slider, typing, or tap it in; one click to use the song's tempo
@@ -174,6 +174,13 @@ A metronome in the top bar that keeps ticking while you read.
 <sub>The metronome: tempo with its Italian name, the beats of the bar, the subdivision and a tap-tempo button.</sub>
 
 </div>
+
+**The note detector** (the *Note detector* tab of the same window):
+- 🎤 **Play and read** - Turn the microphone on and play: the page shows the note it hears, in the same names as the rest of the page (`Sol`, `Sol'` high, `Sol,` low), with the sharp or flat spelling and the frequency in Hz
+- 🎯 **In tune or not** - A needle shows how many cents sharp or flat you are, and turns green when you are within a few cents
+- 🎼 **Practise one note** - Pick a note from *Note to practise* (A4 to F6, grouped by octave; the page remembers it) and it tells you whether you are above or below it: "A little sharp (+12 cents)" when it is the right note but off, or "Below Sol: 2 semitones" ("an octave" when you are an octave away) when it is another note. The note you are playing is shown as always
+- 🧠 **Made for the ocarina** - An ocarina sounds almost like a pure tone, so the note is found with the YIN pitch algorithm: from A4 to F6 it named every note correctly, to within a few cents, in tests with added noise
+- 🔒 **Private** - The sound is only analysed on your device; it is never recorded or sent anywhere, and the microphone is released when you leave the tab or close the window
 
 ---
 
@@ -293,6 +300,7 @@ The picture in use is copied into the browser, so it is there the next time with
 
 ### **Browser APIs**
 - 🔊 **Web Audio API** - The ocarina voice, the scheduler, the metronome and the offline rendering
+- 🎤 **getUserMedia** - The microphone of the note detector (only while its tab is open)
 - 📁 **File System Access API** - Reads and writes your songs folder (Chrome and Edge)
 - 🎞️ **WebCodecs** - AAC encoding for MP4 export
 - 🗄️ **IndexedDB** - Remembers the folder handle and the background picture
@@ -417,6 +425,7 @@ When you create a song you first choose which accidentals it uses: **none, flats
   - **MP4** (`.mp4`) - The same audio compressed with AAC, about 0.7 MB a minute. Needs a browser with the WebCodecs AAC encoder (current Chrome and Edge).
   - **PNG** (`.png`) - The score as an image, one staff per line of the song. You choose whether names, fingering diagrams or both are written under the notes; the note values are always drawn. The picture is black on white with a treble clef, the key signature, the time signature and, when the notes fit the time signature, bar lines. A very long score is drawn a little smaller on phones, whose browsers limit the size of an image.
 - **Metronome** - Set the tempo with the arrows, the slider or by typing, or tap it. Choose the beats per bar and a subdivision. It keeps ticking after you close the window.
+- **Note detector** - In the metronome window, open the **Note detector** tab and press **Turn the microphone on** (the browser asks for permission the first time). Hold the ocarina near the microphone and play one note at a time: the note, its frequency and the needle appear as you play. To practise a particular note, pick it in **Note to practise**: the message then says whether you are above or below it, and the needle is centred on that note (red when you are on another note). It works best in a quiet room; if the metronome or a song is playing through the speakers, the microphone will hear it too, so use headphones. The microphone needs a secure address: `https` (GitHub Pages is), `localhost`, or a page opened from disk.
 
 ### **Fingerings**
 
@@ -526,7 +535,8 @@ Ocarina-Songbook/
 │   ├── router.js             # #/, #/song/<id>, #/digitaciones
 │   ├── home.js               # Song list, search, filters
 │   ├── key-dialog.js         # Flats / sharps / none picker
-│   ├── metronome.js          # The metronome
+│   ├── metronome.js          # The metronome window and its two tabs
+│   ├── pitch.js              # The note detector (microphone, YIN pitch detection)
 │   ├── audio.js              # The ocarina voice and the scheduler
 │   ├── export.js             # MIDI, WAV, MP4 and PNG export
 │   ├── score-image.js        # The score drawn as an image
@@ -573,6 +583,7 @@ Ocarina-Songbook/
 - Songs only live in your `songs/` folder
 - Theme, font and audio settings stay in the browser's local storage
 - The only network requests are the ones that read `songs/` when the page is hosted
+- The microphone is used only while the note detector is on, and what it hears is never recorded or sent
 
 ### **🛡️ Safe with your data**
 - Nothing is written until you press **Done**
@@ -602,13 +613,14 @@ Ocarina-Songbook/
 | 📤 Export | ✅ **Complete** | MIDI, WAV, MP4 and PNG |
 | 🖼️ Score image | ✅ **Complete** | One staff per line, real note values |
 | 🎚️ Metronome | ✅ **Complete** | Tempo, tap, beats, subdivisions |
+| 🎤 Note detector | ✅ **Complete** | The note you play, how in tune it is, and practising one note |
 | 🖐️ Fingerings | ✅ **Complete** | Diagrams page and editor |
 | 🎵 Key signatures | ✅ **Complete** | Flats, sharps, live key name |
 | 💾 Backup | ✅ **Complete** | Export and import everything |
 | 🌍 Languages | ✅ **Complete** | Spanish and English |
 | 📱 Read-only web version | ✅ **Complete** | GitHub Pages, phone friendly |
 | 📲 Installable / offline (PWA) | 📋 **Planned** | Use the page without a connection |
-| 🎤 Play-along with the microphone | 📋 **Planned** | Check the notes you play |
+| 🎤 Play-along with the microphone | 📋 **Planned** | Check what you play against the song (the note detector is the first step) |
 
 ---
 

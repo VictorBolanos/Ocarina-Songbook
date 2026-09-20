@@ -1531,6 +1531,66 @@ a.mode-toggle{ text-decoration: none; }
   .footer-tools{ flex-wrap: wrap; justify-content: center; }
 }
 
+/* ---- Note detector: the metronome window's second tab (js/pitch.js) ------------------------------ */
+.metro-tabs{ display: flex; gap: .25rem; padding: .25rem; margin-bottom: 1rem; border: 1.5px solid var(--line); border-radius: 999px; }
+.metro-tab{
+  flex: 1;
+  padding: .45rem .6rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-soft);
+  font: inherit;
+  font-family: var(--sans);
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.metro-tab:hover{ color: var(--ink); }
+.metro-tab[aria-selected="true"]{ background: var(--accent); color: var(--paper); }
+.metro-panel[hidden]{ display: none; }
+
+.pitch-target{ margin-bottom: .3rem; }
+.pitch-intro{ margin: 0 0 .6rem !important; font-size: .85rem !important; }
+.pitch-display{ display: grid; justify-items: center; gap: .1rem; min-height: 7.6rem; margin: .2rem 0 .5rem; }
+.pitch-note{ min-height: 1.1em; font-family: var(--font); font-size: 4.2rem; font-weight: 700; line-height: 1.1; color: var(--accent); }
+.pitch-note.is-out{ color: var(--ink-soft); }
+.pitch-alt{ min-height: 1.3em; font-family: var(--font); font-size: 1.1rem; color: var(--ink-soft); }
+.pitch-hz{ min-height: 1.2em; font-family: var(--sans); font-size: .8rem; font-weight: 700; letter-spacing: .06em; color: var(--ink-soft); }
+
+.pitch-meter{ position: relative; height: 1.1rem; margin: .3rem .4rem .5rem; border-radius: 999px; background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.pitch-mark{ position: absolute; top: .2rem; bottom: .2rem; width: 2px; border-radius: 2px; background: var(--line); }
+.pitch-mark--flat{ left: 25%; }
+.pitch-mark--centre{ left: 50%; top: 0; bottom: 0; background: var(--ink-soft); }
+.pitch-mark--sharp{ left: 75%; }
+.pitch-needle{
+  position: absolute;
+  top: -.15rem;
+  bottom: -.15rem;
+  left: 50%;
+  width: .7rem;
+  margin-left: -.35rem;
+  border-radius: 999px;
+  background: var(--ink-soft);
+  opacity: .35;
+  transition: left .09s linear, background .15s, opacity .15s;
+}
+.pitch-needle.is-on{ background: var(--accent); opacity: 1; }
+.pitch-needle.is-ok{ background: #2fa866; }
+.pitch-verdict{ min-height: 1.4em; margin: 0 0 .6rem; text-align: center; font-family: var(--sans); font-size: .9rem; font-weight: 700; color: var(--ink); }
+.pitch-verdict.is-wait{ color: var(--ink-soft); font-weight: 400; }
+.pitch-verdict.is-ok{ color: #2fa866; }
+.pitch-verdict.is-far{ color: var(--danger); }
+.pitch-needle.is-far{ background: var(--danger); }
+.pitch-level{ height: .3rem; margin: 0 .4rem .8rem; border-radius: 999px; background: color-mix(in srgb, var(--ink) 10%, transparent); overflow: hidden; }
+.pitch-level-bar{ display: block; height: 100%; width: 0; background: var(--accent); transition: width .06s linear; }
+.pitch-status{ min-height: 1.2em; margin: 0 0 .6rem !important; font-size: .82rem !important; color: var(--danger) !important; }
+.pitch-hint{ margin: 0 0 1rem !important; font-size: .75rem !important; }
+.pitch-actions{ display: flex; justify-content: center; margin-bottom: 1.1rem; }
+.pitch-toggle{ padding: .5rem 1.4rem; font-weight: 700; }
+.pitch-toggle.is-running{ background: var(--danger); border-color: var(--danger); }
+@media (prefers-reduced-motion: reduce){ .pitch-needle, .pitch-level-bar{ transition: none; } }
+
 /* A note's octave, after its name: ' for high, '' for very high, , for low. */
 .note-oct{ margin-left: .03em; font-weight: 800; }
 .note--high::before, .note--high2::before{ content: "\00a0"; }

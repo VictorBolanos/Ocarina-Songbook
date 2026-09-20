@@ -3,7 +3,8 @@
 
   // The metronome: a dialog opened from the toolbar. It keeps ticking after the dialog is closed (so it can
   // be used while reading a song); the toolbar button shows that it is running, and opening the dialog again
-  // is how it is stopped.
+  // is how it is stopped. The same dialog has a second tab, the note detector (see pitch.js), which listens
+  // to the microphone while you play; it stops listening when you leave that tab or close the window.
   //
   // The clicks are synthesised with Web Audio and scheduled a little ahead of time on the audio clock
   // (like the song player does), so the beat does not wobble when the page is busy.
@@ -35,6 +36,8 @@
   var run = null;                        // { timer, next, count, queue } while ticking
   var listeners = [];
   var refs = null;                       // the dialog's live elements while it is open
+  var tab = 'metronome';                 // the tab the dialog opens on: 'metronome' or 'notes'
+  var detector = null;                   // the note detector's panel while the dialog is open
   var taps = [];
 
   function clamp(value, low, high) {
@@ -270,8 +273,13 @@
       }, tr('Tempo de la canción ({bpm})', { bpm: song.bpm || 100 })));
     }
 
-    dialog.replaceChildren(h('form', { method: 'dialog', onsubmit: function (e) { e.preventDefault(); } },
-      h('h2', null, 'Metrónomo'),
+    detector = C.pitch.panel();
+    refs.tabs = {};
+    function tabButton(key, label) {
+      refs.tabs[key] = h('button', { type: 'button', class: 'metro-tab', role: 'tab', 'data-tab': key, onclick: function () { showTab(key); } }, label);
+      return refs.tabs[key];
+    }
+    refs.metroPanel = h('div', { class: 'metro-panel', role: 'tabpanel' },
       h('div', { class: 'metro-display' }, minus, h('div', { class: 'metro-center' }, refs.bpm, h('span', { class: 'metro-unit' }, 'BPM'), refs.name), plus),
       refs.range,
       refs.dotBox,
@@ -280,13 +288,32 @@
           select(BEATS.map(function (n) { return { value: n, label: n === 1 ? tr('Sin acento') : tr('{n} tiempos', { n: n }) }; }), settings.beats, 'Tiempos por compás', setBeats)),
         h('label', { class: 'field' }, 'Subdivisión', select(SUBDIVISIONS, settings.subdivision, 'Subdivisión', setSubdivision)),
         h('label', { class: 'field' }, 'Volumen', volume)),
-      h('div', { class: 'metro-extras' }, extras),
+      h('div', { class: 'metro-extras' }, extras));
+    refs.notesPanel = h('div', { class: 'metro-panel', role: 'tabpanel' }, detector.element);
+
+    dialog.replaceChildren(h('form', { method: 'dialog', onsubmit: function (e) { e.preventDefault(); } },
+      h('div', { class: 'metro-tabs', role: 'tablist' }, tabButton('metronome', 'Metrónomo'), tabButton('notes', 'Detector de notas')),
+      refs.metroPanel,
+      refs.notesPanel,
       h('div', { class: 'dialog-actions' },
         h('button', { type: 'button', class: 'btn', onclick: close }, 'Cerrar'),
         refs.toggle)));
     drawDots();
     syncBpm();
     syncRunning();
+    showTab(tab);
+  }
+
+  // Shows one tab. The microphone is only on while its tab is showing.
+  function showTab(key) {
+    tab = key;
+    Object.keys(refs.tabs).forEach(function (name) {
+      refs.tabs[name].setAttribute('aria-selected', String(name === key));
+    });
+    refs.metroPanel.hidden = key !== 'metronome';
+    refs.notesPanel.hidden = key !== 'notes';
+    refs.toggle.hidden = key !== 'metronome';
+    if (key !== 'notes' && detector) detector.stop();
   }
 
   function dialogEl() {
@@ -302,12 +329,19 @@
     C.menus.closeAll();
     build(dialog);
     dialog.showModal();
-    refs.toggle.focus();
+    (tab === 'metronome' ? refs.toggle : refs.tabs[tab]).focus();
   }
 
   function close() {
     var dialog = dialogEl();
     if (dialog && dialog.open) dialog.close();
+    release();
+  }
+
+  // The dialog is going away: let go of its elements and of the microphone.
+  function release() {
+    if (detector) detector.stop();
+    detector = null;
     refs = null;
   }
 
@@ -338,10 +372,10 @@
     var dialog = dialogEl();
     if (!dialog) return;
     dialog.addEventListener('click', function (e) { if (e.target === dialog) close(); });   // the backdrop
-    dialog.addEventListener('cancel', function () { refs = null; });                       // Escape
-    dialog.addEventListener('close', function () { refs = null; });
+    dialog.addEventListener('cancel', release);                                            // Escape
+    dialog.addEventListener('close', release);
     dialog.addEventListener('keydown', function (e) {
-      if (e.key !== ' ' || e.target.closest('input, select, button')) return;
+      if (tab !== 'metronome' || e.key !== ' ' || e.target.closest('input, select, button')) return;
       e.preventDefault();
       toggle();
     });
