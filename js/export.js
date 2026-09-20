@@ -1,8 +1,8 @@
 (function (C) {
   'use strict';
 
-  // Exporting a song: MIDI (the notes), WAV (uncompressed audio) or MP4 (compressed audio). The button in
-  // the player opens a small window to choose. Everything is built in the browser and handed over as a
+  // Exporting a song: MIDI (the notes), WAV (uncompressed audio), MP4 (compressed audio) or PNG (the score as
+  // an image, see score-image.js). The button in the player opens a small window to choose. Everything is built in the browser and handed over as a
   // download; nothing is uploaded anywhere.
   var h = C.ui.h;
   var tr = C.i18n.t;
@@ -206,12 +206,30 @@
     { key: 'wav', label: 'WAV', ext: 'wav', text: 'Audio sin comprimir, la mejor calidad. Unos 2,6 MB por minuto.',
       make: function (song) { return C.audio.renderWav(song); } },
     { key: 'mp4', label: 'MP4', ext: 'mp4', text: 'Audio comprimido (AAC): suena en móviles y reproductores y ocupa poco. Unos 0,7 MB por minuto.',
-      make: mp4File }
+      make: mp4File },
+    { key: 'png', label: 'PNG', ext: 'png', text: 'La partitura como imagen: un pentagrama por cada línea de la canción, con las duraciones dibujadas.',
+      choose: true,
+      make: function (song, view) { return C.scoreImage.render(song, view); } }
+  ];
+
+  // What can be written under each note of the score image.
+  var VIEWS = [
+    { key: 'names', label: 'Nombres', text: 'El nombre de cada nota bajo el pentagrama.' },
+    { key: 'fingering', label: 'Digitaciones', text: 'El dibujo de la ocarina bajo cada nota. Una digitación sin terminar sale con el nombre de la nota.' },
+    { key: 'both', label: 'Ambas', text: 'El dibujo de la ocarina y el nombre de la nota.' }
   ];
 
   function size(blob) {
     var point = C.i18n.lang() === 'en' ? '.' : ',';
     return blob.size < 1048576 ? Math.max(1, Math.round(blob.size / 1024)) + ' KB' : (blob.size / 1048576).toFixed(1).replace('.', point) + ' MB';
+  }
+
+  function failureText(error, format) {
+    var reason = error && error.message;
+    if (reason === 'unsupported') return tr('Este navegador no puede crear {format}.', { format: format.label });
+    if (reason === 'empty') return tr('La canción todavía no tiene notas que dibujar.');
+    if (reason === 'too-large') return tr('La partitura es demasiado grande para crear la imagen en este dispositivo.');
+    return tr('No se pudo generar el archivo {format}.', { format: format.label });
   }
 
   function open(song) {
@@ -220,36 +238,73 @@
     var status = h('p', { class: 'export-status', role: 'status' });
     var buttons = [];
 
-    function run(format) {
-      buttons.forEach(function (b) { b.disabled = true; });
+    function finish(format, view) {
       status.textContent = tr('Generando {format}…', { format: format.label });
-      format.make(song).then(function (blob) {
+      buttons.forEach(function (b) { b.disabled = true; });
+      format.make(song, view).then(function (blob) {
         download(blob, fileName(song, format.ext));
         C.ui.toast(tr('Archivo {file} generado ({size}).', { file: fileName(song, format.ext), size: size(blob) }));
         dialog.close();
       }).catch(function (error) {
-        status.textContent = error && error.message === 'unsupported'
-          ? tr('Este navegador no puede crear {format}.', { format: format.label })
-          : tr('No se pudo generar el archivo {format}.', { format: format.label });
+        status.textContent = failureText(error, format);
         buttons.forEach(function (b) { b.disabled = false; });
       });
     }
 
-    buttons = FORMATS.map(function (format) {
-      return h('button', {
-        type: 'button',
-        class: 'export-option',
-        'data-format': format.key,
-        onclick: function () { run(format); }
-      }, h('strong', null, format.label + ' (.' + format.ext + ')'), h('span', null, format.text));
-    });
+    function heading() {
+      return h('h2', null, tr('Exportar «{name}»', { name: song.title || tr('Sin título') }));
+    }
 
-    dialog.replaceChildren(h('form', { method: 'dialog', onsubmit: function (e) { e.preventDefault(); } },
-      h('h2', null, tr('Exportar «{name}»', { name: song.title || tr('Sin título') })),
-      h('p', null, 'Elige el formato del archivo.'),
-      h('div', { class: 'export-options' }, buttons),
-      status,
-      h('div', { class: 'dialog-actions' }, h('button', { type: 'button', class: 'btn', onclick: function () { dialog.close(); } }, 'Cerrar'))));
+    // Step 1: the file format.
+    function showFormats() {
+      status.textContent = '';
+      buttons = FORMATS.map(function (format) {
+        return h('button', {
+          type: 'button',
+          class: 'export-option',
+          'data-format': format.key,
+          onclick: function () { if (format.choose) showViews(format); else finish(format); }
+        }, h('strong', null, format.label + ' (.' + format.ext + ')'), h('span', null, format.text));
+      });
+      dialog.replaceChildren(h('form', { method: 'dialog', onsubmit: function (e) { e.preventDefault(); } },
+        heading(),
+        h('p', null, 'Elige el formato del archivo.'),
+        h('div', { class: 'export-options' }, buttons),
+        status,
+        h('div', { class: 'dialog-actions' }, h('button', { type: 'button', class: 'btn', onclick: function () { dialog.close(); } }, 'Cerrar'))));
+    }
+
+    // Step 2 (the image): what to write under each note. The page's own view is the starting choice.
+    function showViews(format) {
+      var chosen = document.documentElement.getAttribute('data-view');
+      if (!VIEWS.some(function (v) { return v.key === chosen; })) chosen = 'both';
+      status.textContent = '';
+      var options = VIEWS.map(function (view) {
+        var button = h('button', {
+          type: 'button',
+          class: 'export-option',
+          role: 'radio',
+          'data-view': view.key,
+          'aria-checked': String(view.key === chosen),
+          onclick: function () {
+            chosen = view.key;
+            options.forEach(function (o) { o.setAttribute('aria-checked', String(o.getAttribute('data-view') === chosen)); });
+          }
+        }, h('strong', null, view.label), h('span', null, view.text));
+        return button;
+      });
+      var make = h('button', { type: 'button', class: 'btn btn--primary', 'data-role': 'make', onclick: function () { finish(format, chosen); } }, 'Crear imagen');
+      var back = h('button', { type: 'button', class: 'btn', onclick: showFormats }, 'Atrás');
+      buttons = options.concat([make, back]);
+      dialog.replaceChildren(h('form', { method: 'dialog', onsubmit: function (e) { e.preventDefault(); } },
+        heading(),
+        h('p', null, 'Elige qué se escribe bajo cada nota. Las duraciones (negras, corcheas, blancas…) se dibujan siempre.'),
+        h('div', { class: 'export-options', role: 'radiogroup', 'aria-label': tr('Bajo cada nota') }, options),
+        status,
+        h('div', { class: 'dialog-actions' }, back, make)));
+    }
+
+    showFormats();
     dialog.showModal();
   }
 

@@ -1358,6 +1358,7 @@ a.mode-toggle{ text-decoration: none; }
 }
 .export-option:hover:not(:disabled){ border-color: var(--accent); }
 .export-option:disabled{ opacity: .5; cursor: default; }
+.export-option[aria-checked="true"]{ border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, var(--paper)); box-shadow: inset 0 0 0 1px var(--accent); }
 .export-option strong{ color: var(--accent); }
 .export-option span{ font-size: .8rem; color: var(--ink-soft); }
 .export-status{ min-height: 1.3em; margin: 0 0 .8rem !important; font-size: .82rem !important; }

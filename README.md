@@ -21,7 +21,7 @@ Live application: https://victorbolanos.github.io/Ocarina-Songbook
 
 ## 📖 Overview
 
-Ocarina Songbook is a small, self-contained web page for learning and practising songs on the 12-hole ocarina. You keep your songs in a folder on your computer, browse them from a searchable list, and open any song to read it as note names, as fingering diagrams, or both — and to hear it. It also comes with a step-by-step song editor, a metronome, a fingering editor and export to MIDI, WAV and MP4.
+Ocarina Songbook is a small, self-contained web page for learning and practising songs on the 12-hole ocarina. You keep your songs in a folder on your computer, browse them from a searchable list, and open any song to read it as note names, as fingering diagrams, or both — and to hear it. It also comes with a step-by-step song editor, a metronome, a fingering editor and export to MIDI, WAV, MP4 and a score image (PNG).
 
 The interface comes in **Spanish and English**: the flag button in the top bar (next to the folder name) switches it (in English the notes are shown as `C D E F G A B`).
 
@@ -31,6 +31,7 @@ The interface comes in **Spanish and English**: the flag button in the top bar (
 - ✅ **Zero setup** - Plain HTML, CSS and JavaScript: no server, no dependencies, no build step
 - ✅ **Private** - Nothing is uploaded anywhere and there is no tracking
 - ✅ **Made for the ocarina** - Fingering diagrams, an ocarina-like synthesized voice, key signatures
+- ✅ **Scores you can print** - Export any song as a real staff score (PNG) with the note values, the key and the fingerings under the notes
 - ✅ **Made for your phone too** - A layout designed for touch screens, and on Android Chrome you can even connect a folder and edit; publish it on GitHub Pages to read your songs anywhere
 - ✅ **Two languages** - Spanish and English, with a one-click switch
 - ✅ **Free & Open Source** - No paywalls, no ads
@@ -108,13 +109,48 @@ An ocarina-like voice synthesized in the browser — nothing to download.
 - 🔁 **Repeat & stretch** - Loop the whole song, or just a stretch you mark
 - 🐢 **Speed** - Slow the song down for practice without changing its saved tempo
 - 🥁 **Count-in** - A bar of clicks before the song starts
-- 📤 **Export** - MIDI, WAV or MP4
+- 📤 **Export** - MIDI, WAV, MP4 or a PNG image of the score
 
 <div align="center">
 
-<a href="docs/screenshots/export.png"><img src="docs/screenshots/export.png" alt="The export dialog with the MIDI, WAV and MP4 options" width="380"></a>
+<a href="docs/screenshots/export.png"><img src="docs/screenshots/export.png" alt="The export dialog with the MIDI, WAV, MP4 and PNG options" width="380"></a>
 
-<sub>Export: MIDI for score editors, WAV for the best quality, MP4 for phones and players.</sub>
+<sub>Export: MIDI for score editors, WAV for the best quality, MP4 for phones and players, PNG for the printed score.</sub>
+
+</div>
+
+---
+
+### 🖼️ **Score Image**
+> **Status:** ✅ **FULLY IMPLEMENTED**
+
+Your song as a printed-style score, in one PNG.
+
+<div align="center">
+
+<a href="docs/screenshots/score-both.png"><img src="docs/screenshots/score-both.png" alt="Cock Robin exported as a score image, with fingering diagrams and names under the notes" width="560"></a>
+
+<sub>A song exported in Both mode: a staff per line, the note values drawn, and the fingering and name of every note under it.</sub>
+
+</div>
+
+**Key Features:**
+- 🎼 **One staff per line** - Every line of the song is a staff of its own, with its subtitle above it; a line too long for the page continues on another staff
+- 🎵 **Real note values** - Whole, half, quarter, eighth and sixteenth notes and rests, dotted or not, with heads, stems, flags and beams where a score has them
+- 🎹 **Clef, key and time** - A treble clef, the key signature and the time signature; accidentals only where the key needs them, and bar lines when the notes fit the time signature
+- 🖐️ **You choose what goes under the notes** - Names, fingering diagrams or both (a fingering that is not finished shows the note's name)
+- 🖨️ **Ready to print or share** - Black on white whatever the page's theme, sharp on screen and on paper
+
+**How it works:**
+1. Open a song and press **Export**, then **PNG**
+2. Pick **Names**, **Fingerings** or **Both**
+3. Press **Create image**: the file is saved as `<song-id>.png`
+
+<div align="center">
+
+<a href="docs/screenshots/png-choice.png"><img src="docs/screenshots/png-choice.png" alt="The window that asks what to write under each note: names, fingerings or both" width="400"></a>
+
+<sub>Choose what goes under the notes; the window starts on the view you have open.</sub>
 
 </div>
 
@@ -379,6 +415,7 @@ When you create a song you first choose which accidentals it uses: **none, flats
   - **MIDI** (`.mid`) - Notes, tempo, time signature and key on the Ocarina instrument, for score editors and music programs.
   - **WAV** (`.wav`) - Mono 16-bit 22.05 kHz audio, about 2.6 MB a minute.
   - **MP4** (`.mp4`) - The same audio compressed with AAC, about 0.7 MB a minute. Needs a browser with the WebCodecs AAC encoder (current Chrome and Edge).
+  - **PNG** (`.png`) - The score as an image, one staff per line of the song. You choose whether names, fingering diagrams or both are written under the notes; the note values are always drawn. The picture is black on white with a treble clef, the key signature, the time signature and, when the notes fit the time signature, bar lines. A very long score is drawn a little smaller on phones, whose browsers limit the size of an image.
 - **Metronome** - Set the tempo with the arrows, the slider or by typing, or tap it. Choose the beats per bar and a subdivision. It keeps ticking after you close the window.
 
 ### **Fingerings**
@@ -491,7 +528,9 @@ Ocarina-Songbook/
 │   ├── key-dialog.js         # Flats / sharps / none picker
 │   ├── metronome.js          # The metronome
 │   ├── audio.js              # The ocarina voice and the scheduler
-│   ├── export.js             # MIDI, WAV and MP4 export
+│   ├── export.js             # MIDI, WAV, MP4 and PNG export
+│   ├── score-image.js        # The score drawn as an image
+│   ├── ocarina-image.js      # The ocarina picture as data (generated)
 │   ├── player.js             # The play bar
 │   ├── render.js             # Song pages and the editor view
 │   ├── editor.js             # Editing logic and keyboard
@@ -511,6 +550,7 @@ Ocarina-Songbook/
 ├── 📁 bg/                    # Sample background pictures
 ├── 📁 tools/
 │   ├── build-icons.js        # src/svg → js/icons.js
+│   ├── build-images.js       # src/img/ocarina_base.png → js/ocarina-image.js
 │   └── stamp-version.js      # Cache-busting fingerprints in index.html
 ├── index.html                # The page shell
 └── README.md                 # This file
@@ -520,6 +560,7 @@ Ocarina-Songbook/
 
 - **Languages** - Every text is written in Spanish in the code and in `index.html`. The English versions are in the `EN` dictionary at the top of `js/i18n.js`, keyed by the Spanish text; a text that is missing there just stays in Spanish. Text with a variable part (a title, a number) is written as `t('… {name} …', { name })` so the variable is never translated. Anything inside an element marked `translate="no"` is left alone.
 - **Categories** - Add a category, or options to one, in `js/categories.js`. The editor, the list filters and the JSON files all follow it.
+- **Ocarina picture** - If you change `src/img/ocarina_base.png`, run `node tools/build-images.js` so the score image uses the new one, then `node tools/stamp-version.js`. (The picture is written into a script because a canvas that drew a file loaded from disk cannot be saved when the page itself is opened from disk.)
 - **Icons** - Put SVGs in `src/svg/` and run `node tools/build-icons.js`, then `node tools/stamp-version.js`. Each icon is inlined with its colours replaced by `currentColor`, so it follows the theme.
 - **Ocarina pitches** - The page assumes the usual 12-hole alto C ocarina: `Do` (all ten finger holes closed, both small holes open) is C5, the middle octave is C5 to B5, `_` notes go down to A4 and B4, and `^` notes up to F6. To change the mapping, edit `OCTAVES` in `js/notes.js`.
 - **The voice** - An ocarina is a Helmholtz resonator: its tone is very close to a pure sine wave. The voice in `js/audio.js` is a near-sine wave table with a little breath noise, a soft attack, a slight pitch scoop, a gentle vibrato and a touch of room reverb. Every knob is in the `TIMBRE` object at the top of that file.
@@ -541,7 +582,7 @@ Ocarina-Songbook/
 ### **⚡ Light and fast**
 - No dependencies, no build step
 - Audio is scheduled ahead of time on the audio clock, so playback stays steady
-- Exports are rendered in the browser, faster than real time
+- Exports are rendered in the browser, faster than real time; the score image is drawn on a canvas with no library
 
 ### **🌍 Browser support**
 - Editing needs the File System Access API: **Chrome and Edge on desktop**
@@ -558,7 +599,8 @@ Ocarina-Songbook/
 | 🎼 Song library | ✅ **Complete** | Search, filters, categories and tags |
 | ✍️ Song editor | ✅ **Complete** | Palette, keyboard entry, lines, undo, variants |
 | 🔊 Playback | ✅ **Complete** | Ocarina voice, speed, stretch, count-in |
-| 📤 Export | ✅ **Complete** | MIDI, WAV and MP4 |
+| 📤 Export | ✅ **Complete** | MIDI, WAV, MP4 and PNG |
+| 🖼️ Score image | ✅ **Complete** | One staff per line, real note values |
 | 🎚️ Metronome | ✅ **Complete** | Tempo, tap, beats, subdivisions |
 | 🖐️ Fingerings | ✅ **Complete** | Diagrams page and editor |
 | 🎵 Key signatures | ✅ **Complete** | Flats, sharps, live key name |
