@@ -253,6 +253,7 @@ Fingering diagrams for the 12-hole ocarina, and a tool to draw the ones that are
 
 **Key Features:**
 - 👁️ **Three views** - Note names, fingering diagrams, or both
+- 🔍 **Diagram size** - A slider next to the switch makes the diagrams in the songs bigger or smaller (60% to 200%); it is remembered by the browser
 - 📋 **Fingerings page** - Every note (three octaves, naturals, sharps and flats) with its diagram and whether it is finished
 - 🖱️ **Fingering editor** - Pick a note and click the holes that are covered, or covered only halfway (the *Half hole* switch), as many accidentals are played
 - ✅ **Finished switch** - Until a fingering is marked as finished, songs keep showing that note by its name

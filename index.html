@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Ocarina">
-<link rel="stylesheet" href="css/styles.css?v=c1e2573a">
+<link rel="stylesheet" href="css/styles.css?v=8f48bf3a">
 </head>
 <body>
 <svg id="fingering-sprite" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -75,6 +75,11 @@
         <label><input type="radio" name="view" value="fingering"><span>Digitación</span></label>
         <label><input type="radio" name="view" value="both"><span>Ambas</span></label>
       </div>
+      <label class="size-slider" id="size-slider">
+        <span>Tamaño</span>
+        <input type="range" id="size-input" min="60" max="200" step="5" value="100" aria-label="Tamaño de las digitaciones">
+        <output id="size-output">100%</output>
+      </label>
     </div>
 
     <div class="legend">
@@ -140,7 +145,7 @@
 
 <div class="toast no-print" id="toast" role="status" hidden></div>
 
-<script src="js/i18n.js?v=a21f2202"></script>
+<script src="js/i18n.js?v=a4f35975"></script>
 <script src="js/notes.js?v=5ecc671f"></script>
 <script src="js/keys.js?v=bfc69fc7"></script>
 <script src="js/fingering.js?v=1544949d"></script>
@@ -166,7 +171,7 @@
 <script src="js/editor.js?v=f2659d3b"></script>
 <script src="js/folder.js?v=bc073a36"></script>
 <script src="js/background.js?v=1efc275c"></script>
-<script src="js/preferences.js?v=672522c2"></script>
+<script src="js/preferences.js?v=6ff1febe"></script>
 <script src="js/fingering-editor.js?v=07fadadf"></script>
 <script src="js/fingering-page.js?v=284f0e43"></script>
 <script src="js/backup.js?v=002a093d"></script>

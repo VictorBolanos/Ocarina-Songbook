@@ -36,6 +36,8 @@
     'Nombre': 'Name',
     'Digitación': 'Fingering',
     'Ambas': 'Both',
+    'Tamaño': 'Size',
+    'Tamaño de las digitaciones': 'Size of the fingerings',
     'octava media': 'middle octave',
     'grave': 'low',
     'aguda': 'high',

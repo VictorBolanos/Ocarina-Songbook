@@ -119,9 +119,31 @@
     });
   }
 
+  // How big the fingering diagrams are in the songs, as a percentage of their normal size. The CSS reads it
+  // from --oc-scale; the slider only shows while the diagrams do.
+  var SIZE = { min: 60, max: 200, fallback: 100 };
+
+  function initSize() {
+    var input = document.getElementById('size-input');
+    var output = document.getElementById('size-output');
+
+    function setSize(percent) {
+      root.style.setProperty('--oc-scale', String(percent / 100));
+      input.value = String(percent);
+      output.textContent = percent + '%';
+    }
+
+    var saved = Number(read('ocarina-size'));
+    setSize(Number.isFinite(saved) && saved >= SIZE.min && saved <= SIZE.max ? saved : SIZE.fallback);
+
+    input.addEventListener('input', function () { setSize(Number(input.value)); });
+    input.addEventListener('change', function () { write('ocarina-size', input.value); });
+  }
+
   function init() {
     migrate();
     initView();
+    initSize();
     initPicker('theme', 'data-theme', 'ocarina-theme', COLORS, 'canela');
     initPicker('font', 'data-font', 'ocarina-font', FONTS, 'clasica');
     initMode();

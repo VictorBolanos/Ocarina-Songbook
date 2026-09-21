@@ -312,7 +312,7 @@ button.note{
 
 /* Notes that have a fingering diagram hold both the diagram and the name; html[data-view] picks
    what shows: "names" (the plain chip), "fingering" (diagram only) or "both". */
-.note--oc .ocarina{ display: none; width: 4em; height: auto; }
+.note--oc .ocarina{ display: none; width: calc(4em * var(--oc-scale, 1)); height: auto; }
 
 [data-view="fingering"] .note--oc,
 [data-view="both"] .note--oc{ padding: 0; background: none; box-shadow: none; }
@@ -577,10 +577,34 @@ button.note{
   top: .6rem;
   z-index: 6;
   display:flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content:center;
+  gap: .5rem .8rem;
   margin-bottom: 1.2rem;
   pointer-events: none;
 }
+
+/* The size of the fingering diagrams: a pill like the switch, only while the diagrams are showing. */
+.size-slider{
+  display:flex;
+  align-items:center;
+  gap: .6rem;
+  padding: .45rem 1rem;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px var(--shade);
+  font-family: var(--sans);
+  font-size: .82rem;
+  color: var(--ink-soft);
+  pointer-events: auto;
+}
+.size-slider input{ width: 7.5rem; accent-color: var(--accent); }
+.size-slider output{ min-width: 2.6em; text-align: right; font-variant-numeric: tabular-nums; }
+[data-view="names"] .size-slider{ display: none; }
 
 .segmented{
   position: relative;
