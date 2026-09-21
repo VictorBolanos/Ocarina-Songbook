@@ -9,7 +9,7 @@
   "status": "por-aprender",
   "tags": ["minecraft"],
   "lines": [
-    { "subtitle": "", "notes": ["R:h", "R:e", "Sol:s", "Do^:s", "Si:e", "Sol:s", "R:s", "Do:s", "Si:s", "R:s", "Mi^:s", "Mi:s", "R:s", "Si:s"] },
+    { "subtitle": "", "notes": ["Sol:s", "Do^:s", "Si:e", "Sol:s", "R:s", "Do:s", "Si:s", "R:s", "Mi^:s", "Mi:s", "R:s", "Si:s"] },
     { "subtitle": "", "notes": ["R:s", "Mi:s", "R:s", "Sol:s", "Do^:s", "Si:e", "Sol:s", "R:s", "Do:s", "Si:e", "Mi^:s", "Mi:e", "Si:e", "Mi:e"] },
     { "subtitle": "", "notes": ["Sol:s", "Do^:s", "Si:e", "Sol:e", "Do:s", "Si:e", "Mi^:s", "Mi:e", "Si:e", "Mi:e", "Sol:s", "Do^:s", "Si:e", "Sol:e"] },
     { "subtitle": "", "notes": ["Do:s", "Si:e", "Mi^:s", "Mi:e", "Si:e", "Mi:e", "Sol:s", "Do^:s", "Si:e", "Sol:e", "Do:s", "Si:e", "Mi^:s", "Mi:e"] },
@@ -30,13 +30,13 @@
     { "subtitle": "", "notes": ["R:s", "Sol:s", "Si:s", "R:s", "Mi^:s", "Sol:e", "Si:s", "R:s", "Sol:e", "Sol:s", "Do^:s", "Si:e", "Sol:s", "R:s"] },
     { "subtitle": "", "notes": ["Re:s", "Si:s", "R:s", "Mi^:s", "Re:e", "Si:s", "R:s", "Re:e", "Sol:s", "Do^:s", "Si:e", "Sol:s", "R:s", "Do:s"] },
     { "subtitle": "", "notes": ["Si:s", "R:s", "Mi^:s", "Mi:s", "R:s", "Si:s", "R:s", "Mi:s", "R:s", "Sol:s", "Do^:s", "Si:e", "Sol:s", "R:w"] },
-    { "subtitle": "", "notes": ["R:s", "Do^:h", "Re^", "R:h.", "Sol^:h"] },
+    { "subtitle": "", "notes": ["R:s", "Do^:h", "Re^", "R:h.", "Fa^:h"] },
     { "subtitle": "", "notes": ["Mi^:h", "Mi^:e.", "R:s", "Re^", "R:w"] },
-    { "subtitle": "", "notes": ["Do^:h", "Re^", "R", "Re^:h", "Sol^:h"] },
-    { "subtitle": "", "notes": ["Mi^:h", "Re^:h", "Sol^:h", "Sol^:e.", "R:s", "Fa#^"] },
-    { "subtitle": "", "notes": ["Do^:h", "Re^", "Sol^", "R:h", "Sol^:h"] },
-    { "subtitle": "", "notes": ["Mi^:h", "Re^:h", "Sol^:h", "Sol^:e.", "R:s", "Fa#^:e", "R:e"] },
-    { "subtitle": "", "notes": ["Do^:h", "Re^", "Sol^", "Fa#^:h", "Re^:h"] },
+    { "subtitle": "", "notes": ["Do^:h", "Re^", "R", "Re^:h", "Fa^:h"] },
+    { "subtitle": "", "notes": ["Mi^:h", "Re^:h", "Fa^:h", "Fa^:e.", "R:s", "Fa#^"] },
+    { "subtitle": "", "notes": ["Do^:h", "Re^", "Fa^", "R:h", "Fa^:h"] },
+    { "subtitle": "", "notes": ["Mi^:h", "Re^:h", "Fa^:h", "Fa^:e.", "R:s", "Fa#^:e", "R:e"] },
+    { "subtitle": "", "notes": ["Do^:h", "Re^", "Fa^", "Fa#^:h", "Re^:h"] },
     { "subtitle": "", "notes": ["Si:h", "La:h"] }
   ]
 }

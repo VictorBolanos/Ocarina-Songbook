@@ -362,6 +362,12 @@
     '1 nota queda fuera del rango de la ocarina ({range}); podrás transportarla en el editor.': '1 note is out of the ocarina’s range ({range}); you can transpose it in the editor.',
     '1 nota muy larga se ha partido en varias.': '1 very long note was split into several.',
 
+    'Medio agujero': 'Half hole',
+    'Agujero a medias': 'Half-covered hole',
+    'Actívalo y pulsa un agujero para marcarlo tapado a medias, como se tocan muchas notas con alteración.': 'Switch it on and press a hole to mark it covered halfway, the way many accidentals are played.',
+    '1 a medias': '1 halfway',
+    '{n} a medias': '{n} halfway',
+
     // ---- installing and offline use
     'Instalar la aplicación': 'Install the app',
     'Instalar la página como una aplicación, para abrirla sin conexión': 'Install the page as an app, to open it without a connection',
@@ -458,7 +464,7 @@
     'Destapar todos los agujeros': 'Uncover all holes',
     'Destapar todos': 'Uncover all',
     'Copiar la digitación de otra nota': 'Copy the fingering of another note',
-    'Elige una nota y pulsa los agujeros que se tapan. Los agujeros sin marcar están destapados.': 'Pick a note and click the holes that are covered. Holes you leave unmarked are open.',
+    'Elige una nota y pulsa los agujeros que se tapan. Los agujeros sin marcar están destapados. Con «Medio agujero» activado, pulsar un agujero lo marca tapado solo a medias.': 'Pick a note and click the holes that are covered. Holes you leave unmarked are open. With “Half hole” on, clicking a hole marks it covered only halfway.',
     'Octava': 'Octave',
     'Nota': 'Note',
     'Alteración': 'Accidental',

@@ -254,7 +254,7 @@ Fingering diagrams for the 12-hole ocarina, and a tool to draw the ones that are
 **Key Features:**
 - 👁️ **Three views** - Note names, fingering diagrams, or both
 - 📋 **Fingerings page** - Every note (three octaves, naturals, sharps and flats) with its diagram and whether it is finished
-- 🖱️ **Fingering editor** - Pick a note and click the holes that are covered
+- 🖱️ **Fingering editor** - Pick a note and click the holes that are covered, or covered only halfway (the *Half hole* switch), as many accidentals are played
 - ✅ **Finished switch** - Until a fingering is marked as finished, songs keep showing that note by its name
 
 <div align="center">
@@ -558,9 +558,10 @@ The **Fingerings** button in the top bar opens the fingerings page: every note w
 1. Pick the **octave**, the **note** and the **accidental**.
 2. The ocarina shows the fingering that note has now (all holes open if it has none).
 3. Click a hole to cover or uncover it (holes are numbered right to left, 1 to 12).
-4. **Uncover all** opens every hole, **Copy from…** starts from another note's fingering, and **Remove fingering** removes yours.
-5. The **Fingering completed** switch says whether it is finished; until it is on, songs show that note by its name.
-6. **Done** saves, **Cancel** or `Esc` discards.
+4. Switch **Half hole** on and click a hole to mark it covered only halfway (drawn half filled; a covered hole you click becomes halfway, and clicking with the switch off makes it covered again). Many accidentals are played by partly venting a hole, and this is how you record it.
+5. **Uncover all** opens every hole, **Copy from…** starts from another note's fingering, and **Remove fingering** removes yours.
+6. The **Fingering completed** switch says whether it is finished; until it is on, songs show that note by its name.
+7. **Done** saves, **Cancel** or `Esc` discards.
 
 ### **Backup**
 
@@ -628,12 +629,12 @@ Files can be edited by hand. Changes are picked up when you come back to the bro
 {
   "fingerings": {
     "Sol#^": { "holes": [7, 10, 11], "done": true },
-    "Do^": { "holes": [1, 2, 3, 4, 5, 7, 8, 10, 11], "done": false }
+    "Do#": { "holes": [2, 3, 4, 5, 7, 8, 10, 11, 12], "half": [1], "done": false }
   }
 }
 ```
 
-The key is the note without a duration, `holes` are the covered holes and `done` says whether the fingering is finished.
+The key is the note without a duration, `holes` are the covered holes, `half` (optional) are the holes covered only halfway, and `done` says whether the fingering is finished.
 
 ### **Several windows, several tabs**
 

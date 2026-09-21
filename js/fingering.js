@@ -3,7 +3,8 @@
 
   // Fingerings: which of the ocarina's 12 holes are covered for each note.
   //
-  // A fingering is a list of hole numbers. Notes the page ships with (the middle octave, no accidentals)
+  // A fingering is a list of hole numbers (`holes`), plus optionally the holes that are covered only halfway
+  // (`half`: the way the accidentals are played on many ocarinas, by partly venting a hole). Notes the page ships with (the middle octave, no accidentals)
   // are in DEFAULTS; the ones the user draws with the fingering editor are stored in songs/fingerings.json
   // (see folder.js) and override or add to them. A fingering can be marked as not finished: the songs then
   // keep showing that note by its name, in every view. This file turns the finished ones into the <symbol>s
@@ -36,9 +37,9 @@
     'Re':  [2, 3, 4, 5, 7, 8, 10, 11, 12],
     'Mi':  [2, 4, 5, 7, 8, 10, 11, 12],
     'Fa':  [2, 5, 7, 8, 10, 11, 12],
-    'Sol': [7, 10, 11, 12],
-    'La':  [7, 11, 12],
-    'Si':  [7, 12]
+    'Sol': [2, 7, 8, 10, 11, 12],
+    'La':  [2, 7, 8, 11, 12],
+    'Si':  [2, 7, 8, 12]
   };
 
   // The user's fingerings, from songs/fingerings.json: key -> { holes: [...], done: true|false }.
@@ -61,7 +62,7 @@
   function entryOf(key, map) {
     map = map || custom;
     if (own(map, key)) return map[key];
-    return own(DEFAULTS, key) ? { holes: DEFAULTS[key], done: true } : null;
+    return own(DEFAULTS, key) ? { holes: DEFAULTS[key], half: [], done: true } : null;
   }
 
   // The covered holes of a note that has a finished fingering, or null (none yet, or not done).
@@ -71,11 +72,18 @@
     return entry && entry.done ? entry.holes : null;
   }
 
+  // The finished fingering of a note as { holes, half } (holes covered, holes covered halfway), or null.
+  function shape(codeOrNote) {
+    var key = keyOf(codeOrNote);
+    var entry = key === null ? null : entryOf(key);
+    return entry && entry.done ? { holes: entry.holes, half: entry.half || [] } : null;
+  }
+
   // A copy of the user's fingerings, to edit without touching the live ones.
   function overrides() {
     var copy = {};
     Object.keys(custom).forEach(function (key) {
-      copy[key] = { holes: custom[key].holes.slice(), done: custom[key].done };
+      copy[key] = { holes: custom[key].holes.slice(), half: (custom[key].half || []).slice(), done: custom[key].done };
     });
     return copy;
   }
@@ -103,34 +111,47 @@
     return svgEl('circle', attrs);
   }
 
+  // A hole covered halfway: the left half of the hole is filled.
+  function holeHalf(hole, id) {
+    var d = 'M' + hole.cx + ' ' + (hole.cy - hole.r) + 'A' + hole.r + ' ' + hole.r + ' 0 0 0 ' + hole.cx + ' ' + (hole.cy + hole.r) + 'Z';
+    var attrs = { d: d, class: 'oc-hole oc-half', style: 'fill: var(--hole, #161616); stroke: #161616; stroke-width: 1.6' };
+    if (id) attrs.id = id;
+    return svgEl('path', attrs);
+  }
+
   // Redraws the <defs> the chips point at: the holes, and one <symbol> per finished fingering.
   function rebuild() {
     var defs = document.getElementById('fingering-defs');
     if (!defs) return;
     defs.replaceChildren();
-    HOLES.forEach(function (hole) { defs.appendChild(holeCircle(hole, 'h' + hole.n)); });
+    HOLES.forEach(function (hole) {
+      defs.appendChild(holeCircle(hole, 'h' + hole.n));
+      defs.appendChild(holeHalf(hole, 'h' + hole.n + 'h'));
+    });
     allKeys().forEach(function (key) {
       var note = C.notes.parse(key);
-      var holes = get(key);                          // only finished fingerings are drawn in the songs
-      if (!note || !holes) return;
+      var drawn = shape(key);                        // only finished fingerings are drawn in the songs
+      if (!note || !drawn) return;
       var symbol = svgEl('symbol', { id: C.notes.fingeringName(note), viewBox: '0 0 ' + BASE.width + ' ' + BASE.height });
       var image = svgEl('image', { href: BASE.href, width: BASE.width, height: BASE.height });
       image.setAttribute('style', 'filter: var(--oc-halo)');
       symbol.appendChild(image);
-      holes.forEach(function (n) { symbol.appendChild(svgEl('use', { href: '#h' + n })); });
+      drawn.holes.forEach(function (n) { symbol.appendChild(svgEl('use', { href: '#h' + n })); });
+      drawn.half.forEach(function (n) { symbol.appendChild(svgEl('use', { href: '#h' + n + 'h' })); });
       defs.appendChild(symbol);
     });
   }
 
   // An <svg> of the ocarina with the given holes covered (a static drawing, unlike the symbols, so it can also
   // show a fingering that is not finished).
-  function diagram(holes, className) {
+  function diagram(holes, className, half) {
     var picture = svgEl('svg', { class: className || '', viewBox: '0 0 ' + BASE.width + ' ' + BASE.height, 'aria-hidden': 'true' });
     var image = svgEl('image', { href: BASE.href, width: BASE.width, height: BASE.height });
     image.setAttribute('style', 'filter: var(--oc-halo)');
     picture.appendChild(image);
     HOLES.forEach(function (hole) {
       if (holes.indexOf(hole.n) >= 0) picture.appendChild(holeCircle(hole));
+      else if (half && half.indexOf(hole.n) >= 0) picture.appendChild(holeHalf(hole));
     });
     return picture;
   }
@@ -150,10 +171,15 @@
       list.forEach(function (n) {
         if (Number.isInteger(n) && n >= 1 && n <= HOLES.length) holes[n] = true;
       });
-      clean[key] = {
-        holes: Object.keys(holes).map(Number).sort(function (a, b) { return a - b; }),
-        done: Array.isArray(value) ? true : value.done !== false
-      };
+      var halves = {};
+      (!Array.isArray(value) && Array.isArray(value.half) ? value.half : []).forEach(function (n) {
+        if (Number.isInteger(n) && n >= 1 && n <= HOLES.length && !holes[n]) halves[n] = true;     // a hole is covered or halfway, not both
+      });
+      var half = Object.keys(halves).map(Number).sort(function (a, b) { return a - b; });
+      var entry = { holes: Object.keys(holes).map(Number).sort(function (a, b) { return a - b; }) };
+      if (half.length) entry.half = half;
+      entry.done = Array.isArray(value) ? true : value.done !== false;
+      clean[key] = entry;
     });
     return clean;
   }
@@ -175,7 +201,8 @@
     var clean = sanitize(map);
     var keys = sortedKeys(clean);
     var lines = keys.map(function (k) {
-      return '    ' + JSON.stringify(k) + ': { "holes": [' + clean[k].holes.join(', ') + '], "done": ' + clean[k].done + ' }';
+      return '    ' + JSON.stringify(k) + ': { "holes": [' + clean[k].holes.join(', ') + ']' +
+        (clean[k].half ? ', "half": [' + clean[k].half.join(', ') + ']' : '') + ', "done": ' + clean[k].done + ' }';
     });
     return '{\n  "fingerings": {' + (lines.length ? '\n' + lines.join(',\n') + '\n  ' : '') + '}\n}\n';
   }
@@ -218,6 +245,7 @@
     keyOf: keyOf,
     entryOf: entryOf,
     get: get,
+    shape: shape,
     overrides: overrides,
     allKeys: allKeys,
     sanitize: sanitize,

@@ -49,7 +49,7 @@
     var entry = C.fingering.entryOf(key);
     var name = C.i18n.noteName(note.name) + C.notes.glyph(note.accidental) + C.notes.displayMark(note.octave);
     return h('div', { class: 'card fcell fcell--' + status, 'data-fingering': key },
-      C.fingering.diagram(entry ? entry.holes : [], 'fcell-diagram'),
+      C.fingering.diagram(entry ? entry.holes : [], 'fcell-diagram', entry ? entry.half : []),
       h('strong', { class: 'fcell-name' }, name),
       h('span', { class: 'fcell-status' }, STATUS_TEXT[status]),
       C.store.canEdit()

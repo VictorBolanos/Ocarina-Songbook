@@ -176,14 +176,14 @@
           elems.push({ type: 'rest', pos: it.pos, dur: it.dur, value: it.value, dotted: it.dotted });
           return;
         }
-        var holes = mode.diagram ? C.fingering.get(it.code) : null;
+        var drawn = mode.diagram ? C.fingering.shape(it.code) : null;
         var text = noteLabel(it.note);
         elems.push({
           type: 'note', pos: it.pos, dur: it.dur, value: it.value, dotted: it.dotted,
           step: stepOf(it.note), sign: accidentalFor(it.note, sig, state, barsKnown),
-          text: text, holes: holes,
-          drawDiagram: mode.diagram && !!holes,
-          drawName: mode.name || (mode.diagram && !holes),
+          text: text, holes: drawn ? drawn.holes : null, half: drawn ? drawn.half : [],
+          drawDiagram: mode.diagram && !!drawn,
+          drawName: mode.name || (mode.diagram && !drawn),
           textW: measure(NAME_FONT, text)
         });
       });
@@ -707,9 +707,12 @@
     ctx.strokeStyle = '#161616';
     ctx.lineWidth = 1.6 * k;
     C.fingering.HOLES.forEach(function (hole) {
-      if (e.holes.indexOf(hole.n) < 0) return;
+      var covered = e.holes.indexOf(hole.n) >= 0;
+      if (!covered && e.half.indexOf(hole.n) < 0) return;
       ctx.beginPath();
-      ctx.arc(left + hole.cx * k, y + hole.cy * k, hole.r * k, 0, Math.PI * 2);
+      if (covered) ctx.arc(left + hole.cx * k, y + hole.cy * k, hole.r * k, 0, Math.PI * 2);
+      else ctx.arc(left + hole.cx * k, y + hole.cy * k, hole.r * k, Math.PI / 2, Math.PI * 1.5);    // halfway: the left half
+      ctx.closePath();
       ctx.fill();
       ctx.stroke();
     });
@@ -896,7 +899,19 @@
       ctx.strokeStyle = '#161616';
       ctx.lineWidth = 1.4;
       ctx.beginPath(); ctx.arc(lx + 6, footerY + 21, 5, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillText(tr('Agujero abierto'), lx + 18, footerY + 26);
+      var open = tr('Agujero abierto');
+      ctx.fillText(open, lx + 18, footerY + 26);
+      var usesHalf = systems.some(function (system) {
+        return system.units.some(function (unit) { return unit.elems.some(function (e) { return e.drawDiagram && e.half.length; }); });
+      });
+      if (usesHalf) {                                    // a hole covered halfway is drawn half filled
+        lx += 18 + ctx.measureText(open).width + 22;
+        ctx.fillStyle = '#161616';
+        ctx.beginPath(); ctx.arc(lx + 6, footerY + 21, 5, Math.PI / 2, Math.PI * 1.5); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.arc(lx + 6, footerY + 21, 5, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = SOFT;
+        ctx.fillText(tr('Agujero a medias'), lx + 18, footerY + 26);
+      }
     }
     return canvas;
   }

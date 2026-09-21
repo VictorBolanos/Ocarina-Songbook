@@ -1,7 +1,8 @@
 (function (C) {
   'use strict';
 
-  // The fingering editor: pick a note, then click the holes of the ocarina that are covered for it.
+  // The fingering editor: pick a note, then click the holes of the ocarina that are covered for it. With
+  // "half hole" switched on, a click marks a hole covered halfway instead (drawn as a half-filled hole).
   // Everything is edited on a copy; "Listo" writes songs/fingerings.json and redraws the page, "Cancelar"
   // (or Esc) throws the changes away. A note with no fingering starts with every hole open.
   var h = C.ui.h;
@@ -20,7 +21,8 @@
   ];
 
   var sel = { octave: 'mid', name: 'Do', accidental: '' };
-  var work = null;              // the copy being edited: key -> holes
+  var work = null;              // the copy being edited: key -> { holes, half, done }
+  var halfMode = false;         // a click on a hole marks it halfway instead of covered
   var original = '';            // JSON of the fingerings when the window was opened
   var refs = null;
 
@@ -46,6 +48,11 @@
     return entry ? entry.holes : null;
   }
 
+  function halfOf(key) {
+    var entry = entryOf(key);
+    return entry && entry.half ? entry.half : [];
+  }
+
   function isDone(key) {
     var entry = entryOf(key);
     return !!entry && entry.done;
@@ -56,7 +63,7 @@
   function editable(key) {
     if (!has(work, key)) {
       var base = entryOf(key);
-      work[key] = { holes: base ? base.holes.slice() : [], done: base ? base.done : false };
+      work[key] = { holes: base ? base.holes.slice() : [], half: base && base.half ? base.half.slice() : [], done: base ? base.done : false };
     }
     return work[key];
   }
@@ -77,11 +84,23 @@
     return el;
   }
 
+  function without(list, n) {
+    return list.filter(function (x) { return x !== n; });
+  }
+
+  // A click on a hole. Normally it toggles covered / open (a hole that was halfway becomes covered); with the
+  // half-hole switch on, it toggles halfway / open (a covered hole becomes halfway).
   function toggleHole(n) {
     var entry = editable(currentKey());
-    var at = entry.holes.indexOf(n);
-    if (at >= 0) entry.holes.splice(at, 1); else entry.holes.push(n);
+    entry.half = entry.half || [];
+    var covered = entry.holes.indexOf(n) >= 0;
+    var half = entry.half.indexOf(n) >= 0;
+    entry.holes = without(entry.holes, n);
+    entry.half = without(entry.half, n);
+    if (halfMode) { if (!half) entry.half.push(n); }
+    else if (!covered) entry.holes.push(n);
     entry.holes.sort(function (a, b) { return a - b; });
+    entry.half.sort(function (a, b) { return a - b; });
     sync();
   }
 
@@ -98,6 +117,7 @@
       group.appendChild(title);
       group.appendChild(svg('circle', { class: 'fp-ring', cx: hole.cx, cy: hole.cy, r: hole.r + 2.4 }));
       group.appendChild(svg('circle', { class: 'fp-fill', cx: hole.cx, cy: hole.cy, r: hole.r, style: 'fill: var(--hole, #161616); stroke: #161616; stroke-width: 1.6' }));
+      group.appendChild(svg('path', { class: 'fp-half', d: 'M' + hole.cx + ' ' + (hole.cy - hole.r) + 'A' + hole.r + ' ' + hole.r + ' 0 0 0 ' + hole.cx + ' ' + (hole.cy + hole.r) + 'Z', style: 'fill: var(--hole, #161616); stroke: #161616; stroke-width: 1.6' }));
       group.addEventListener('click', function () { toggleHole(hole.n); });
       group.addEventListener('keydown', function (e) {
         if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleHole(hole.n); }
@@ -140,6 +160,7 @@
   function sync() {
     var key = currentKey();
     var holes = holesOf(key) || [];
+    var halves = halfOf(key);
     pressAll(refs.octaves, sel.octave);
     pressAll(refs.names, sel.name);
     pressAll(refs.accidentals, sel.accidental);
@@ -152,16 +173,20 @@
     });
     Object.keys(refs.holes).forEach(function (n) {
       var on = holes.indexOf(Number(n)) >= 0;
+      var partly = halves.indexOf(Number(n)) >= 0;
       refs.holes[n].classList.toggle('is-on', on);
-      refs.holes[n].setAttribute('aria-pressed', String(on));
+      refs.holes[n].classList.toggle('is-half', partly);
+      refs.holes[n].setAttribute('aria-pressed', partly ? 'mixed' : String(on));
     });
     refs.title.textContent = label(key);
     refs.status.textContent = statusText(key);
-    refs.count.textContent = holes.length === 1 ? tr('1 agujero tapado') : tr('{n} agujeros tapados', { n: holes.length });
+    refs.count.textContent = (holes.length === 1 ? tr('1 agujero tapado') : tr('{n} agujeros tapados', { n: holes.length })) +
+      (halves.length ? ' · ' + (halves.length === 1 ? tr('1 a medias') : tr('{n} a medias', { n: halves.length })) : '');
     refs.finished.checked = isDone(key);
     refs.remove.disabled = !has(work, key);
     refs.remove.textContent = C.fingering.DEFAULTS[key] ? 'Volver a la de fábrica' : 'Quitar digitación';
-    refs.clear.disabled = holes.length === 0;
+    refs.clear.disabled = holes.length === 0 && halves.length === 0;
+    refs.half.checked = halfMode;
 
     var options = C.fingering.allKeys(work).filter(function (k) { return k !== key && entryOf(k); });
     refs.copy.replaceChildren.apply(refs.copy, [h('option', { value: '' }, 'Copiar de…')].concat(options.map(function (k) {
@@ -187,12 +212,14 @@
       editable(currentKey()).done = refs.finished.checked;
       sync();
     });
+    refs.half = h('input', { type: 'checkbox', role: 'switch', class: 'fp-switch-input' });
+    refs.half.addEventListener('change', function () { halfMode = refs.half.checked; sync(); });
     refs.title = h('strong', { class: 'fp-title' });
     refs.status = h('span', { class: 'fp-status' });
     refs.count = h('span', { class: 'fp-count' });
     refs.clear = h('button', {
       type: 'button', class: 'btn btn--sm', title: 'Destapar todos los agujeros',
-      onclick: function () { editable(currentKey()).holes = []; sync(); }
+      onclick: function () { var entry = editable(currentKey()); entry.holes = []; entry.half = []; sync(); }
     }, 'Destapar todos');
     refs.remove = h('button', {
       type: 'button', class: 'btn btn--sm btn--danger',
@@ -201,7 +228,11 @@
     refs.copy = h('select', { class: 'input input--mini', 'aria-label': 'Copiar la digitación de otra nota' });
     refs.copy.addEventListener('change', function () {
       var from = holesOf(refs.copy.value);
-      if (from) editable(currentKey()).holes = from.slice();
+      if (from) {
+        var entry = editable(currentKey());
+        entry.holes = from.slice();
+        entry.half = halfOf(refs.copy.value).slice();
+      }
       sync();
     });
     refs.done = h('button', { type: 'button', class: 'btn btn--primary', onclick: save }, C.icons.create('check'), 'Listo');
@@ -209,12 +240,15 @@
 
     dialog.replaceChildren(h('form', { method: 'dialog', onsubmit: function (e) { e.preventDefault(); } },
       h('h2', null, 'Digitaciones'),
-      h('p', { class: 'fp-help' }, 'Elige una nota y pulsa los agujeros que se tapan. Los agujeros sin marcar están destapados.'),
+      h('p', { class: 'fp-help' }, 'Elige una nota y pulsa los agujeros que se tapan. Los agujeros sin marcar están destapados. Con «Medio agujero» activado, pulsar un agujero lo marca tapado solo a medias.'),
       h('div', { class: 'fp-body' },
         h('div', { class: 'fp-side' },
           h('div', { class: 'field' }, 'Octava', refs.octaves),
           h('div', { class: 'field' }, 'Nota', refs.names),
           h('div', { class: 'field' }, 'Alteración', refs.accidentals),
+          h('div', { class: 'fp-finished' },
+            h('label', { class: 'fp-switch' }, refs.half, h('span', { class: 'fp-switch-track', 'aria-hidden': 'true' }), h('span', null, 'Medio agujero')),
+            h('p', { class: 'fp-hint' }, 'Actívalo y pulsa un agujero para marcarlo tapado a medias, como se tocan muchas notas con alteración.')),
           h('div', { class: 'fp-finished' },
             h('label', { class: 'fp-switch' }, refs.finished, h('span', { class: 'fp-switch-track', 'aria-hidden': 'true' }), h('span', null, 'Digitación completada')),
             h('p', { class: 'fp-hint' }, 'Si no está completada, las canciones muestran solo el nombre de esta nota.')),

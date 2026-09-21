@@ -1281,6 +1281,9 @@ button.note{
 .fp-ring{ fill: transparent; stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 3 2.2; opacity: .85; }
 .fp-fill{ opacity: 0; transition: opacity .1s; }
 .fp-hole.is-on .fp-fill{ opacity: 1; }
+.fp-half{ opacity: 0; transition: opacity .1s; pointer-events: none; }
+.fp-hole.is-half .fp-half{ opacity: 1; }
+.fp-hole.is-half .fp-ring{ opacity: .55; }
 .fp-hole.is-on .fp-ring{ opacity: 0; }
 .fp-hole:hover .fp-ring, .fp-hole:focus-visible .fp-ring{ fill: color-mix(in srgb, var(--accent) 28%, transparent); stroke-width: 2.6; opacity: 1; }
 .fp-hole.is-on:hover .fp-ring, .fp-hole.is-on:focus-visible .fp-ring{ fill: transparent; }

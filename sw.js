@@ -12,10 +12,10 @@
 // between the markers below; do not edit them by hand.
 
 /* BEGIN GENERATED */
-const VERSION = 'c56629d6';
+const VERSION = 'd814a53d';
 const PRECACHE = [
   "./",
-  "css/styles.css?v=37fb708f",
+  "css/styles.css?v=c1e2573a",
   "index.html",
   "js/app.js?v=b48c4c60",
   "js/audio-import.js?v=50b1eca6",
@@ -25,12 +25,12 @@ const PRECACHE = [
   "js/categories.js?v=e4b6179c",
   "js/editor.js?v=f2659d3b",
   "js/export.js?v=bba5ee3e",
-  "js/fingering-editor.js?v=225b2afc",
-  "js/fingering-page.js?v=0c6c6b65",
-  "js/fingering.js?v=7f323d44",
+  "js/fingering-editor.js?v=07fadadf",
+  "js/fingering-page.js?v=284f0e43",
+  "js/fingering.js?v=1544949d",
   "js/folder.js?v=bc073a36",
   "js/home.js?v=75d3bbf1",
-  "js/i18n.js?v=a65ef67b",
+  "js/i18n.js?v=a21f2202",
   "js/icons.js?v=138fa6bb",
   "js/key-dialog.js?v=051c6c0b",
   "js/keys.js?v=bfc69fc7",
@@ -45,7 +45,7 @@ const PRECACHE = [
   "js/pwa.js?v=e09ce499",
   "js/render.js?v=1bc6040a",
   "js/router.js?v=cafb81aa",
-  "js/score-image.js?v=647e380d",
+  "js/score-image.js?v=4e587538",
   "js/store.js?v=a6adb113",
   "js/transpose.js?v=ca121f5f",
   "js/ui.js?v=81b71ef0",
