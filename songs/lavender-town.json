@@ -1,0 +1,30 @@
+{
+  "id": "lavender-town",
+  "title": "Lavender Town",
+  "meter": "4/4",
+  "bpm": 126,
+  "signature": "sharp",
+  "difficulty": "dificil",
+  "origin": "videojuegos",
+  "status": "por-aprender",
+  "tags": ["Pokémon"],
+  "lines": [
+    { "subtitle": "", "notes": ["Sol:h", "Sol:h", "Mi:h", "Mi:h"] },
+    { "subtitle": "", "notes": ["Sol", "Fa#", "Mi", "Si", "Do#:h", "Do#:h"] },
+    { "subtitle": "", "notes": ["Sol:h", "Sol:h", "Fa#:h", "Fa#:h"] },
+    { "subtitle": "", "notes": ["Si", "Sol", "Fa#", "Si", "Do^:h", "Do^:h"] },
+    { "subtitle": "", "notes": ["Sol:h", "Sol:h", "Mi:h", "Mi:h"] },
+    { "subtitle": "", "notes": ["Sol", "Fa#", "Mi", "Si", "Do#:h", "Do#:h"] },
+    { "subtitle": "", "notes": ["Sol:h", "Sol:h", "Fa#:h", "Fa#:h"] },
+    { "subtitle": "", "notes": ["Si", "Sol", "Fa#", "Si", "Do:h", "Do:h"] },
+    { "subtitle": "", "notes": ["R:w.", "R:h"] },
+    { "subtitle": "", "notes": ["Sol:h", "Sol:h", "Mi:h", "Mi:h"] },
+    { "subtitle": "", "notes": ["Sol", "Fa#", "Mi", "Si", "Do#:h", "Do#:h"] },
+    { "subtitle": "", "notes": ["Sol:h", "Sol:h", "Fa#:h", "Fa#:h"] },
+    { "subtitle": "", "notes": ["Si", "Sol", "Fa#", "Si", "Do^:h", "Do^:h"] },
+    { "subtitle": "", "notes": ["Sol:h", "Sol:h", "Mi:h", "Mi:h"] },
+    { "subtitle": "", "notes": ["Sol", "Fa#", "Mi", "Si", "Do#:h", "Do#:h"] },
+    { "subtitle": "", "notes": ["Sol:h", "Sol:h", "Fa#:h", "Fa#:h"] },
+    { "subtitle": "", "notes": ["Si", "Sol", "Fa#", "Si", "Do:h", "Do:h"] }
+  ]
+}

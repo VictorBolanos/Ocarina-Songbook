@@ -194,7 +194,23 @@
     });
   }
 
-  // A copy of a song to write a variant of it. Like any new song it is only a draft until Listo.
+  // Opens a song that does not exist in the folder yet (a copy, an imported file) for editing, with the title
+  // selected. Like any new song it is only a draft until Listo.
+  function openDraft(draft) {
+    if (!store.canEdit()) return;
+    store.flushText();
+    state.draft = draft;
+    state.editId = draft.id;
+    state.undo = [];
+    state.redo = [];
+    if (!draft.lines.length) draft.lines.push(blank());
+    var last = draft.lines.length - 1;
+    state.caret = { line: last, pos: draft.lines[last].notes.length };
+    state.selectKey = 'title';
+    C.router.go('#/song/' + draft.id, ['title']);
+  }
+
+  // A copy of a song to write a variant of it.
   function duplicateSong(id) {
     if (!store.canEdit()) return;
     var original = store.find(id);
@@ -202,16 +218,7 @@
     var copy = JSON.parse(JSON.stringify(original));
     copy.title = (original.title + tr(' (variante)')).slice(0, 80);
     copy.id = store.uniqueId(copy.title);
-    store.flushText();
-    state.draft = copy;
-    state.editId = copy.id;
-    state.undo = [];
-    state.redo = [];
-    var last = copy.lines.length ? copy.lines.length - 1 : 0;
-    if (!copy.lines.length) copy.lines.push(blank());
-    state.caret = { line: last, pos: copy.lines[last].notes.length };
-    state.selectKey = 'title';
-    C.router.go('#/song/' + copy.id, ['title']);
+    openDraft(copy);
   }
 
   // Changes the kind of accidentals of the song being edited. Going to flats or sharps, the notes already
@@ -619,6 +626,7 @@
     stop: stop,
     createSong: createSong,
     duplicateSong: duplicateSong,
+    openDraft: openDraft,
     changeSignature: changeSignature,
     leave: leave,
     draftAtRisk: draftAtRisk,

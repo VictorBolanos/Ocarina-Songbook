@@ -1,0 +1,21 @@
+{
+  "id": "c418-sweden-minecraft-main-theme-a-m",
+  "title": "Minecraft - C418",
+  "meter": "4/4",
+  "bpm": 88,
+  "signature": "sharp",
+  "difficulty": "dificil",
+  "origin": "videojuegos",
+  "status": "por-aprender",
+  "tags": ["minecraft"],
+  "lines": [
+    { "subtitle": "", "notes": ["La#_:h", "Do^", "Re^", "La:h", "Re", "Fa:e", "Sol:e"] },
+    { "subtitle": "", "notes": ["La:h", "La#_", "La_:e", "Do:e", "Sol:w"] },
+    { "subtitle": "", "notes": ["La#", "Fa^", "Re^", "Do^", "La:h", "Re", "Fa:e", "Sol:e"] },
+    { "subtitle": "", "notes": ["La:h", "La_", "Do^:e", "La:e", "Sol:w"] },
+    { "subtitle": "", "notes": ["La#:h", "Do^", "Re^", "Fa^:h", "Re", "La^:e", "Sol^:e"] },
+    { "subtitle": "", "notes": ["Mi^:h", "La#_", "Fa^:e", "Mi^:e", "Do^:w"] },
+    { "subtitle": "", "notes": ["La#:h", "Re^", "Do^", "La^:h", "Re", "Fa^:e", "Sol^:e"] },
+    { "subtitle": "", "notes": ["La^:h", "La#", "La:e", "Do^:e", "Sol:w"] }
+  ]
+}

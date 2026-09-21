@@ -1531,6 +1531,68 @@ a.mode-toggle{ text-decoration: none; }
   .footer-tools{ flex-wrap: wrap; justify-content: center; }
 }
 
+/* ---- Range warning, transposing, MIDI import ------------------------------------------------ */
+.note--out{ outline: 2px dashed var(--danger); outline-offset: 1px; }
+.pal-notes .note--out{ opacity: .55; }
+.range-warning{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem;
+  margin: .3rem 0 .6rem;
+  padding: .5rem .8rem;
+  border: 1.5px solid var(--danger);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  font-family: var(--sans);
+  font-size: .85rem;
+}
+.range-warning .icon{ flex: none; width: 1.2rem; height: 1.2rem; color: var(--danger); }
+.range-warning span{ flex: 1 1 12rem; min-width: 0; }
+.edit-actions{ gap: .5rem; }
+
+.dialog--transpose, .dialog--import{ width: min(30rem, calc(100vw - 2rem)); }
+.transpose-steps{ display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem; margin-bottom: .6rem; }
+.transpose-steps .btn{ justify-content: center; padding-inline: .3rem; }
+.transpose-value{ margin: .2rem 0 .8rem; text-align: center; font-family: var(--font); font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+.transpose-kinds{ display: flex; align-items: center; gap: .5rem; margin-bottom: .8rem; font-family: var(--sans); font-size: .8rem; color: var(--ink-soft); }
+.transpose-kinds span{ margin-right: auto; }
+.transpose-kinds .btn[aria-pressed="true"]{ background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.transpose-info{ min-height: 2.4em; margin: 0 0 .3rem !important; font-size: .88rem !important; font-weight: 700; }
+.transpose-info.is-ok{ color: #2fa866; }
+.transpose-info.is-warn{ color: var(--accent); }
+.transpose-info.is-bad{ color: var(--danger); }
+.transpose-key{ margin: 0 0 1rem !important; font-size: .8rem !important; }
+
+.add-row{ display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: .9rem; }
+.add-row .add-song{ flex: 1 1 12rem; width: auto; margin: 0; }
+.add-row .add-song--import{ flex: 0 1 auto; padding-inline: 1.6rem; }
+.import-parts{ max-height: 14rem; overflow-y: auto; padding: 2px; }
+.import-check{ display: flex; align-items: center; gap: .5rem; margin: 0 0 .8rem; font-family: var(--sans); font-size: .85rem; cursor: pointer; }
+.import-check input{ accent-color: var(--accent); }
+.import-warning, .import-quality{
+  display: grid;
+  gap: .2rem;
+  margin: 0 0 .8rem;
+  padding: .6rem .8rem;
+  border: 1.5px solid var(--danger);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  font-family: var(--sans);
+  font-size: .85rem;
+}
+.import-warning strong, .import-quality strong{ color: var(--danger); }
+.import-quality:empty{ display: none; }
+.import-quality.is-note{ border-color: var(--line); background: none; }
+.import-file{ margin: 0 0 .5rem !important; font-size: .8rem !important; word-break: break-all; }
+.import-progress{ width: 100%; height: .5rem; margin: 0 0 .4rem; accent-color: var(--accent); }
+.import-status{ min-height: 1.2em; margin: 0 0 .5rem !important; font-size: .82rem !important; }
+.import-controls{ display: grid; gap: .6rem; margin-bottom: .8rem; }
+.import-controls[hidden]{ display: none; }
+.import-tempo{ display: flex; align-items: flex-end; gap: .4rem; }
+.import-tempo .field{ flex: 1; }
+.import-summary{ display: grid; gap: .15rem; margin: 0 0 1rem !important; font-size: .82rem !important; }
+
 /* ---- Note detector: the metronome window's second tab (js/pitch.js) ------------------------------ */
 .metro-tabs{ display: flex; gap: .25rem; padding: .25rem; margin-bottom: 1rem; border: 1.5px solid var(--line); border-radius: 999px; }
 .metro-tab{
@@ -1550,7 +1612,20 @@ a.mode-toggle{ text-decoration: none; }
 .metro-tab[aria-selected="true"]{ background: var(--accent); color: var(--paper); }
 .metro-panel[hidden]{ display: none; }
 
-.pitch-target{ margin-bottom: .3rem; }
+.pitch-target{ display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-bottom: .5rem; }
+.pitch-target-title{ margin-right: auto; font-family: var(--sans); font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.pitch-spelling{ display: inline-flex; gap: .2rem; }
+.pitch-spell{ min-width: 2.1rem; justify-content: center; padding-inline: .4rem; font-size: 1rem; }
+.pitch-spell[aria-pressed="true"], .pitch-any.is-on{ background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.pitch-picker{ display: grid; gap: .55rem; margin-bottom: .3rem; }
+.pitch-row{ display: grid; grid-template-columns: 2.5rem 1fr; align-items: center; gap: .3rem; }
+.pitch-row-label{ font-family: var(--sans); font-size: .7rem; color: var(--ink-soft); }
+.pitch-legend{ margin: 0 0 .2rem !important; font-size: .72rem !important; }
+.pitch-strip{ display: grid; grid-template-columns: repeat(14, 1fr); grid-template-rows: 2.15rem 2.15rem; gap: .3rem 0; }
+.pitch-strip .note{ min-width: 0; width: calc(100% - .3rem); height: 100%; margin: 0 auto; padding: 0; justify-content: center; font-size: .9rem; cursor: pointer; }
+.pitch-strip .note.is-off{ opacity: .25; box-shadow: none; cursor: default; }
+.pitch-strip .note.is-target{ outline: 2px solid var(--accent); outline-offset: 2px; transform: translateY(-1px); }
+@media (max-width: 400px){ .pitch-strip .note{ font-size: .78rem; } }
 .pitch-intro{ margin: 0 0 .6rem !important; font-size: .85rem !important; }
 .pitch-display{ display: grid; justify-items: center; gap: .1rem; min-height: 7.6rem; margin: .2rem 0 .5rem; }
 .pitch-note{ min-height: 1.1em; font-family: var(--font); font-size: 4.2rem; font-weight: 700; line-height: 1.1; color: var(--accent); }

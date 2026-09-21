@@ -1,0 +1,17 @@
+{
+  "name": "Ocarina Songbook",
+  "short_name": "Ocarina",
+  "description": "A personal songbook for practising the 12-hole ocarina: your songs as notes or fingering diagrams, with a synthesized ocarina, a metronome and a note detector.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#3a2a1c",
+  "theme_color": "#3a2a1c",
+  "categories": ["music", "education"],
+  "icons": [
+    { "src": "src/img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "src/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "src/img/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

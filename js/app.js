@@ -15,6 +15,7 @@
   C.home.init();
   C.router.init();
   C.folder.init();                                         // async: reconnects the songs folder if it can
+  C.pwa.init();                                            // offline use, install, connection notices
 
   C.i18n.onChange(function () { C.store.notify(); });      // the texts built by the code are drawn again
   C.store.notify();                                        // first paint

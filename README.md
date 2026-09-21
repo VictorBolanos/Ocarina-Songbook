@@ -21,7 +21,7 @@ Live application: https://victorbolanos.github.io/Ocarina-Songbook
 
 ## 📖 Overview
 
-Ocarina Songbook is a small, self-contained web page for learning and practising songs on the 12-hole ocarina. You keep your songs in a folder on your computer, browse them from a searchable list, and open any song to read it as note names, as fingering diagrams, or both — and to hear it. It also comes with a step-by-step song editor, a metronome, a fingering editor, a note detector that listens to your ocarina, and export to MIDI, WAV, MP4 and a score image (PNG).
+Ocarina Songbook is a small, self-contained web page for learning and practising songs on the 12-hole ocarina. You keep your songs in a folder on your computer, browse them from a searchable list, and open any song to read it as note names, as fingering diagrams, or both — and to hear it. It also comes with a step-by-step song editor, a metronome, a fingering editor, a note detector that listens to your ocarina, importing from MIDI and audio files, transposing, offline use as an installable app, and export to MIDI, WAV, MP4 and a score image (PNG).
 
 The interface comes in **Spanish and English**: the flag button in the top bar (next to the folder name) switches it (in English the notes are shown as `C D E F G A B`).
 
@@ -31,6 +31,7 @@ The interface comes in **Spanish and English**: the flag button in the top bar (
 - ✅ **Zero setup** - Plain HTML, CSS and JavaScript: no server, no dependencies, no build step
 - ✅ **Private** - Nothing is uploaded anywhere and there is no tracking
 - ✅ **Made for the ocarina** - Fingering diagrams, an ocarina-like synthesized voice, key signatures
+- ✅ **Works without a connection** - Install it as an app (or just open it): the page and your songs stay available at the music stand, with no coverage
 - ✅ **Scores you can print** - Export any song as a real staff score (PNG) with the note values, the key and the fingerings under the notes
 - ✅ **Made for your phone too** - A layout designed for touch screens, and on Android Chrome you can even connect a folder and edit; publish it on GitHub Pages to read your songs anywhere
 - ✅ **Two languages** - Spanish and English, with a one-click switch
@@ -72,6 +73,8 @@ Write songs with a note palette or straight from the keyboard.
 - ⌨️ **Keyboard entry** - `1`–`7` for the notes, `0` for a rest, `+`/`-` for sharps and flats, arrows for octaves
 - 🧩 **Lines** - Optional subtitles, duplicate, reorder with buttons, keyboard or drag and drop
 - ♻️ **Duplicate a song** - Open a copy to write a variant of it
+- ⚠️ **Range warning** - Notes the ocarina cannot play (outside A4–F6) are outlined in red, dimmed in the palette, and counted in a notice under the form
+- 🔄 **Transpose** - Raise or lower the whole song by half steps or octaves to fit your ocarina, with a live check of what still falls outside
 - ↩️ **Undo & redo** - And nothing touches your folder until you press **Done**
 
 **How it works:**
@@ -178,9 +181,68 @@ A metronome in the top bar that keeps ticking while you read — and, in the sam
 **The note detector** (the *Note detector* tab of the same window):
 - 🎤 **Play and read** - Turn the microphone on and play: the page shows the note it hears, in the same names as the rest of the page (`Sol`, `Sol'` high, `Sol,` low), with the sharp or flat spelling and the frequency in Hz
 - 🎯 **In tune or not** - A needle shows how many cents sharp or flat you are, and turns green when you are within a few cents
-- 🎼 **Practise one note** - Pick a note from *Note to practise* (A4 to F6, grouped by octave; the page remembers it) and it tells you whether you are above or below it: "A little sharp (+12 cents)" when it is the right note but off, or "Below Sol: 2 semitones" ("an octave" when you are an octave away) when it is another note. The note you are playing is shown as always
+- 🎼 **Practise one note** - Pick a note in *Note to practise*: a small keyboard per octave (high notes on top, all three the same shape) with the same coloured bubbles as the song editor, the naturals in a row and the notes with an accidental above, between the two they sit between; the keys the ocarina cannot play are faded. Choose whether those are written with sharps (♯) or flats (♭) and the whole tool follows; press the chosen note again, or *Any note*, to go back to free playing. The page remembers both choices and it tells you whether you are above or below it: "A little sharp (+12 cents)" when it is the right note but off, or "Below Sol: 2 semitones" ("an octave" when you are an octave away) when it is another note. The note you are playing is shown as always
 - 🧠 **Made for the ocarina** - An ocarina sounds almost like a pure tone, so the note is found with the YIN pitch algorithm: from A4 to F6 it named every note correctly, to within a few cents, in tests with added noise
 - 🔒 **Private** - The sound is only analysed on your device; it is never recorded or sent anywhere, and the microphone is released when you leave the tab or close the window
+
+<div align="center">
+
+<a href="docs/screenshots/detector.png"><img src="docs/screenshots/detector.png" alt="The note detector tab: a keyboard to pick the note to practise, the note being played and how in tune it is" width="340"></a>
+
+<sub>The note detector: pick a note on the keyboard, play, and it shows what you are playing, how in tune it is and whether you are above or below the note you practise.</sub>
+
+</div>
+
+
+---
+
+### 🎹 **MIDI & Audio Import**
+> **Status:** ✅ **FULLY IMPLEMENTED**
+
+Writing notes by hand is the slow part: bring a melody in from a `.mid` file or from a recording instead.
+
+**From a MIDI file:**
+- 📥 **Import file** - The button next to *New song* opens any Standard MIDI File (format 0 or 1) as a new song
+- 🎼 **Pick the melody** - Every track (and channel) with notes is listed, with its number of notes and range; the busiest is chosen for you, and drums are left out
+- 🧩 **Made into a tune** - Chords keep their top note, notes are snapped to sixteenths, gaps become rests, and long notes are split into the values the page has
+- ⏱️ **Tempo, time and key** - Taken from the file, and the notes are cut into lines of two bars
+
+**From an audio file** (WAV, MP3, M4A, MP4, OGG…):
+- 🎧 **It listens and writes the notes down** - The browser decodes the file and the page follows the pitch every 10 ms (the same tracker as the note detector), cuts the sound into notes, estimates the tempo and turns them into a song
+- 🎛️ **Tempo and sensitivity are yours** - Halve or double the estimated tempo, or type one, and choose whether short notes are kept
+- ⚠️ **One melody only** - The window always warns: with more than one instrument or sound at once (accompaniment, bass, drums, voices) **the result will be garbage**. It also measures how clear the recording is and shouts louder when it looks like a mix
+- ✅ **What it is good for** - Your own recordings of a solo ocarina, flute, voice or whistle, or any clean single-line audio
+
+**For both:**
+- 🎯 **Fitted to the ocarina** - The octaves are moved so as many notes as possible land in A4–F6; the rest are flagged and can be transposed
+- ✋ **Nothing saved yet** - The result opens in the editor as a draft: fix it, transpose it, and press **Done** (or discard it)
+
+**How it works:**
+1. On the song list press **Import file** and choose a `.mid`, `.wav`, `.mp3`, `.m4a` or `.mp4` file
+2. MIDI: pick the track that carries the melody. Audio: read the warning, wait for the analysis and check the tempo
+3. See what will happen (notes, tempo, octaves, notes out of range) and press **Open in the editor**, check the song and press **Done**
+
+<div align="center">
+
+| From a MIDI file | From an audio file |
+|:---:|:---:|
+| <a href="docs/screenshots/import-midi.png"><img src="docs/screenshots/import-midi.png" alt="The MIDI import window: the tracks of the file and what will be imported" width="380"></a> | <a href="docs/screenshots/import-audio.png"><img src="docs/screenshots/import-audio.png" alt="The audio import window with the warning that it only works for a single melody" width="380"></a> |
+| MIDI: pick the track with the melody and see what the import will do. | Audio: the window always warns that only a single melody works, and lets you fix the tempo. |
+
+</div>
+
+---
+
+### 📲 **Installable & Offline**
+> **Status:** ✅ **FULLY IMPLEMENTED**
+
+The page works as an app you can put on your phone or computer, and keeps working without a connection.
+
+**Key Features:**
+- 📴 **Offline** - A service worker keeps the page and your published songs; with no coverage they still open, and a notice tells you when the connection goes and returns
+- 🔄 **Updates** - When there is a connection the page and the songs are fetched fresh, so a new version arrives on its own
+- ⬇️ **Install** - An *Install the app* link appears in the footer when the browser offers it (Chrome, Edge, Android), and it opens in its own window with its own icon
+- 🍎 **iPhone** - Share → *Add to Home Screen*
 
 ---
 
@@ -251,7 +313,7 @@ The whole page in Spanish or English.
 
 **Key Features:**
 - 📦 **Backup file** - Every song and fingering in one `.json`, and import it back
-- 📱 **Read-only on the web** - Publish the folder with GitHub Pages and read your songs on your phone
+- 📱 **Read-only on the web** - Publish the folder with GitHub Pages and read your songs on your phone, even offline
 - 🪟 **Several tabs** - Tabs stay in sync, and a song you are editing is never replaced under you
 
 ---
@@ -301,6 +363,8 @@ The picture in use is copied into the browser, so it is there the next time with
 ### **Browser APIs**
 - 🔊 **Web Audio API** - The ocarina voice, the scheduler, the metronome and the offline rendering
 - 🎤 **getUserMedia** - The microphone of the note detector (only while its tab is open)
+- 📴 **Service Worker & Cache Storage** - Offline use of the page and the songs
+- 🎹 **File API & decodeAudioData** - Read the MIDI or audio file you choose (it never leaves your computer)
 - 📁 **File System Access API** - Reads and writes your songs folder (Chrome and Edge)
 - 🎞️ **WebCodecs** - AAC encoding for MP4 export
 - 🗄️ **IndexedDB** - Remembers the folder handle and the background picture
@@ -339,6 +403,16 @@ python -m http.server 8000
 Then click **Connect folder** and pick the `songs/` folder (or the project root that contains it). The browser remembers it; occasionally it asks for permission again — click **Reconnect folder**.
 
 > Opened straight from disk (`file://`) the page can only read songs after you connect the folder. Served over `http(s)`, it also shows the published songs read-only when no folder is connected.
+
+### **Installing it as an app, and offline use**
+
+Served over `https` (GitHub Pages is), the page installs a service worker the first time you open it, and from then on it opens without a connection, with the songs it had then:
+
+- **Chrome / Edge (computer)** - Use the install icon in the address bar, or the *Install the app* link in the footer
+- **Android (Chrome)** - Menu → *Install app* (or the footer link)
+- **iPhone / iPad (Safari)** - Share → *Add to Home Screen*
+
+Songs are kept up to date whenever there is a connection. If you connect a songs folder (Chrome and Edge) the songs come from the folder as always, connection or not. The service worker does nothing when the page is opened from disk (`file://`), and on `localhost` it stays off so it cannot hide the changes you make: add `?pwa` to the address (`http://localhost:8000/?pwa`) to try it there.
 
 ### **Setting up your songs folder**
 
@@ -379,6 +453,54 @@ What happens next:
 Every note has a **duration**: the *Duration* row shows the value of the selected note (the one before the caret) and changes it; new notes take the value shown. *Dot* lengthens a note by half, and *Rest* adds a rest.
 
 **Duplicate** (on a song's page and on its card) opens a copy called “Title (variant)” in the editor. Like any new song, it is only saved when you press **Done**.
+
+### **Range and transposing**
+
+The 12-hole ocarina plays from A4 to F6 (`La,` to `Fa'` on this page). While you edit, any note outside that range is outlined in red and the palette dims the notes you cannot play; a notice under the form counts them. Press **Transpose…** (in the notice, or next to *Delete song*) to fix it:
+
+<div align="center">
+
+<a href="docs/screenshots/range-warning.png"><img src="docs/screenshots/range-warning.png" alt="The editor with notes outside the ocarina's range outlined in red and a notice with a Transpose button" width="600"></a>
+
+<sub>Notes the ocarina cannot play are outlined in red in the song and dimmed in the palette, and a notice under the form counts them.</sub>
+
+</div>
+
+
+1. Choose the shift with the buttons: an octave down or up, or half a step down or up (as many times as you like, up to two octaves)
+2. Choose whether the new accidentals are written with sharps or flats
+3. The window shows how many notes would still be out of range and what the key becomes; a shift that would leave the octaves the page can write (C4–B6) is refused
+4. Press **Transpose**; it is one step of the editor's undo
+
+<div align="center">
+
+| Before | Choosing a shift |
+|:---:|:---:|
+| <a href="docs/screenshots/transpose.png"><img src="docs/screenshots/transpose.png" alt="The transpose window before choosing a shift" width="380"></a> | <a href="docs/screenshots/transpose2.png"><img src="docs/screenshots/transpose2.png" alt="The transpose window refusing a shift that would leave the octaves the page has" width="380"></a> |
+| Open it and it shows how many notes are out of range. | Shift the song: it checks the result live, and refuses a shift the page cannot write. |
+
+</div>
+
+### **Importing a MIDI file**
+
+On the song list, **Import file** (next to *New song*) reads a `.mid` file. If it has several tracks, pick the one with the melody. The window lists what it found, and the options: *Move the octaves so it fits the ocarina* is on by default. Lines are cut every two bars. Things to know:
+- Only one melody line is kept (the top note of every chord), so pick a melody track, not an accompaniment
+- Times are snapped to sixteenth notes, so very fast or "swung" playing is simplified
+- A note longer than six beats is split into several notes of the same pitch, and a long silence is shortened
+- Files timed in frames (SMPTE) cannot be imported
+
+### **Importing from an audio file**
+
+The same **Import file** button also takes audio (`.wav`, `.mp3`, `.m4a`, `.mp4`, `.ogg`, `.flac`…). The page listens to the recording and writes down the notes it hears.
+
+> ⚠️ **It only works for a single melody.** One instrument, one voice, one whistle, with nothing else sounding. If there is more than one instrument or sound at once — a band, chords, a bass line, drums, a choir — the pitch tracker follows now the melody, now the bass, now the noise, and **the result will be garbage**. The window says so every time, and when less than about 60 % of the sound has a clear note it warns that the recording looks like a mix.
+
+What you can adjust in the window:
+- **Tempo (BPM)** - Estimated from where the notes start. A recording has no time signature, so the estimate can come out at half or double the real tempo: use **÷ 2** and **× 2**, or type the right one
+- **Sensitivity** - *Normal*, *Detailed* (keeps shorter notes, more mistakes) or *Simplified* (ignores brief notes)
+- **Move the octaves** - Like the MIDI import
+
+Only the first five minutes are analysed, and files up to 80 MB are accepted. In tests with the page's own recordings, single-voice audio came out with almost every note right and the right tempo; a real recording (breath noise, echo, vibrato, slides between notes) will need more correction in the editor, so treat the result as a first draft.
 
 ### **Keyboard shortcuts in the editor**
 
@@ -425,7 +547,7 @@ When you create a song you first choose which accidentals it uses: **none, flats
   - **MP4** (`.mp4`) - The same audio compressed with AAC, about 0.7 MB a minute. Needs a browser with the WebCodecs AAC encoder (current Chrome and Edge).
   - **PNG** (`.png`) - The score as an image, one staff per line of the song. You choose whether names, fingering diagrams or both are written under the notes; the note values are always drawn. The picture is black on white with a treble clef, the key signature, the time signature and, when the notes fit the time signature, bar lines. A very long score is drawn a little smaller on phones, whose browsers limit the size of an image.
 - **Metronome** - Set the tempo with the arrows, the slider or by typing, or tap it. Choose the beats per bar and a subdivision. It keeps ticking after you close the window.
-- **Note detector** - In the metronome window, open the **Note detector** tab and press **Turn the microphone on** (the browser asks for permission the first time). Hold the ocarina near the microphone and play one note at a time: the note, its frequency and the needle appear as you play. To practise a particular note, pick it in **Note to practise**: the message then says whether you are above or below it, and the needle is centred on that note (red when you are on another note). It works best in a quiet room; if the metronome or a song is playing through the speakers, the microphone will hear it too, so use headphones. The microphone needs a secure address: `https` (GitHub Pages is), `localhost`, or a page opened from disk.
+- **Note detector** - In the metronome window, open the **Note detector** tab and press **Turn the microphone on** (the browser asks for permission the first time). Hold the ocarina near the microphone and play one note at a time: the note, its frequency and the needle appear as you play. To practise a particular note, press its bubble in **Note to practise**: the message then says whether you are above or below it, and the needle is centred on that note (red when you are on another note). It works best in a quiet room; if the metronome or a song is playing through the speakers, the microphone will hear it too, so use headphones. The microphone needs a secure address: `https` (GitHub Pages is), `localhost`, or a page opened from disk.
 
 ### **Fingerings**
 
@@ -455,6 +577,8 @@ Without a connected folder the page can still show the songs that sit next to it
 2. Commit and push songs/ (with index.json), and GitHub Pages serves them
 3. Open the page on the phone: the toolbar says "Read-only"
 ```
+
+`tools/stamp-version.js` also writes the list of files and the version in `sw.js`, which is what makes a new version replace the copies kept for offline use, so commit `sw.js` and `index.html` together with your changes.
 
 With GitHub Pages: in the repository, *Settings → Pages → Deploy from a branch → `main` / root*. `tools/stamp-version.js` adds a fingerprint to the script and style addresses in `index.html`, so a phone loads new files at once instead of after GitHub Pages' ten minutes of cache.
 
@@ -535,12 +659,16 @@ Ocarina-Songbook/
 │   ├── router.js             # #/, #/song/<id>, #/digitaciones
 │   ├── home.js               # Song list, search, filters
 │   ├── key-dialog.js         # Flats / sharps / none picker
+│   ├── transpose.js          # Transposing the song being edited
+│   ├── midi-import.js        # Reading a MIDI file into a song
+│   ├── audio-import.js       # Listening to an audio file and writing the melody down
 │   ├── metronome.js          # The metronome window and its two tabs
 │   ├── pitch.js              # The note detector (microphone, YIN pitch detection)
 │   ├── audio.js              # The ocarina voice and the scheduler
 │   ├── export.js             # MIDI, WAV, MP4 and PNG export
 │   ├── score-image.js        # The score drawn as an image
 │   ├── ocarina-image.js      # The ocarina picture as data (generated)
+│   ├── pwa.js                # Service worker registration, install link, connection notices
 │   ├── player.js             # The play bar
 │   ├── render.js             # Song pages and the editor view
 │   ├── editor.js             # Editing logic and keyboard
@@ -561,8 +689,11 @@ Ocarina-Songbook/
 ├── 📁 tools/
 │   ├── build-icons.js        # src/svg → js/icons.js
 │   ├── build-images.js       # src/img/ocarina_base.png → js/ocarina-image.js
-│   └── stamp-version.js      # Cache-busting fingerprints in index.html
+│   ├── build-pwa-icons.py    # src/img/ocarina_title.png → the app icons (needs Pillow)
+│   └── stamp-version.js      # Cache-busting fingerprints in index.html, and the file list of sw.js
 ├── index.html                # The page shell
+├── sw.js                     # The service worker (offline use); its file list is generated
+├── manifest.webmanifest      # The app's name, colours and icons
 └── README.md                 # This file
 ```
 
@@ -571,6 +702,8 @@ Ocarina-Songbook/
 - **Languages** - Every text is written in Spanish in the code and in `index.html`. The English versions are in the `EN` dictionary at the top of `js/i18n.js`, keyed by the Spanish text; a text that is missing there just stays in Spanish. Text with a variable part (a title, a number) is written as `t('… {name} …', { name })` so the variable is never translated. Anything inside an element marked `translate="no"` is left alone.
 - **Categories** - Add a category, or options to one, in `js/categories.js`. The editor, the list filters and the JSON files all follow it.
 - **Ocarina picture** - If you change `src/img/ocarina_base.png`, run `node tools/build-images.js` so the score image uses the new one, then `node tools/stamp-version.js`. (The picture is written into a script because a canvas that drew a file loaded from disk cannot be saved when the page itself is opened from disk.)
+- **App icons** - The icons of the installed app (`src/img/icon-*.png`, `apple-touch-icon.png`) are made from the logo, `src/img/ocarina_title.png`, with `python tools/build-pwa-icons.py`. The logo is 128 pixels wide, so the big sizes are enlarged from it; drop in a bigger logo and run the script again for sharper ones.
+- **Ocarina range** - The range the editor warns about (A4 to F6) is `RANGE` in `js/notes.js`.
 - **Icons** - Put SVGs in `src/svg/` and run `node tools/build-icons.js`, then `node tools/stamp-version.js`. Each icon is inlined with its colours replaced by `currentColor`, so it follows the theme.
 - **Ocarina pitches** - The page assumes the usual 12-hole alto C ocarina: `Do` (all ten finger holes closed, both small holes open) is C5, the middle octave is C5 to B5, `_` notes go down to A4 and B4, and `^` notes up to F6. To change the mapping, edit `OCTAVES` in `js/notes.js`.
 - **The voice** - An ocarina is a Helmholtz resonator: its tone is very close to a pure sine wave. The voice in `js/audio.js` is a near-sine wave table with a little breath noise, a soft attack, a slight pitch scoop, a gentle vibrato and a touch of room reverb. Every knob is in the `TIMBRE` object at the top of that file.
@@ -600,6 +733,7 @@ Ocarina-Songbook/
 - Any modern browser, phones included, can read the published songs; Chrome on Android can also connect a folder and edit
 - **Phone layout**: on narrow screens the note palette is a compact sheet at the bottom (closed to a slim bar until you open it, and a side panel when the phone is held sideways, so it never covers the score), the player and the filters fold away, and every control has a finger-sized target
 - MP4 export needs the WebCodecs AAC encoder (current Chrome and Edge)
+- Offline use and installing need `https` (or `localhost`); importing a MIDI or audio file needs a folder you can write to, like editing does
 
 ---
 
@@ -619,7 +753,9 @@ Ocarina-Songbook/
 | 💾 Backup | ✅ **Complete** | Export and import everything |
 | 🌍 Languages | ✅ **Complete** | Spanish and English |
 | 📱 Read-only web version | ✅ **Complete** | GitHub Pages, phone friendly |
-| 📲 Installable / offline (PWA) | 📋 **Planned** | Use the page without a connection |
+| 📲 Installable / offline (PWA) | ✅ **Complete** | Install as an app, open without a connection |
+| 🎹 MIDI & audio import | ✅ **Complete** | A melody from a `.mid` file or a single-voice recording, fitted to the ocarina |
+| 🔄 Transpose & range warning | ✅ **Complete** | Shift the song, and see what the ocarina cannot play |
 | 🎤 Play-along with the microphone | 📋 **Planned** | Check what you play against the song (the note detector is the first step) |
 
 ---
@@ -636,6 +772,7 @@ Ocarina-Songbook/
 ## 🙏 Acknowledgments
 
 - **[SVG Repo](https://www.svgrepo.com)** - For the icons used in the interface
+- **YIN** (Alain de Cheveigné and Hideki Kawahara, 2002) - The pitch-detection algorithm behind the note detector and the audio import
 - **The Web platform** - Web Audio, File System Access and WebCodecs make a page like this possible without a single dependency
 - **Ocarina players everywhere** - For the inspiration
 
@@ -643,8 +780,8 @@ Ocarina-Songbook/
 
 ## 🔖 Version
 
-**Current Version:** 1.0.0  
-**Last Updated:** September 19, 2026
+**Current Version:** 1.1.0  
+**Last Updated:** September 21, 2026
 
 ---
 

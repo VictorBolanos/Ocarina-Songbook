@@ -69,6 +69,27 @@
     return el;
   }
 
+  // The notes of a song that the ocarina cannot play (outside A4 - F6).
+  function outOfRangeCount(song) {
+    var count = 0;
+    song.lines.forEach(function (line) {
+      line.notes.forEach(function (code) {
+        var note = C.notes.parse(code);
+        if (note && !C.notes.inRange(note)) count++;
+      });
+    });
+    return count;
+  }
+
+  // Marks a chip whose note is out of the ocarina's range: dashed red outline and a tooltip.
+  function markOutOfRange(el, note) {
+    if (!note || C.notes.inRange(note)) return false;
+    var reason = tr('Fuera del rango de la ocarina ({range})', { range: C.notes.rangeText() });
+    el.classList.add('note--out');
+    el.title = reason;
+    return reason;
+  }
+
   function pending() {
     return h('span', { class: 'tbd' }, 'Próximamente');
   }
@@ -248,8 +269,9 @@
     line.notes.forEach(function (code, j) {
       var note = C.notes.parse(code);
       var body = chip(code, { button: true, ref: { line: i, index: j } });
+      var reason = markOutOfRange(body, note);
       body.setAttribute('data-key', 'chip:' + i + ':' + j);
-      body.setAttribute('aria-label', tr('{note}. Colocar el cursor detrás', { note: C.notes.describe(note) }));
+      body.setAttribute('aria-label', tr('{note}. Colocar el cursor detrás', { note: C.notes.describe(note) }) + (reason ? '. ' + reason : ''));
       body.addEventListener('click', function () { C.editor.setCaret(i, j + 1, true); });
       notes.appendChild(h('span', { class: 'ec' },
         body,
@@ -293,8 +315,9 @@
 
   function paletteButton(code) {
     var button = chip(code, { button: true, text: true });
+    var reason = markOutOfRange(button, C.notes.parse(code));
     button.setAttribute('data-key', 'pal:' + code);
-    button.setAttribute('aria-label', tr('Añadir {note}', { note: C.notes.describe(C.notes.parse(code)) }));
+    button.setAttribute('aria-label', tr('Añadir {note}', { note: C.notes.describe(C.notes.parse(code)) }) + (reason ? '. ' + reason : ''));
     button.addEventListener('click', function () { C.editor.add(code); });
     return button;
   }
@@ -487,6 +510,18 @@
       })));
   }
 
+  // A line under the form when some notes cannot be played on the ocarina, with the way to fix it.
+  function rangeWarning(song) {
+    var count = outOfRangeCount(song);
+    if (!count) return null;
+    return h('div', { class: 'range-warning', role: 'status' },
+      C.icons.create('info'),
+      h('span', null, count === 1
+        ? tr('1 nota está fuera del rango de la ocarina ({range}) y no se podrá tocar.', { range: C.notes.rangeText() })
+        : tr('{n} notas están fuera del rango de la ocarina ({range}) y no se podrán tocar.', { n: count, range: C.notes.rangeText() })),
+      h('button', { type: 'button', class: 'btn btn--sm', onclick: function () { C.transpose.open(); } }, 'Transportar…'));
+  }
+
   function keyText(song) {
     return C.keys.describe(song.signature, song).text;
   }
@@ -546,8 +581,11 @@
       h('div', { class: 'meta-grid' }, C.categories.list.map(function (category) { return categoryField(song, category); })),
       tagsField(song),
       h('div', { class: 'edit-actions' },
+        h('button', { type: 'button', class: 'btn btn--sm', 'data-key': 'transpose', onclick: function () { C.transpose.open(); },
+          title: 'Subir o bajar toda la canción, para adaptarla a tu ocarina' }, C.icons.create('arrow-up'), 'Transportar…'),
         h('button', { type: 'button', class: 'btn btn--danger btn--sm', 'data-key': 'delsong', onclick: function () { C.editor.removeSong(); } },
           C.icons.create('trash'), C.editor.isNewDraft() ? 'Descartar' : 'Borrar canción')),
+      rangeWarning(song),
       C.player.view(song),
       h('div', { class: 'elines' }, song.lines.map(function (line, i) { return editLine(song, line, i); })),
       inlineDock(song));
@@ -682,7 +720,7 @@
           ];
         }
         if (state.folder.status === 'readonly') return [h('p', null, 'Todavía no hay canciones publicadas.')];
-        return [h('p', null, 'La carpeta no tiene canciones todavía. Crea la primera.'), C.home.newSongButton()];
+        return [h('p', null, 'La carpeta no tiene canciones todavía. Crea la primera.'), h('div', { class: 'add-row' }, C.home.newSongButton(), C.home.importButton())];
       default:
         return null;                        // still checking
     }
@@ -744,5 +782,5 @@
     window.addEventListener('resize', syncDockHeight);
   }
 
-  C.render = { init: init, placeCaret: placeCaret };
+  C.render = { init: init, placeCaret: placeCaret, chip: chip };
 })(window.Songbook = window.Songbook || {});

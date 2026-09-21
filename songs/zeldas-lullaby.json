@@ -4,9 +4,9 @@
   "meter": "3/4",
   "bpm": 100,
   "signature": "flat",
-  "difficulty": "",
+  "difficulty": "facil",
   "origin": "videojuegos",
-  "status": "",
+  "status": "por-aprender",
   "tags": ["zelda"],
   "lines": [
     { "subtitle": "Parte 1", "notes": ["Mi", "Sol", "Re"] },

@@ -1,0 +1,22 @@
+{
+  "id": "ragnarok-title",
+  "title": "Ragnarok Title",
+  "meter": "4/4",
+  "bpm": 94,
+  "signature": "sharp",
+  "difficulty": "media",
+  "origin": "videojuegos",
+  "status": "por-aprender",
+  "tags": [],
+  "lines": [
+    { "subtitle": "", "notes": ["R:h.", "Do#:s", "Mi:s", "Sol#:s", "Do#^:s", "Re#^:h", "Mi^:h"] },
+    { "subtitle": "", "notes": ["Re#^", "Do#^", "Do^:s", "Sol#:s", "Mi:s", "Do#:s", "Do#:s", "Mi:s", "Sol#:s", "Do#^:s", "Re#^:h", "Mi^:h"] },
+    { "subtitle": "", "notes": ["Re#^", "Do#^:h", "Do#^:s", "Mi:s", "La:s", "Do#^:s", "Do^:w"] },
+    { "subtitle": "", "notes": ["Do#^:h", "La#:q.", "Sol:e", "Sol#:h.", "Sol#:s", "La#:s", "Do^:s", "Do#^:s"] },
+    { "subtitle": "", "notes": ["Do^:h.", "Do#:s", "Mi:s", "Sol#:s", "Do#^:s", "Re#^:h", "Mi^:h"] },
+    { "subtitle": "", "notes": ["Re#^", "Do#^:h", "Do#:s", "Mi:s", "La:s", "Do#^:s", "Re#^:h", "Mi^:q.", "La^:e"] },
+    { "subtitle": "", "notes": ["Re#^", "Do#^:h.", "Do^:w"] },
+    { "subtitle": "", "notes": ["Do#^:h", "La#:q.", "Do^:e", "Do#^:h.", "Re#^:e", "Re^:s", "Do#^:s"] },
+    { "subtitle": "", "notes": ["Do^:w"] }
+  ]
+}

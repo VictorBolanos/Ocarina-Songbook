@@ -4,9 +4,9 @@
   "meter": "",
   "bpm": 100,
   "signature": "sharp",
-  "difficulty": "",
+  "difficulty": "media",
   "origin": "cine",
-  "status": "",
+  "status": "por-aprender",
   "tags": ["señor de los anillos"],
   "lines": [
     { "subtitle": "Línea 1", "notes": ["La", "Sol:q.", "La:e", "La#:e", "La:e", "Sol:e", "Fa", "Sol", "Mi:h", "R"] },

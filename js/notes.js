@@ -131,6 +131,16 @@
     'b': [['Do', ''], ['Re', 'b'], ['Re', ''], ['Mi', 'b'], ['Mi', ''], ['Fa', ''], ['Sol', 'b'], ['Sol', ''], ['La', 'b'], ['La', ''], ['Si', 'b'], ['Si', '']]
   };
 
+  // The stored text of the note at a MIDI number, spelled with sharps ('#') or flats ('b'), or null when the
+  // page cannot write it (it has the octaves from C4 to B6, see WRITABLE).
+  function fromMidi(number, accidental) {
+    if (number < WRITABLE.low || number > WRITABLE.high) return null;
+    var shift = number - MIDI_MIDDLE_DO;
+    var octave = OCTAVE_ORDER[Math.floor(shift / 12) + 1];
+    var pair = SPELLING[accidental === 'b' ? 'b' : '#'][((shift % 12) + 12) % 12];
+    return build(pair[0], pair[1], octave);
+  }
+
   // The same sound written with the other kind of accidental: respell('Reb:h', '#') -> 'Do#:h',
   // respell('Mi#', 'b') -> 'Fa', respell('Dob', '#') -> 'Si_' (Do flat sounds as the Si below).
   // Rests, naturals and notes that already use `accidental` come back as they were, and so does a note
@@ -148,6 +158,25 @@
     note.octave = octave;
     return format(note);
   }
+
+  // What the 12-hole ocarina can play: A4 (MIDI 69) up to F6 (MIDI 89). The page also has notes below and
+  // above that (its octaves go from C4 to B6), which the instrument cannot sound.
+  var RANGE = { low: 69, high: 89 };
+
+  // False for a pitched note the ocarina cannot play. A rest is never out of range.
+  function inRange(note) {
+    if (note.rest) return true;
+    var m = midi(note);
+    return m >= RANGE.low && m <= RANGE.high;
+  }
+
+  // "La, – Fa'" (or "A, – F'"): the ocarina's range, as the page writes notes.
+  function rangeText() {
+    return C.i18n.noteName('La') + DISPLAY_MARK.low + ' – ' + C.i18n.noteName('Fa') + DISPLAY_MARK.high;
+  }
+
+  // The lowest and highest notes the page can write (C4 and B6), as MIDI numbers.
+  var WRITABLE = { low: 60, high: 95 };
 
   function frequency(midiNumber) {
     return 440 * Math.pow(2, (midiNumber - 69) / 12);
@@ -218,6 +247,11 @@
     beats: beats,
     badge: badge,
     midi: midi,
+    fromMidi: fromMidi,
+    RANGE: RANGE,
+    WRITABLE: WRITABLE,
+    inRange: inRange,
+    rangeText: rangeText,
     frequency: frequency,
     describe: describe,
     fingeringName: fingeringName,

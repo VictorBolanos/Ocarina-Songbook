@@ -152,6 +152,17 @@
     }, C.icons.create('plus'), 'Nueva canción');
   }
 
+  // Next to it: make a song from a MIDI file.
+  function importButton() {
+    return h('button', {
+      type: 'button',
+      class: 'add-song add-song--import no-print',
+      'data-key': 'import-midi',
+      title: 'Crear una canción a partir de un archivo MIDI o de audio',
+      onclick: function () { C.midiImport.choose(); }
+    }, C.icons.create('open'), 'Importar archivo');
+  }
+
   // ---- Home view --------------------------------------------------------------------------------
   function select(label, key, value, options, onchange) {
     var control = h('select', {
@@ -236,7 +247,7 @@
         h('div', { class: 'filters-foot' }, results, h('div', { class: 'filters-actions' }, clear, sort)));
     return h('div', { class: 'home' },
       panel,
-      C.store.canEdit() ? newSongButton() : null,
+      C.store.canEdit() ? h('div', { class: 'add-row no-print' }, newSongButton(), importButton()) : null,
       list);
   }
 
@@ -252,5 +263,5 @@
     });
   }
 
-  C.home = { view: view, chips: chips, newSongButton: newSongButton, init: init };
+  C.home = { view: view, chips: chips, newSongButton: newSongButton, importButton: importButton, init: init };
 })(window.Songbook = window.Songbook || {});
