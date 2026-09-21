@@ -354,8 +354,7 @@
   }
 
   // ---- Note values -----------------------------------------------------------------------------------
-  // The note just before the caret is the "selected" one: the duration buttons show and change its value,
-  // and new notes get the value the buttons show. With the caret at the start of a line it is the default.
+  // The note just before the caret is the "selected" one (the others keys change it: sharp, flat, octave).
   function selectedNote() {
     var target = song();
     if (!target) return null;
@@ -363,16 +362,24 @@
     return line && state.caret.pos > 0 ? line.notes[state.caret.pos - 1] : null;
   }
 
+  // The note the user picked (clicked, or moved onto with the arrow keys) is the one the duration buttons
+  // show and change. Otherwise they are for the next note: it is a quarter note unless a value was chosen
+  // for it, and it goes back to a quarter note once it is placed.
+  function pickedNote() {
+    var pick = state.selection;
+    var caret = state.caret;
+    return pick && pick.line === caret.line && pick.index === caret.pos - 1 ? selectedNote() : null;
+  }
+
   function currentDuration() {
-    var code = selectedNote();
+    var code = pickedNote();
     var note = code ? C.notes.parse(code) : null;
     return note ? { key: note.duration, dotted: note.dotted } : state.duration;
   }
 
   function applyDuration(key, dotted) {
-    state.duration = { key: key, dotted: dotted };
     var target = song();
-    if (target && selectedNote()) {
+    if (target && pickedNote()) {
       var caret = state.caret;
       var picked = state.selection;
       store.mutate(function () {
@@ -381,6 +388,7 @@
       }, ['dur:' + key]);
       state.selection = picked;
     } else {
+      state.duration = { key: key, dotted: dotted };
       store.notify(['dur:' + key]);
     }
   }
@@ -464,7 +472,8 @@
 
   function add(code) {
     if (!song()) return;
-    var value = currentDuration();
+    var value = state.duration;
+    state.duration = { key: 'q', dotted: false };
     store.mutate(function () {
       var caret = state.caret;
       song().lines[caret.line].notes.splice(caret.pos, 0, C.notes.withDuration(code, value.key, value.dotted));

@@ -9,10 +9,24 @@
   "status": "aprendiendo",
   "tags": ["zelda"],
   "lines": [
-    { "subtitle": "Parte 1", "notes": ["Mi", "Sol", "Re"] },
-    { "subtitle": "", "notes": ["Do:q.", "Re", "Mi"] },
+    { "subtitle": "Parte 1", "notes": ["Mi:q.", "Sol", "Re:q."] },
+    { "subtitle": "", "notes": ["Do:q.", "Re", "Mi:h"] },
     { "subtitle": "", "notes": ["Sol", "Re:q."] },
-    { "subtitle": "", "notes": ["Mi", "Sol", "Re^:h", "Do^", "Sol"] },
+    { "subtitle": "", "notes": ["Mi:e", "Sol:e", "Re^:h", "Do^", "Sol:q."] },
+    { "subtitle": "", "notes": ["Fa:e", "Mi:e", "Re:h", "R"] },
+    { "subtitle": "Parte 2", "notes": ["Sol:q.", "Fa:e", "Mi:e", "Fa:e", "Mi:e", "Do:q."] },
+    { "subtitle": "", "notes": ["Fa:q.", "Mi:e", "Re:e", "Mi:e", "Re:e", "La_:q."] },
+    { "subtitle": "", "notes": ["Sol:q.", "Fa:e", "Mi:e", "Fa:e", "Mi:e", "Re:q."] },
+    { "subtitle": "", "notes": ["Sol", "Re^:w"] },
+    { "subtitle": "", "notes": ["Mi:h", "Sol", "Re:q."] },
+    { "subtitle": "", "notes": ["Do:e", "Re:e", "Mi:h", "Sol", "Re:h"] },
+    { "subtitle": "", "notes": ["Mi:h", "Sol", "Re^:q."] },
+    { "subtitle": "", "notes": ["Do^", "Sol:q."] },
+    { "subtitle": "", "notes": ["Fa:e", "Mi:e", "Re:h"] },
+    { "subtitle": "", "notes": ["Mi:h", "Sol", "Re:q."] },
+    { "subtitle": "", "notes": ["Do:e", "Re:e", "Mi:h", "Sol", "Re:h"] },
+    { "subtitle": "", "notes": ["Mi:h", "Sol", "Re^:q."] },
+    { "subtitle": "", "notes": ["Do^", "Sol:q."] },
     { "subtitle": "", "notes": ["Fa:e", "Mi:e", "Re:h"] }
   ]
 }

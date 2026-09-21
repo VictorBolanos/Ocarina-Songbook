@@ -32,7 +32,7 @@
     saved: true,                   // false when the last write to the folder failed
     saveError: '',                 // why, in words for the user
     route: { name: 'home', id: null },   // home = the song list, song = one open song (router.js)
-    duration: { key: 'q', dotted: false },   // note value used for new notes when nothing is selected
+    duration: { key: 'q', dotted: false },   // note value of the next new note (a quarter note again once it is placed)
     selectKey: null,               // data-key of a field whose text should be selected once rendered
     folder: { status: 'checking', name: '' }   // checking | unsupported | disconnected | needs-permission | readonly | connected
   };

@@ -451,7 +451,7 @@ What happens next:
 5. Press "Done" to save; "Cancel" or Esc to discard
 ```
 
-Every note has a **duration**: the *Duration* row shows the value of the selected note (the one before the caret) and changes it; new notes take the value shown. *Dot* lengthens a note by half, and *Rest* adds a rest.
+Every note has a **duration**. New notes are quarter notes: pick another value in the *Duration* row (or press its key) before adding a note and that note takes it, then the row goes back to a quarter note for the next one. To change a note that is already there, click it (or move onto it with the arrow keys): the row then shows its value and changes it. *Dot* lengthens a note by half, and *Rest* adds a rest.
 
 **Duplicate** (on a song's page and on its card) opens a copy called “Title (variant)” in the editor. Like any new song, it is only saved when you press **Done**.
 
