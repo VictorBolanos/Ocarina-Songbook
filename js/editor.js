@@ -478,6 +478,9 @@
       var caret = state.caret;
       song().lines[caret.line].notes.splice(caret.pos, 0, C.notes.withDuration(code, value.key, value.dotted));
       state.caret = { line: caret.line, pos: caret.pos + 1 };
+      // The note just placed is "picked" too, like clicking it: its duration can be changed right away,
+      // with no need to move off it and back (it also matches the highlight placeCaret() already gives it).
+      state.selection = { line: caret.line, index: caret.pos };
     });
   }
 

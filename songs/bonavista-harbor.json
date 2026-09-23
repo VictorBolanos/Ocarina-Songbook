@@ -1,14 +1,17 @@
 {
   "id": "bonavista-harbor",
   "title": "Bonavista Harbor",
-  "meter": "",
+  "meter": "6/8",
   "bpm": 100,
   "signature": "sharp",
-  "difficulty": "",
+  "difficulty": "facil",
   "origin": "tradicional",
-  "status": "",
+  "status": "aprendiendo",
   "tags": ["folk"],
   "lines": [
-    { "subtitle": "", "notes": ["Re"] }
+    { "subtitle": "", "notes": ["Do", "Mi:e", "Sol", "Sol:e", "Sol:e", "La:e", "Sol:e", "Mi"] },
+    { "subtitle": "", "notes": ["Do:e", "Do", "Fa:e", "La", "La:e", "La:e", "Si:e", "Do^:e", "Sol"] },
+    { "subtitle": "", "notes": ["Do", "Mi:e", "Sol", "Sol:e", "Sol:e", "La:e", "Sol:e", "Mi"] },
+    { "subtitle": "", "notes": ["Do:e", "Do^", "La:e", "Sol", "Mi:e", "Re:e", "Mi:e", "Re:e", "Do:h"] }
   ]
 }

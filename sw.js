@@ -12,7 +12,7 @@
 // between the markers below; do not edit them by hand.
 
 /* BEGIN GENERATED */
-const VERSION = '5e40ccb6';
+const VERSION = 'd76f7adb';
 const PRECACHE = [
   "./",
   "css/styles.css?v=8f48bf3a",
@@ -23,7 +23,7 @@ const PRECACHE = [
   "js/background.js?v=1efc275c",
   "js/backup.js?v=002a093d",
   "js/categories.js?v=e4b6179c",
-  "js/editor.js?v=aae294b7",
+  "js/editor.js?v=88caed87",
   "js/export.js?v=bba5ee3e",
   "js/fingering-editor.js?v=07fadadf",
   "js/fingering-page.js?v=284f0e43",

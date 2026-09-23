@@ -2,7 +2,7 @@
   "id": "cancion-del-tiempo",
   "title": "Song of time",
   "meter": "",
-  "bpm": 100,
+  "bpm": 110,
   "signature": "none",
   "difficulty": "facil",
   "origin": "videojuegos",
@@ -11,8 +11,8 @@
   "lines": [
     { "subtitle": "", "notes": ["La", "Re:q."] },
     { "subtitle": "", "notes": ["Fa", "La", "Re:q."] },
-    { "subtitle": "", "notes": ["Fa", "La", "Do^:e", "Si:e", "Sol:e", "Fa:q."] },
-    { "subtitle": "", "notes": ["Sol", "La", "Re"] },
-    { "subtitle": "", "notes": ["Do", "Mi", "Re:q."] }
+    { "subtitle": "", "notes": ["Fa", "La", "Do^:e", "Si:e", "Sol:e", "Fa"] },
+    { "subtitle": "", "notes": ["Sol", "La", "Re:q."] },
+    { "subtitle": "", "notes": ["Do", "Mi", "Re:h"] }
   ]
 }

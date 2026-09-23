@@ -1,0 +1,21 @@
+{
+  "id": "auld-lang-syne",
+  "title": "Auld Lang Syne",
+  "meter": "",
+  "bpm": 100,
+  "signature": "none",
+  "difficulty": "media",
+  "origin": "tradicional",
+  "status": "por-aprender",
+  "tags": [],
+  "lines": [
+    { "subtitle": "", "notes": ["Do", "Fa:q.", "Fa:e", "Fa", "La", "Sol:q.", "Fa:e"] },
+    { "subtitle": "", "notes": ["Sol", "La", "Fa:q.", "Fa:e", "La", "Do^"] },
+    { "subtitle": "", "notes": ["Re^", "Re^:h.", "Do^:q.", "La:e", "La", "Fa"] },
+    { "subtitle": "", "notes": ["Sol:q.", "Fa:e", "Sol", "La", "Fa:q.", "Re:e", "Re", "Do"] },
+    { "subtitle": "", "notes": ["Fa:h.", "Re^", "Do^:q.", "La:e", "La", "Fa"] },
+    { "subtitle": "", "notes": ["Sol:q.", "Fa:e", "Sol", "Re^", "Do^:q.", "La:e", "La", "Do^"] },
+    { "subtitle": "", "notes": ["Re^:h.", "Fa^", "Do^:q.", "La:e", "La", "Fa", "Sol:q.", "Fa:e"] },
+    { "subtitle": "", "notes": ["Sol", "La", "Fa:q.", "Re:e", "Re", "Do", "Fa:q."] }
+  ]
+}
