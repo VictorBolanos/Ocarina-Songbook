@@ -466,9 +466,19 @@
       content = h('button', { type: 'button', class: 'btn folder-btn', onclick: connect }, C.icons.create('open'), 'Conectar carpeta');
     } else if (status === 'needs-permission') {
       content = h('button', { type: 'button', class: 'btn folder-btn is-alert', onclick: reconnect }, C.icons.create('open'), 'Reconectar carpeta');
-    } else if (status === 'readonly') {
+    } else if (status === 'readonly' || status === 'unsupported') {
+      // Editing needs the File System Access API: Chrome, Edge or similar on a computer, or Chrome / Samsung
+      // Internet on Android - not Safari, not Firefox, not an iPhone or iPad at all. Without it there is no
+      // "Conectar carpeta" button to explain it, so the pill itself opens a toast that says why: a title
+      // (hover) tooltip alone would never be seen on a touchscreen, where this matters most.
+      const why = 'Este navegador no permite conectar una carpeta para editar. Hace falta Chrome, Edge o similar en un ordenador, o Chrome / Samsung Internet en Android (no funciona en iPhone, iPad ni Firefox).';
       content = h('span', { class: 'folder-readonly' },
-        h('span', { class: 'folder-pill is-readonly', title: 'Estás viendo las canciones publicadas: no se pueden editar desde aquí.' }, 'Solo lectura'),
+        supported()
+          ? h('span', { class: 'folder-pill is-readonly', title: 'Estás viendo las canciones publicadas: no se pueden editar desde aquí.' }, 'Solo lectura')
+          : h('button', {
+            type: 'button', class: 'folder-pill is-readonly', title: why,
+            onclick: () => C.ui.toast(why, null, 12000)
+          }, 'Solo lectura'),
         pending
           ? h('button', { type: 'button', class: 'btn folder-btn is-alert', onclick: reconnect }, C.icons.create('open'), 'Reconectar carpeta')
           : (supported() ? h('button', { type: 'button', class: 'btn folder-btn', onclick: connect }, C.icons.create('open'), 'Conectar carpeta') : null));

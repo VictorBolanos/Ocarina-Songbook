@@ -1371,6 +1371,8 @@ input[type="range"]:disabled{ opacity: .45; cursor: default; }
 
 .folder-readonly{ display: inline-flex; align-items: center; gap: .5rem; }
 .folder-pill.is-readonly{ cursor: default; color: var(--accent); border-color: var(--accent); font-weight: 700; }
+/* Only when it is a real button (the browser can't edit at all, see js/folder.js): tap it to see why. */
+button.folder-pill.is-readonly{ cursor: pointer; }
 
 /* The metronome button and its play / stop button, joined. */
 .metro-split{ display: inline-flex; }

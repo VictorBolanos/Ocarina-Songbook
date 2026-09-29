@@ -525,6 +525,8 @@
     'Canciones actualizadas desde la carpeta.': 'Songs updated from the folder.',
     'Conectar carpeta': 'Connect folder',
     'Estás viendo las canciones publicadas: no se pueden editar desde aquí.': 'You are viewing the published songs: they cannot be edited from here.',
+    'Este navegador no permite conectar una carpeta para editar. Hace falta Chrome, Edge o similar en un ordenador, o Chrome / Samsung Internet en Android (no funciona en iPhone, iPad ni Firefox).':
+      'This browser cannot connect a folder to edit. You need Chrome, Edge or similar on a computer, or Chrome / Samsung Internet on Android (it does not work on iPhone, iPad or Firefox).',
     'Solo lectura': 'Read-only',
     'Las canciones se guardan como archivos .json en esta carpeta. Pulsa para elegir otra.': 'Songs are saved as .json files in this folder. Click to pick another one.',
     'Las canciones son archivos .json de la carpeta songs. Conéctala para verlas y editarlas.': 'Songs are .json files in the songs folder. Connect it to see and edit them.',
