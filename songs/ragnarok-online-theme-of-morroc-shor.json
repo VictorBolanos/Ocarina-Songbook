@@ -1,0 +1,24 @@
+{
+  "id": "ragnarok-online-theme-of-morroc-shor",
+  "title": "Ragnarok Online - Theme of Morroc Short",
+  "meter": "4/4",
+  "bpm": 116,
+  "signature": "sharp",
+  "difficulty": "dificil",
+  "origin": "videojuegos",
+  "status": "por-aprender",
+  "tags": ["ragnarok online"],
+  "lines": [
+    { "subtitle": "B", "notes": ["Do^:e", "Do^:e.", "Si:e.", "La:e", "La", "R"] },
+    { "subtitle": "B", "notes": ["La:e.", "Si:e.", "La:e", "Si:e.", "La:e.", "Si:e", "La:q.", "Sol#:e.", "R:e"] },
+    { "subtitle": "B", "notes": ["Si_:e", "Si:s", "Si:s", "Si:e.", "La:e.", "Sol#:e", "Sol#:e."] },
+    { "subtitle": "A", "notes": ["Mi^:e.", "Fa^:e", "Fa^:e.", "Mi^:e.", "Re^:e"] },
+    { "subtitle": "B", "notes": ["Sol#:e.", "Fa:e.", "Mi:e", "Mi:e.", "Re:e.", "Do:s", "Re:s", "La_"] },
+    { "subtitle": "A", "notes": ["Si_", "La_:s", "Si_:s", "Do:e.", "Re:e.", "Mi:e", "Mi:h"] },
+    { "subtitle": "B", "notes": ["La_", "Si_"] },
+    { "subtitle": "A", "notes": ["Mi:e", "La#:e.", "La#:e.", "La#:e", "La#:e.", "La:e.", "La:e", "La:e.", "Sol:e.", "Sol:e", "Sol:e.", "Fa:e.", "Mi:s", "La:q."] },
+    { "subtitle": "B", "notes": ["La_:e", "La_:e"] },
+    { "subtitle": "B", "notes": ["La_:e", "Fa:e", "Sol", "La", "Si:e.", "Si:e.", "Si:e"] },
+    { "subtitle": "A", "notes": ["Si:e.", "La:e.", "La:e", "La:e.", "Sol:e.", "Sol:e", "Sol:e.", "Fa:e.", "Re#:e", "Mi:h"] }
+  ]
+}
