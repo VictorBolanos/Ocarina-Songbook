@@ -116,6 +116,49 @@
     group.addEventListener('change', function (e) {
       setView(e.target.value);
       write('ocarina-view', e.target.value);
+      // Normally nothing needs to be redrawn (see above), but the live score (further down this file) is a
+      // picture baked for one specific view, so with it showing this change has to reach it.
+      if (scoreOn) C.store.notify();
+    });
+  }
+
+  // Which instrument's fingerings the notes/fingering switch draws under the notes (the same choice as on
+  // the fingerings page, js/fingering-page.js: there is only one, kept between the two). Unlike the switch
+  // itself this needs a redraw, since it changes which <symbol> each chip's <use> points at.
+  function initInstrument() {
+    var select = document.getElementById('instrument-input');
+    if (!select) return;
+    select.replaceChildren.apply(select, C.fingering.INSTRUMENT_ORDER.map(function (id) {
+      var option = document.createElement('option');
+      option.value = id;
+      option.textContent = C.fingering.instrument(id).name;
+      return option;
+    }));
+    select.value = C.fingering.selected();
+
+    select.addEventListener('change', function () {
+      C.fingering.select(select.value);
+      C.store.notify();
+    });
+    // Stays in sync with the same picker on the fingerings page (js/fingering-page.js): this element is
+    // part of the page shell, so a redraw of the songs/fingerings area does not touch it by itself.
+    C.store.subscribe(function () { select.value = C.fingering.selected(); });
+  }
+
+  // The "Partitura" switch: not a fourth view, but a check that combines with any of the three. On, the
+  // engraved score (js/score-image.js, the same drawing the PNG export uses) is shown above the notes,
+  // still drawn with names, fingering diagrams or both underneath, following the very same choice.
+  var scoreOn = false;
+
+  function initScore() {
+    var checkbox = document.getElementById('score-input');
+    if (!checkbox) return;
+    scoreOn = read('ocarina-score') === '1';
+    checkbox.checked = scoreOn;
+    checkbox.addEventListener('change', function () {
+      scoreOn = checkbox.checked;
+      write('ocarina-score', scoreOn ? '1' : '0');
+      C.store.notify();
     });
   }
 
@@ -143,11 +186,13 @@
   function init() {
     migrate();
     initView();
+    initInstrument();
+    initScore();
     initSize();
     initPicker('theme', 'data-theme', 'ocarina-theme', COLORS, 'canela');
     initPicker('font', 'data-font', 'ocarina-font', FONTS, 'clasica');
     initMode();
   }
 
-  C.preferences = { init: init };
+  C.preferences = { init: init, scoreOn: function () { return scoreOn; } };
 })(window.Songbook = window.Songbook || {});

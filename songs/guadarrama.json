@@ -1,0 +1,15 @@
+{
+  "id": "guadarrama",
+  "title": "Guadarrama",
+  "meter": "3/4",
+  "bpm": 100,
+  "signature": "none",
+  "difficulty": "facil",
+  "origin": "otras",
+  "status": "aprendiendo",
+  "tags": ["personalizada"],
+  "lines": [
+    { "subtitle": "", "notes": ["Do:e", "Si", "La:s", "Sol:e", "Fa"] },
+    { "subtitle": "", "notes": ["Mi:e", "Fa", "Sol:s", "Fa:e", "Mi"] }
+  ]
+}

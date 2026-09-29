@@ -15,12 +15,14 @@
       return;
     }
     var today = new Date().toISOString().slice(0, 10);
+    var fingerings = {};
+    C.fingering.INSTRUMENT_ORDER.forEach(function (id) { fingerings[id] = C.fingering.overrides(id); });
     var data = {
       format: FORMAT,
       version: 1,
       exported: new Date().toISOString(),
       songs: store.state.songs,
-      fingerings: C.fingering.overrides()
+      fingerings: fingerings
     };
     var link = h('a', {
       href: URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })),
@@ -37,8 +39,14 @@
     return JSON.stringify(a) === JSON.stringify(b);
   }
 
+  // Every note across every instrument's map: { oc12: {...}, oc6: {...} } -> a count.
+  function totalNotes(fingerings) {
+    return C.fingering.INSTRUMENT_ORDER.reduce(function (n, id) { return n + Object.keys(fingerings[id] || {}).length; }, 0);
+  }
+
   // Adds the songs of a backup (a song that already exists as it is, is skipped; one with the same id but
-  // different content is added under another id) and lays the backup's fingerings over the current ones.
+  // different content is added under another id) and lays the backup's fingerings over the current ones,
+  // instrument by instrument.
   function apply(songs, fingerings) {
     var added = 0;
     var skipped = 0;
@@ -51,10 +59,13 @@
         added++;
       });
     });
-    var notes = Object.keys(fingerings).length;
+    var notes = totalNotes(fingerings);
     var finished = notes ? (function () {
-      var map = C.fingering.overrides();
-      Object.keys(fingerings).forEach(function (key) { map[key] = fingerings[key]; });
+      var map = {};
+      C.fingering.INSTRUMENT_ORDER.forEach(function (id) {
+        map[id] = C.fingering.overrides(id);
+        Object.keys(fingerings[id] || {}).forEach(function (key) { map[id][key] = fingerings[id][key]; });
+      });
       return C.folder.saveFingerings(map).then(function () {
         C.fingering.setCustom(map);
         store.notify();
@@ -80,8 +91,8 @@
         return;
       }
       var songs = store.sanitize(data.songs) || [];
-      var fingerings = C.fingering.sanitize(data.fingerings);
-      var count = Object.keys(fingerings).length;
+      var fingerings = C.fingering.sanitizeAll(data.fingerings);
+      var count = totalNotes(fingerings);
       C.ui.confirm({
         title: 'Importar la copia',
         text: tr('La copia tiene {songs}{fingerings}. Las canciones se añaden a las que ya tienes (si una ya existe con otro contenido, se guarda con otro nombre) y las digitaciones sustituyen a las de las mismas notas.', {

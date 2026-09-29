@@ -360,8 +360,12 @@
     highlight(current);
   }
 
+  // The note's own chip, or (with the "Partitura" switch hiding it in favour of the score image, see
+  // js/render.js) the whole line's picture instead: a line, not one note in it, but better than nothing.
   function elementFor(ref) {
-    return ref ? document.querySelector('[data-note="' + ref.line + ':' + ref.index + '"]') : null;
+    if (!ref) return null;
+    return document.querySelector('[data-note="' + ref.line + ':' + ref.index + '"]') ||
+      document.querySelector('[data-score-line="' + ref.line + '"]');
   }
 
   function highlight(ref) {

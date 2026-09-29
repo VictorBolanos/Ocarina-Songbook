@@ -77,15 +77,6 @@
     return DURATION_BY_KEY[note.duration].beats * (note.dotted ? 1.5 : 1);
   }
 
-  // Short text for the badge on a chip: the length in beats, nothing for a plain quarter note.
-  // Plain digits (1/2, not the single ½ character): those glyphs are too small to read on a badge.
-  var FRACTIONS = { 0.25: '1/4', 0.375: '3/8', 0.5: '1/2', 0.75: '3/4', 1.5: '1,5' };
-  function badge(note) {
-    var n = beats(note);
-    if (n === 1) return '';
-    return FRACTIONS[n] || String(n).replace('.', ',');
-  }
-
   // MIDI number of a pitched note (60 = C4), or null for a rest.
   function midi(note) {
     if (note.rest) return null;
@@ -198,20 +189,21 @@
     return ', ' + label + (note.dotted ? ' con puntillo' : '');
   }
 
-  // Name of the <symbol> that draws a note's fingering (see js/fingering.js): oc-do, oc-do-s (sharp),
-  // oc-re-f (flat), oc-high-do, ... Null for a rest.
-  function fingeringName(note) {
+  // Name of the <symbol> that draws a note's fingering (see js/fingering.js): oc12-do, oc12-do-s (sharp),
+  // oc6-re-f (flat), oc12-high-do, ... Null for a rest. `instrumentId` picks whose fingering (the 12-hole
+  // ocarina, songs' own instrument, if not given).
+  function fingeringName(note, instrumentId) {
     if (note.rest) return null;
-    var parts = ['oc'];
+    var parts = [instrumentId || 'oc12'];
     if (note.octave !== 'mid') parts.push(note.octave);
     parts.push(note.name.toLowerCase());
     if (note.accidental) parts.push(note.accidental === '#' ? 's' : 'f');
     return parts.join('-');
   }
 
-  // Id of the symbol to draw, or null when that note has no fingering yet.
-  function fingeringId(note) {
-    var id = fingeringName(note);
+  // Id of the symbol to draw, or null when that note has no fingering yet (for that instrument).
+  function fingeringId(note, instrumentId) {
+    var id = fingeringName(note, instrumentId);
     return id && document.getElementById(id) ? id : null;
   }
 
@@ -245,7 +237,6 @@
     NAMES: NAMES,
     withDuration: withDuration,
     beats: beats,
-    badge: badge,
     midi: midi,
     fromMidi: fromMidi,
     RANGE: RANGE,

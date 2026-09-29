@@ -249,12 +249,14 @@ The page works as an app you can put on your phone or computer, and keeps workin
 ### 🖐️ **Fingerings**
 > **Status:** ✅ **FULLY IMPLEMENTED**
 
-Fingering diagrams for the 12-hole ocarina, and a tool to draw the ones that are missing.
+Fingering diagrams for the 12-hole ocarina songs are written for, and a tool to draw the ones that are missing. The fingerings page and editor also know a 6-hole ocarina, for looking up or drawing its own chart; songs themselves are always written for the 12-hole one.
 
 **Key Features:**
-- 👁️ **Three views** - Note names, fingering diagrams, or both
+- 👁️ **Three views** - Note names, fingering diagrams, or both; an **Instrument** picker next to it chooses whose diagrams are drawn (the same choice as on the fingerings page)
+- 🎼 **Partitura** - A check next to the views, not a fourth one of its own: switch it on with any of the three and a small engraved staff (the same drawing the PNG export makes, one strip per line) appears right above that line's own notes, still showing names, diagrams or both underneath, following that same choice
 - 🔍 **Diagram size** - A slider next to the switch makes the diagrams in the songs bigger or smaller (60% to 200%); it is remembered by the browser
-- 📋 **Fingerings page** - Every note (three octaves, naturals, sharps and flats) with its diagram and whether it is finished
+- 📋 **Fingerings page** - Every note (three octaves, naturals, sharps and flats) with its diagram and whether it is finished, for the instrument you pick
+- 🎼 **More than one instrument** - A picker on the fingerings page and in the editor switches between the 12-hole and the 6-hole ocarina; each keeps its own fingerings
 - 🖱️ **Fingering editor** - Pick a note and click the holes that are covered, or covered only halfway (the *Half hole* switch), as many accidentals are played
 - ✅ **Finished switch** - Until a fingering is marked as finished, songs keep showing that note by its name
 
@@ -554,11 +556,11 @@ When you create a song you first choose which accidentals it uses: **none, flats
 
 The middle-octave notes come with their fingering diagram. Any other note (other octaves, sharps and flats) shows as a name chip until it has one.
 
-The **Fingerings** button in the top bar opens the fingerings page: every note with its diagram and whether it is finished, with a filter for the finished or the pending ones. With the songs folder connected each note has an **Edit** button that opens the fingering editor on it:
+The **Fingerings** button in the top bar opens the fingerings page: every note with its diagram and whether it is finished, with a filter for the finished or the pending ones, and an **Instrument** picker (the page only ever shows one instrument's fingerings at a time). With the songs folder connected each note has an **Edit** button that opens the fingering editor on it:
 
-1. Pick the **octave**, the **note** and the **accidental**.
+1. Pick the **instrument** (also in the editor, in case you open it straight from a note), the **octave**, the **note** and the **accidental**.
 2. The ocarina shows the fingering that note has now (all holes open if it has none).
-3. Click a hole to cover or uncover it (holes are numbered right to left, 1 to 12).
+3. Click a hole to cover or uncover it (holes are numbered right to left, 1 to 12 on the 12-hole ocarina, 1 to 6 on the 6-hole one).
 4. Switch **Half hole** on and click a hole to mark it covered only halfway (drawn half filled; a covered hole you click becomes halfway, and clicking with the switch off makes it covered again). Many accidentals are played by partly venting a hole, and this is how you record it.
 5. **Uncover all** opens every hole, **Copy from…** starts from another note's fingering, and **Remove fingering** removes yours.
 6. The **Fingering completed** switch says whether it is finished; until it is on, songs show that note by its name.
@@ -624,18 +626,21 @@ One file per song in `songs/`; the file name is the song id.
 
 Files can be edited by hand. Changes are picked up when you come back to the browser tab; unreadable files are skipped and never overwritten. Notes that are not valid (a typo like `Xx`) are left out of the page, and the page tells you which song has them, because they would be lost the next time that song is saved.
 
-**Other files in `songs/`**: `index.json` (the list of song files, kept up to date by the page) and `fingerings.json` (the fingerings you draw, one note per line):
+**Other files in `songs/`**: `index.json` (the list of song files, kept up to date by the page) and `fingerings.json` (the fingerings you draw, one section per instrument, one note per line):
 
 ```json
 {
   "fingerings": {
-    "Sol#^": { "holes": [7, 10, 11], "done": true },
-    "Do#": { "holes": [2, 3, 4, 5, 7, 8, 10, 11, 12], "half": [1], "done": false }
+    "oc12": {
+      "Sol#^": { "holes": [7, 10, 11], "done": true },
+      "Do#": { "holes": [2, 3, 4, 5, 7, 8, 10, 11, 12], "half": [1], "done": false }
+    },
+    "oc6": {}
   }
 }
 ```
 
-The key is the note without a duration, `holes` are the covered holes, `half` (optional) are the holes covered only halfway, and `done` says whether the fingering is finished.
+`oc12` and `oc6` are the instruments (see `INSTRUMENTS` in `js/fingering.js`); each holds its own notes. The key is the note without a duration, `holes` are the covered holes, `half` (optional) are the holes covered only halfway, and `done` says whether the fingering is finished. A file written before there was more than one instrument, with the notes straight under `"fingerings"` and no `"oc12"` / `"oc6"`, is still read fine: as the 12-hole ocarina's own notes.
 
 ### **Several windows, several tabs**
 
@@ -683,14 +688,15 @@ Ocarina-Songbook/
 │   └── app.js                # Start-up
 ├── 📁 songs/                 # Your songs: one JSON file each
 │   ├── index.json            # The list of songs (kept up to date)
-│   └── fingerings.json      # The fingerings you draw
+│   └── fingerings.json      # The fingerings you draw, one section per instrument
 ├── 📁 src/
-│   ├── img/                  # Logo and the ocarina picture
+│   ├── img/                  # Logo, app icons, and:
+│   │   └── digitation base/  #   the picture of every instrument's ocarina, for the fingering diagrams
 │   └── svg/                  # Source icons
 ├── 📁 bg/                    # Sample background pictures
 ├── 📁 tools/
 │   ├── build-icons.js        # src/svg → js/icons.js
-│   ├── build-images.js       # src/img/ocarina_base.png → js/ocarina-image.js
+│   ├── build-images.js       # the 12-hole ocarina's picture → js/ocarina-image.js
 │   ├── build-pwa-icons.py    # src/img/ocarina_title.png → the app icons (needs Pillow)
 │   └── stamp-version.js      # Cache-busting fingerprints in index.html, and the file list of sw.js
 ├── index.html                # The page shell
@@ -703,9 +709,10 @@ Ocarina-Songbook/
 
 - **Languages** - Every text is written in Spanish in the code and in `index.html`. The English versions are in the `EN` dictionary at the top of `js/i18n.js`, keyed by the Spanish text; a text that is missing there just stays in Spanish. Text with a variable part (a title, a number) is written as `t('… {name} …', { name })` so the variable is never translated. Anything inside an element marked `translate="no"` is left alone.
 - **Categories** - Add a category, or options to one, in `js/categories.js`. The editor, the list filters and the JSON files all follow it.
-- **Ocarina picture** - If you change `src/img/ocarina_base.png`, run `node tools/build-images.js` so the score image uses the new one, then `node tools/stamp-version.js`. (The picture is written into a script because a canvas that drew a file loaded from disk cannot be saved when the page itself is opened from disk.)
+- **Ocarina picture** - If you change the 12-hole ocarina's picture (`src/img/digitation base/ocarina_12_base.png`), run `node tools/build-images.js` so the score image uses the new one, then `node tools/stamp-version.js`. (The picture is written into a script because a canvas that drew a file loaded from disk cannot be saved when the page itself is opened from disk.) Another instrument's picture just replaces its file in `src/img/digitation base/` and needs no build step, since only the 12-hole ocarina's is ever drawn on a canvas.
+- **Instruments and their holes** - `INSTRUMENTS` in `js/fingering.js` lists the ocarinas the fingerings page and editor know: each one's picture, its holes (`cx`, `cy`, `r` in the picture's own pixels) and its built-in fingerings, if it has any. Songs are always written for the 12-hole ocarina; another instrument is only for looking up or drawing its own fingerings so far, see [Fingerings](#fingerings) below.
 - **App icons** - The icons of the installed app (`src/img/icon-*.png`, `apple-touch-icon.png`) are made from the logo, `src/img/ocarina_title.png`, with `python tools/build-pwa-icons.py`. The logo is 128 pixels wide, so the big sizes are enlarged from it; drop in a bigger logo and run the script again for sharper ones.
-- **Ocarina range** - The range the editor warns about (A4 to F6) is `RANGE` in `js/notes.js`.
+- **Ocarina range** - The range the editor warns about (A4 to F6) is `RANGE` in `js/notes.js`, for the 12-hole ocarina songs are written for.
 - **Icons** - Put SVGs in `src/svg/` and run `node tools/build-icons.js`, then `node tools/stamp-version.js`. Each icon is inlined with its colours replaced by `currentColor`, so it follows the theme.
 - **Ocarina pitches** - The page assumes the usual 12-hole alto C ocarina: `Do` (all ten finger holes closed, both small holes open) is C5, the middle octave is C5 to B5, `_` notes go down to A4 and B4, and `^` notes up to F6. To change the mapping, edit `OCTAVES` in `js/notes.js`.
 - **The voice** - An ocarina is a Helmholtz resonator: its tone is very close to a pure sine wave. The voice in `js/audio.js` is a near-sine wave table with a little breath noise, a soft attack, a slight pitch scoop, a gentle vibrato and a touch of room reverb. Every knob is in the `TIMBRE` object at the top of that file.

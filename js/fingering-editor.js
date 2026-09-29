@@ -1,10 +1,11 @@
 (function (C) {
   'use strict';
 
-  // The fingering editor: pick a note, then click the holes of the ocarina that are covered for it. With
+  // The fingering editor: pick an instrument and a note, then click the holes that are covered for it. With
   // "half hole" switched on, a click marks a hole covered halfway instead (drawn as a half-filled hole).
-  // Everything is edited on a copy; "Listo" writes songs/fingerings.json and redraws the page, "Cancelar"
-  // (or Esc) throws the changes away. A note with no fingering starts with every hole open.
+  // Everything is edited on a copy of every instrument's fingerings; "Listo" writes songs/fingerings.json
+  // and redraws the page, "Cancelar" (or Esc) throws the changes away. A note with no fingering starts with
+  // every hole open.
   var h = C.ui.h;
   var tr = C.i18n.t;
   var SVG_NS = 'http://www.w3.org/2000/svg';
@@ -20,10 +21,10 @@
     { key: 'b', label: 'Bemol ♭' }
   ];
 
-  var sel = { octave: 'mid', name: 'Do', accidental: '' };
-  var work = null;              // the copy being edited: key -> { holes, half, done }
+  var sel = { instrument: 'oc12', octave: 'mid', name: 'Do', accidental: '' };
+  var work = null;              // the copy being edited: instrument id -> key -> { holes, half, done }
   var halfMode = false;         // a click on a hole marks it halfway instead of covered
-  var original = '';            // JSON of the fingerings when the window was opened
+  var original = '';            // JSON of every instrument's fingerings when the window was opened
   var refs = null;
 
   function dialogEl() {
@@ -34,13 +35,17 @@
     return C.notes.build(sel.name, sel.accidental, sel.octave);
   }
 
+  function currentInstrument() {
+    return C.fingering.instrument(sel.instrument);
+  }
+
   function has(map, key) {
     return Object.prototype.hasOwnProperty.call(map, key);
   }
 
   // The fingering of `key` in the copy being edited ({ holes, done }): the user's, else the built-in one.
   function entryOf(key) {
-    return C.fingering.entryOf(key, work);
+    return C.fingering.entryOf(key, sel.instrument, work[sel.instrument]);
   }
 
   function holesOf(key) {
@@ -61,15 +66,22 @@
   // The entry to change for `key`: made from the built-in fingering if that is what it has, or empty (and
   // not done) for a note with none.
   function editable(key) {
-    if (!has(work, key)) {
+    var map = work[sel.instrument];
+    if (!has(map, key)) {
       var base = entryOf(key);
-      work[key] = { holes: base ? base.holes.slice() : [], half: base && base.half ? base.half.slice() : [], done: base ? base.done : false };
+      map[key] = { holes: base ? base.holes.slice() : [], half: base && base.half ? base.half.slice() : [], done: base ? base.done : false };
     }
-    return work[key];
+    return map[key];
+  }
+
+  function sanitizedWork() {
+    var clean = {};
+    C.fingering.INSTRUMENT_ORDER.forEach(function (id) { clean[id] = C.fingering.sanitize(work[id], id); });
+    return clean;
   }
 
   function isDirty() {
-    return JSON.stringify(C.fingering.sanitize(work)) !== original;
+    return JSON.stringify(sanitizedWork()) !== original;
   }
 
   function label(key) {
@@ -105,12 +117,13 @@
   }
 
   function board() {
-    var picture = svg('svg', { class: 'fp-ocarina', viewBox: '0 0 ' + C.fingering.BASE.width + ' ' + C.fingering.BASE.height, role: 'group', 'aria-label': 'Agujeros de la ocarina' });
-    var image = svg('image', { href: C.fingering.BASE.href, width: C.fingering.BASE.width, height: C.fingering.BASE.height });
+    var inst = currentInstrument();
+    var picture = svg('svg', { class: 'fp-ocarina', viewBox: '0 0 ' + inst.BASE.width + ' ' + inst.BASE.height, role: 'group', 'aria-label': 'Agujeros de la ocarina' });
+    var image = svg('image', { href: inst.BASE.href, width: inst.BASE.width, height: inst.BASE.height });
     image.setAttribute('style', 'filter: var(--oc-halo)');
     picture.appendChild(image);
     refs.holes = {};
-    C.fingering.HOLES.forEach(function (hole) {
+    inst.HOLES.forEach(function (hole) {
       var group = svg('g', { class: 'fp-hole', tabindex: '0', role: 'button', 'aria-label': tr('Agujero {n}', { n: hole.n }), 'data-hole': hole.n });
       var title = svg('title');
       title.textContent = tr('Agujero {n}', { n: hole.n });
@@ -152,7 +165,7 @@
     var entry = entryOf(key);
     if (!entry) return 'Sin digitación todavía: todos los agujeros destapados';
     if (!entry.done) return 'En progreso: las canciones muestran el nombre de esta nota';
-    if (has(work, key)) return C.fingering.DEFAULTS[key] ? 'Digitación propia (cambia la de fábrica)' : 'Digitación propia';
+    if (has(work[sel.instrument], key)) return currentInstrument().DEFAULTS[key] ? 'Digitación propia (cambia la de fábrica)' : 'Digitación propia';
     return 'Digitación de fábrica';
   }
 
@@ -161,6 +174,7 @@
     var key = currentKey();
     var holes = holesOf(key) || [];
     var halves = halfOf(key);
+    pressAll(refs.instruments, sel.instrument);
     pressAll(refs.octaves, sel.octave);
     pressAll(refs.names, sel.name);
     pressAll(refs.accidentals, sel.accidental);
@@ -183,12 +197,12 @@
     refs.count.textContent = (holes.length === 1 ? tr('1 agujero tapado') : tr('{n} agujeros tapados', { n: holes.length })) +
       (halves.length ? ' · ' + (halves.length === 1 ? tr('1 a medias') : tr('{n} a medias', { n: halves.length })) : '');
     refs.finished.checked = isDone(key);
-    refs.remove.disabled = !has(work, key);
-    refs.remove.textContent = C.fingering.DEFAULTS[key] ? 'Volver a la de fábrica' : 'Quitar digitación';
+    refs.remove.disabled = !has(work[sel.instrument], key);
+    refs.remove.textContent = currentInstrument().DEFAULTS[key] ? 'Volver a la de fábrica' : 'Quitar digitación';
     refs.clear.disabled = holes.length === 0 && halves.length === 0;
     refs.half.checked = halfMode;
 
-    var options = C.fingering.allKeys(work).filter(function (k) { return k !== key && entryOf(k); });
+    var options = C.fingering.allKeys(sel.instrument, work[sel.instrument]).filter(function (k) { return k !== key && entryOf(k); });
     refs.copy.replaceChildren.apply(refs.copy, [h('option', { value: '' }, 'Copiar de…')].concat(options.map(function (k) {
       return h('option', { value: k }, label(k));
     })));
@@ -201,9 +215,19 @@
     sync();
   }
 
+  // Switching instrument changes the holes on screen, so the board (and everything else) is rebuilt.
+  function pickInstrument(id) {
+    sel.instrument = id;
+    C.fingering.select(id);
+    build(dialogEl());
+  }
+
   // ---- The window -------------------------------------------------------------------------------------------
   function build(dialog) {
     refs = {};
+    refs.instruments = choice(C.fingering.INSTRUMENT_ORDER.map(function (id) {
+      return { key: id, label: C.fingering.instrument(id).name };
+    }), function () { return sel.instrument; }, pickInstrument);
     refs.octaves = choice(OCTAVES.map(function (o) { return { key: o.key, label: C.i18n.octave(o.key) }; }), function () { return sel.octave; }, function (v) { pick('octave', v); });
     refs.names = choice(C.notes.NAMES.map(function (n) { return { key: n, label: C.i18n.noteName(n) }; }), function () { return sel.name; }, function (v) { pick('name', v); });
     refs.accidentals = choice(ACCIDENTALS, function () { return sel.accidental; }, function (v) { pick('accidental', v); });
@@ -223,7 +247,7 @@
     }, 'Destapar todos');
     refs.remove = h('button', {
       type: 'button', class: 'btn btn--sm btn--danger',
-      onclick: function () { delete work[currentKey()]; sync(); }
+      onclick: function () { delete work[sel.instrument][currentKey()]; sync(); }
     });
     refs.copy = h('select', { class: 'input input--mini', 'aria-label': 'Copiar la digitación de otra nota' });
     refs.copy.addEventListener('change', function () {
@@ -240,9 +264,10 @@
 
     dialog.replaceChildren(h('form', { method: 'dialog', onsubmit: function (e) { e.preventDefault(); } },
       h('h2', null, 'Digitaciones'),
-      h('p', { class: 'fp-help' }, 'Elige una nota y pulsa los agujeros que se tapan. Los agujeros sin marcar están destapados. Con «Medio agujero» activado, pulsar un agujero lo marca tapado solo a medias.'),
+      h('p', { class: 'fp-help' }, 'Elige un instrumento y una nota, y pulsa los agujeros que se tapan. Los agujeros sin marcar están destapados. Con «Medio agujero» activado, pulsar un agujero lo marca tapado solo a medias.'),
       h('div', { class: 'fp-body' },
         h('div', { class: 'fp-side' },
+          h('div', { class: 'field' }, 'Instrumento', refs.instruments),
           h('div', { class: 'field' }, 'Octava', refs.octaves),
           h('div', { class: 'field' }, 'Nota', refs.names),
           h('div', { class: 'field' }, 'Alteración', refs.accidentals),
@@ -278,7 +303,7 @@
   }
 
   function save() {
-    var map = C.fingering.sanitize(work);
+    var map = sanitizedWork();
     refs.done.disabled = true;
     C.folder.saveFingerings(map).then(function () {
       C.fingering.setCustom(map);
@@ -291,15 +316,19 @@
     });
   }
 
-  // Opens the editor, on the note `key` (like "Sol#^") if given.
-  function open(key) {
+  // Opens the editor, on the note `key` (like "Sol#^") if given, for `instrumentId` (the one last picked
+  // here, or on the fingerings page, if not given).
+  function open(key, instrumentId) {
     var dialog = dialogEl();
     if (!dialog || !C.store.canEdit() || typeof dialog.showModal !== 'function') return;
     C.menus.closeAll();
+    sel.instrument = C.fingering.instrument(instrumentId || C.fingering.selected()).id;
+    C.fingering.select(sel.instrument);
     var note = typeof key === 'string' ? C.notes.parse(key) : null;
-    if (note && !note.rest) sel = { octave: note.octave, name: note.name, accidental: note.accidental };
-    work = C.fingering.overrides();
-    original = JSON.stringify(C.fingering.sanitize(work));
+    if (note && !note.rest) sel = { instrument: sel.instrument, octave: note.octave, name: note.name, accidental: note.accidental };
+    work = {};
+    C.fingering.INSTRUMENT_ORDER.forEach(function (id) { work[id] = C.fingering.overrides(id); });
+    original = JSON.stringify(sanitizedWork());
     build(dialog);
     dialog.showModal();
   }

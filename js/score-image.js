@@ -38,8 +38,14 @@
     both:      { slot: 62, diagram: true,  name: true }
   };
   var DIAGRAM_W = 50;
-  var DIAGRAM_H = DIAGRAM_W * 194 / 200;
   var NAME_H = 20;
+
+  // The height of a fingering diagram at DIAGRAM_W wide, for the instrument the score is drawn for (they
+  // don't all have the same picture proportions).
+  function diagramH(instrumentId) {
+    var base = C.fingering.instrument(instrumentId).BASE;
+    return DIAGRAM_W * base.height / base.width;
+  }
 
   var LETTER = { Do: 0, Re: 1, Mi: 2, Fa: 3, Sol: 4, La: 5, Si: 6 };
   var OCTAVE_NUMBER = { low: 4, mid: 5, high: 6, high2: 7 };
@@ -71,10 +77,12 @@
   }
 
   // The notes of every line that has any, each with where it starts (in quarter notes) and how long it lasts.
+  // `songIndex` is its place in song.lines: a blank line (while editing) has none of its own, so the two
+  // don't otherwise line up.
   function collect(song) {
     var lines = [];
     var pos = 0;
-    song.lines.forEach(function (line) {
+    song.lines.forEach(function (line, songIndex) {
       var items = [];
       line.notes.forEach(function (code) {
         var note = C.notes.parse(code);
@@ -83,7 +91,7 @@
         items.push({ code: code, note: note, pos: pos, dur: dur, value: VALUE[note.duration], dotted: note.dotted });
         pos += dur;
       });
-      if (items.length) lines.push({ subtitle: line.subtitle || '', items: items });
+      if (items.length) lines.push({ subtitle: line.subtitle || '', items: items, songIndex: songIndex });
     });
     return lines;
   }
@@ -156,7 +164,7 @@
   }
 
   // ---- The model: elements, units and systems ---------------------------------------------------------------
-  function buildModel(song, mode) {
+  function buildModel(song, mode, instrumentId) {
     var lines = collect(song);
     var all = [];
     lines.forEach(function (line) { line.items.forEach(function (it) { all.push(it); }); });
@@ -176,7 +184,7 @@
           elems.push({ type: 'rest', pos: it.pos, dur: it.dur, value: it.value, dotted: it.dotted });
           return;
         }
-        var drawn = mode.diagram ? C.fingering.shape(it.code) : null;
+        var drawn = mode.diagram ? C.fingering.shape(it.code, instrumentId) : null;
         var text = noteLabel(it.note);
         elems.push({
           type: 'note', pos: it.pos, dur: it.dur, value: it.value, dotted: it.dotted,
@@ -616,7 +624,7 @@
   }
 
   // ---- Drawing: a staff ----------------------------------------------------------------------------------------
-  function drawSystem(ctx, system, x0, staffW, top, model, base) {
+  function drawSystem(ctx, system, x0, staffW, top, model, base, instrumentId) {
     ctx.save();
     ctx.translate(0, top);
     ctx.strokeStyle = INK;
@@ -670,7 +678,7 @@
     });
     ctx.restore();
 
-    drawLabels(ctx, system, base);
+    drawLabels(ctx, system, base, instrumentId);
   }
 
   function drawNote(ctx, e) {
@@ -699,14 +707,15 @@
   }
 
   // ---- Drawing: what is written under the notes -----------------------------------------------------------------
-  function drawDiagram(ctx, base, e, cx, y) {
-    var k = DIAGRAM_W / 200;
+  function drawDiagram(ctx, base, e, cx, y, instrumentId) {
+    var inst = C.fingering.instrument(instrumentId);
+    var k = DIAGRAM_W / inst.BASE.width;
     var left = cx - DIAGRAM_W / 2;
-    ctx.drawImage(base, left, y, DIAGRAM_W, DIAGRAM_H);
+    ctx.drawImage(base, left, y, DIAGRAM_W, diagramH(instrumentId));
     ctx.fillStyle = '#161616';
     ctx.strokeStyle = '#161616';
     ctx.lineWidth = 1.6 * k;
-    C.fingering.HOLES.forEach(function (hole) {
+    inst.HOLES.forEach(function (hole) {
       var covered = e.holes.indexOf(hole.n) >= 0;
       if (!covered && e.half.indexOf(hole.n) < 0) return;
       ctx.beginPath();
@@ -718,17 +727,18 @@
     });
   }
 
-  function drawLabels(ctx, system, base) {
+  function drawLabels(ctx, system, base, instrumentId) {
     var mode = system.mode;
     var y = system.labelTop;
+    var dh = diagramH(instrumentId);
     system.units.forEach(function (unit) {
       unit.elems.forEach(function (e) {
         if (e.type !== 'note') return;
         var at = y;
-        if (e.drawDiagram) drawDiagram(ctx, base, e, e.x, at);
+        if (e.drawDiagram) drawDiagram(ctx, base, e, e.x, at, instrumentId);
         if (!e.drawName) return;
-        if (mode.name) at += mode.diagram ? DIAGRAM_H + 5 : 0;           // the name below the diagram (or alone)
-        else at += (DIAGRAM_H - NAME_H) / 2;                             // no diagram yet: the name in its place
+        if (mode.name) at += mode.diagram ? dh + 5 : 0;                  // the name below the diagram (or alone)
+        else at += (dh - NAME_H) / 2;                                    // no diagram yet: the name in its place
         ctx.fillStyle = INK;
         ctx.font = NAME_FONT;
         ctx.textAlign = 'center';
@@ -743,8 +753,8 @@
     return C.keys.describe(song.signature, song).text;
   }
 
-  function layout(song, mode) {
-    var model = buildModel(song, mode);
+  function layout(song, mode, instrumentId) {
+    var model = buildModel(song, mode, instrumentId);
     if (!model.lines.length) return null;
 
     model.lines.forEach(function (line) { line.units = groupUnits(line.elems, model.meter, mode); });
@@ -812,8 +822,8 @@
     return { model: model, systems: systems, staffW: staffW };
   }
 
-  function paint(song, mode, base) {
-    var plan = layout(song, mode);
+  function paint(song, mode, base, instrumentId) {
+    var plan = layout(song, mode, instrumentId);
     if (!plan) throw new Error('empty');
     var model = plan.model;
     var systems = plan.systems;
@@ -828,7 +838,7 @@
     y += 30;
     var tempoY = y + 12;
     y += 30;
-    var labelH = (mode.diagram ? DIAGRAM_H + (mode.name ? 5 + NAME_H - 6 : 0) : NAME_H);
+    var labelH = (mode.diagram ? diagramH(instrumentId) + (mode.name ? 5 + NAME_H - 6 : 0) : NAME_H);
     systems.forEach(function (system) {
       if (system.subtitle) { system.subtitleY = y + 14; y += 28; }
       var above = Math.max(2.2 * SP, -system.minY + 0.6 * SP);
@@ -873,7 +883,7 @@
         ctx.fillText(system.subtitle, MARGIN, system.subtitleY, staffW);
       }
       system.labelTop += system.top;
-      drawSystem(ctx, system, MARGIN, staffW, system.top, model, base);
+      drawSystem(ctx, system, MARGIN, staffW, system.top, model, base, instrumentId);
     });
 
     // Footer: a rule, the legend of the diagrams, and the name of the page.
@@ -916,15 +926,77 @@
     return canvas;
   }
 
-  var baseImage = null;
+  // ---- One line, live (the "Partitura" switch, js/preferences.js) -------------------------------------------
+  // js/render.js draws this small strip above a line's own notes, in its place among them, instead of the
+  // one big picture paint() makes for the whole song: no title, no margins for a page, no line of its own
+  // wide enough for every line's notes, and only the clef/key/time header a printed line would have (the
+  // time signature on the very first one only, like paint() itself).
+  var LINE_MARGIN = 10;
 
-  function loadBase() {
-    if (baseImage) return Promise.resolve(baseImage);
+  function paintLine(model, li, mode, base, instrumentId) {
+    var line = model.lines[li];
+    if (!line || !line.elems.length) return null;
+
+    var units = groupUnits(line.elems, model.meter, mode);
+    var head = headerWidth(model, li === 0);
+    var natural = units.reduce(function (sum, u) { return sum + u.width; }, 0);
+    var staffW = head + natural + SP;
+
+    var system = { units: units, mode: mode, model: model, first: li === 0 };
+    var x = LINE_MARGIN + head;
+    units.forEach(function (unit) {
+      unit.elems.forEach(function (e) {
+        var w = slotOf(e, mode);
+        e.x = x + w / 2;
+        x += w;
+      });
+    });
+    system.end = x;
+    geometry(system);
+
+    var dh = diagramH(instrumentId);
+    var labelH = mode.diagram ? dh + (mode.name ? 5 + NAME_H - 6 : 0) : NAME_H;
+    var top = Math.max(2.2 * SP, -system.minY + 0.6 * SP);
+    var below = Math.max(2.2 * SP, system.maxY - STAFF_H + 0.6 * SP);
+    system.labelTop = top + STAFF_H + below + 10;
+    var width = staffW + 2 * LINE_MARGIN;
+    var height = top + STAFF_H + below + 10 + labelH + 8;
+
+    var scale = 2;
+    var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    var maxArea = coarse ? 16e6 : 90e6;
+    scale = Math.min(scale, Math.sqrt(maxArea / (width * height)), 16000 / height, 16000 / width);
+    if (scale < 0.6) return null;                     // an absurdly long line: skip it rather than fail
+
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.round(width * scale);
+    canvas.height = Math.round(height * scale);
+    var ctx = canvas.getContext('2d');
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    ctx.fillStyle = PAPER;
+    ctx.fillRect(0, 0, width, height);
+
+    drawSystem(ctx, system, LINE_MARGIN, staffW, top, model, base, instrumentId);
+    // Its size before `scale` (which only sharpens the picture, on a bigger screen): what js/render.js
+    // sizes the element at on the page, before the "Tamaño" slider.
+    canvas.dataset.baseWidth = width;
+    return canvas;
+  }
+
+  // One loaded <img> per instrument, kept once fetched. The 12-hole ocarina's is the data address baked in
+  // by tools/build-images.js (see js/ocarina-image.js), so a PNG built from it can be saved even when the
+  // page itself was opened from disk (file://); the others are only ever drawn on screen, never exported,
+  // so their picture is simply read from its file.
+  var baseImages = {};
+
+  function loadBase(instrumentId) {
+    var id = C.fingering.instrument(instrumentId).id;
+    if (baseImages[id]) return Promise.resolve(baseImages[id]);
     return new Promise(function (resolve, reject) {
       var image = new Image();
-      image.onload = function () { baseImage = image; resolve(image); };
+      image.onload = function () { baseImages[id] = image; resolve(image); };
       image.onerror = function () { reject(new Error('picture')); };
-      image.src = C.ocarinaImage;
+      image.src = id === 'oc12' ? C.ocarinaImage : C.fingering.instrument(id).BASE.href;
     });
   }
 
@@ -934,14 +1006,15 @@
     });
   }
 
-  // The song as a PNG. `view` is what goes under the notes: 'names', 'fingering' or 'both'.
+  // The song as a PNG. `view` is what goes under the notes: 'names', 'fingering' or 'both'. Always the
+  // 12-hole ocarina's fingerings: exporting is only offered for it (see js/export.js).
   function render(song, view) {
     var mode = MODES[view] || MODES.both;
     var wantsDiagrams = mode.diagram;
-    return (wantsDiagrams ? loadBase() : Promise.resolve(null)).then(function (base) {
-      return toBlob(paint(song, mode, base));
+    return (wantsDiagrams ? loadBase('oc12') : Promise.resolve(null)).then(function (base) {
+      return toBlob(paint(song, mode, base, 'oc12'));
     });
   }
 
-  C.scoreImage = { render: render, paint: paint, MODES: MODES };
+  C.scoreImage = { render: render, paint: paint, buildModel: buildModel, paintLine: paintLine, loadBase: loadBase, MODES: MODES };
 })(window.Songbook = window.Songbook || {});

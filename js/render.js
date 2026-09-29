@@ -14,10 +14,11 @@
   function phone() { return PHONE.matches; }
 
   // ---- Note chips -------------------------------------------------------------------------------
-  function diagram(id) {
+  function diagram(id, instrumentId) {
+    var base = C.fingering.instrument(instrumentId).BASE;
     var svg = document.createElementNS(SVG_NS, 'svg');
     svg.setAttribute('class', 'ocarina');
-    svg.setAttribute('viewBox', '0 0 200 194');
+    svg.setAttribute('viewBox', '0 0 ' + base.width + ' ' + base.height);
     svg.setAttribute('aria-hidden', 'true');
     var use = document.createElementNS(SVG_NS, 'use');
     use.setAttribute('href', '#' + id);
@@ -25,11 +26,58 @@
     return svg;
   }
 
-  // "1/4" as a diagonal fraction (small numerator up, small denominator down); anything else as plain text.
-  function fraction(text) {
-    var parts = /^(\d+)\/(\d+)$/.exec(text);
-    if (!parts) return text;
-    return [h('span', { class: 'frac-n' }, parts[1]), h('span', { class: 'frac-s' }, '/'), h('span', { class: 'frac-d' }, parts[2])];
+  // ---- Duration icons -----------------------------------------------------------------------------
+  // A small picture of the note itself (head, stem, flags, a dot) instead of a number: the duration row of
+  // the palette, the "Puntillo" switch, and the badge a chip carries when it is not a plain quarter note.
+  // Drawn with the same head/stem/flag proportions as the score image (js/score-image.js), in "currentColor"
+  // so it always matches the theme; a duration this page does not use (dotted whole) never happens, so it
+  // is not handled.
+  var DSP = 5;                              // this icon's own "staff space": independent of the score's
+
+  function durSvg(tag, attrs) {
+    var el = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs || {}).forEach(function (name) { el.setAttribute(name, attrs[name]); });
+    return el;
+  }
+
+  var DUR_VALUE = { s: 0.25, e: 0.5, q: 1, h: 2, w: 4 };
+
+  function durationIcon(key, dotted) {
+    var value = DUR_VALUE[key] || 1;
+    var flags = value <= 0.25 ? 2 : (value <= 0.5 ? 1 : 0);
+    var hasStem = value < 4;
+    var stemLen = hasStem ? 3.4 * DSP + (flags > 1 ? 0.7 * DSP : 0) : 0;
+    var headRX = 0.66 * DSP;
+    var headRY = 0.46 * DSP;
+    var headX = headRX + 1;
+    var headY = stemLen + headRY + 1;
+    var width = headX + headRX + (flags ? 1.5 * DSP : 0) + (dotted ? 1.3 * DSP : 0.6 * DSP);
+    var height = headY + headRY + 1;
+
+    var svg = durSvg('svg', { viewBox: '0 0 ' + width + ' ' + height, class: 'dur-icon', 'aria-hidden': 'true' });
+    var rotate = 'rotate(-20 ' + headX + ' ' + headY + ')';
+    if (value >= 2) {
+      svg.appendChild(durSvg('ellipse', { cx: headX, cy: headY, rx: headRX, ry: headRY, transform: rotate, fill: 'none', stroke: 'currentColor', 'stroke-width': 0.24 * DSP }));
+    } else {
+      svg.appendChild(durSvg('ellipse', { cx: headX, cy: headY, rx: headRX, ry: headRY, transform: rotate, fill: 'currentColor' }));
+    }
+    if (hasStem) {
+      var stemX = headX + headRX * 0.85;
+      var stemY0 = headY - 0.1 * DSP;
+      var stemY1 = headY - stemLen;
+      svg.appendChild(durSvg('line', { x1: stemX, y1: stemY0, x2: stemX, y2: stemY1, stroke: 'currentColor', 'stroke-width': 0.26 * DSP, 'stroke-linecap': 'round' }));
+      for (var k = 0; k < flags; k++) {
+        var fy = stemY1 + k * 0.95 * DSP;
+        var d = 'M' + stemX + ' ' + fy +
+          ' C ' + (stemX + 0.2 * DSP) + ' ' + (fy + 1.0 * DSP) + ', ' + (stemX + 1.5 * DSP) + ' ' + (fy + 1.4 * DSP) + ', ' + (stemX + 1.1 * DSP) + ' ' + (fy + 3.0 * DSP) +
+          ' C ' + (stemX + 1.25 * DSP) + ' ' + (fy + 1.85 * DSP) + ', ' + (stemX + 0.6 * DSP) + ' ' + (fy + 1.45 * DSP) + ', ' + stemX + ' ' + (fy + 1.05 * DSP) + ' Z';
+        svg.appendChild(durSvg('path', { d: d, fill: 'currentColor' }));
+      }
+    }
+    if (dotted) {
+      svg.appendChild(durSvg('circle', { cx: headX + headRX + 0.55 * DSP, cy: headY - 0.1 * DSP, r: 0.22 * DSP, fill: 'currentColor' }));
+    }
+    return svg;
   }
 
   // options.button: render as a <button> (editor). options.text: never draw the fingering (palette).
@@ -49,13 +97,14 @@
       'aria-label': label,
       'data-note': options.ref ? options.ref.line + ':' + options.ref.index : null
     });
-    var fingering = options.text ? null : C.notes.fingeringId(note);
+    var instrumentId = C.fingering.selected();
+    var fingering = options.text ? null : C.notes.fingeringId(note, instrumentId);
     if (note.rest) {
       el.appendChild(document.createTextNode('\u2014'));
     } else if (fingering) {
       // Both the diagram and the name are in the DOM; html[data-view] decides which one shows.
       el.classList.add('note--oc');
-      el.appendChild(diagram(fingering));
+      el.appendChild(diagram(fingering, instrumentId));
       el.appendChild(h('span', { class: 'note-name', 'aria-hidden': 'true' }, C.i18n.noteName(note.name) + C.notes.glyph(note.accidental) + (OCTAVE_MARK[note.octave] || '')));
     } else {
       // The accidental sits to the right of the name, on the same line.
@@ -64,8 +113,7 @@
         note.accidental ? h('span', { class: 'note-acc' }, C.notes.glyph(note.accidental)) : null,
         OCTAVE_MARK[note.octave] ? h('span', { class: 'note-oct' }, OCTAVE_MARK[note.octave]) : null));
     }
-    var length = options.text ? '' : C.notes.badge(note);
-    if (length) el.appendChild(h('span', { class: 'note-dur', 'aria-hidden': 'true' }, fraction(length)));
+    if (!options.text) el.appendChild(h('span', { class: 'note-dur', 'aria-hidden': 'true' }, durationIcon(note.duration, note.dotted)));
     return el;
   }
 
@@ -94,21 +142,87 @@
     return h('span', { class: 'tbd' }, 'Próximamente');
   }
 
+  // ---- Live score (the "Partitura" switch) -------------------------------------------------------
+  // The same engraving js/score-image.js draws for the PNG export, but a small strip per line instead of
+  // one picture for the whole song: it sits right above that line's own notes, wherever they are (the
+  // reading view here, or the editing one further down), in their place among them and not apart from
+  // them. What the chips themselves show under the notes still follows the Nombre/Digitación/Ambas switch.
+  var scoreBases = {};       // instrument id -> its picture, once js/score-image.js has loaded it
+
+  // Everything every line's strip needs, worked out once per redraw rather than once per line: null when
+  // the switch is off; { loading: true } while a fingering picture it needs is still on its way (a redraw
+  // follows once it has arrived, see below).
+  function scoreContext(song) {
+    if (!C.preferences.scoreOn()) return null;
+    var view = document.documentElement.getAttribute('data-view') || 'fingering';
+    var mode = C.scoreImage.MODES[view] || C.scoreImage.MODES.both;
+    var instrumentId = C.fingering.selected();
+    var base = null;
+    if (mode.diagram) {
+      if (!scoreBases[instrumentId]) {
+        C.scoreImage.loadBase(instrumentId).then(function (image) {
+          scoreBases[instrumentId] = image;
+          C.store.notify();
+        }).catch(function () { scoreBases[instrumentId] = null; });      // draw without a picture rather than never
+        return { loading: true };
+      }
+      base = scoreBases[instrumentId];
+    }
+    var model;
+    try {
+      model = C.scoreImage.buildModel(song, mode, instrumentId);
+    } catch (e) {
+      return null;
+    }
+    var bySongLine = {};
+    model.lines.forEach(function (line, li) { bySongLine[line.songIndex] = li; });
+    return { mode: mode, instrumentId: instrumentId, base: base, model: model, bySongLine: bySongLine };
+  }
+
+  // The strip for song line `songIndex` (its place in song.lines, not among only the ones with notes), or
+  // null: a blank line, or nothing came out of it (an empty song, or one line too long to draw).
+  function scoreLine(ctx, songIndex) {
+    if (!ctx) return null;
+    var li = ctx.bySongLine[songIndex];
+    if (li === undefined) return null;
+    var canvas;
+    try {
+      canvas = C.scoreImage.paintLine(ctx.model, li, ctx.mode, ctx.base, ctx.instrumentId);
+    } catch (e) {
+      return null;
+    }
+    if (!canvas) return null;
+    canvas.className = 'score-line no-print';
+    // Its own size (dataset.baseWidth, from before paintLine sharpened it for a bigger screen), times the
+    // same "Tamaño" the fingering diagrams use; .score-line's max-width still keeps it from overflowing.
+    canvas.style.width = 'calc(' + canvas.dataset.baseWidth + 'px * var(--oc-scale, 1))';
+    // No single note to highlight while it plays (it is a picture, not chips): js/audio.js falls back to
+    // highlighting the whole line by this when the note itself has none (it is hidden behind this score).
+    canvas.setAttribute('data-score-line', songIndex);
+    return canvas;
+  }
+
   // ---- Reading view -----------------------------------------------------------------------------
   function rows(song) {
     var box = h('div', { class: 'rows' });
+    var score = scoreContext(song);
+    if (score && score.loading) box.appendChild(h('p', { class: 'score-loading no-print' }, tr('Cargando la partitura…')));
     song.lines.forEach(function (line, li) {
       if (!line.notes.length && !line.subtitle) return;    // blank lines only exist while editing
+      // With the score drawn, it already carries the notes (names, diagrams or both, whichever is
+      // chosen): the usual chips would just repeat it, so they only show when there is no score for
+      // this line (still loading, or nothing came out of it).
+      var snippet = score && !score.loading ? scoreLine(score, li) : null;
       box.appendChild(h('div', { class: 'row' + (line.subtitle ? ' has-title' : '') },
         line.subtitle ? h('h3', { translate: 'no' }, line.subtitle) : null,
-        line.notes.length
+        snippet || (line.notes.length
           ? h('div', { class: 'line' }, line.notes.map(function (code, ni) {
             var el = chip(code, { ref: { line: li, index: ni } });
             el.title = 'Reproducir desde aquí';
             el.addEventListener('click', function () { C.player.noteClicked(li, ni); });
             return el;
           }))
-          : pending()));
+          : pending())));
     });
     if (!box.children.length) box.appendChild(pending());
     return box;
@@ -264,7 +378,7 @@
     });
   }
 
-  function editLine(song, line, i) {
+  function editLine(song, line, i, score) {
     var notes = h('div', { class: 'eline-notes' });
     line.notes.forEach(function (code, j) {
       var note = C.notes.parse(code);
@@ -290,6 +404,8 @@
 
     var row = h('div', { class: 'eline', 'data-line': i });
     row.appendChild(h('div', { class: 'eline-top' }, lineHandle(i, row), subtitleField(line, i), lineControls(i, song.lines.length)));
+    var snippet = score && !score.loading ? scoreLine(score, i) : null;
+    if (snippet) row.appendChild(snippet);
     row.appendChild(notes);
     makeDropZone(row, i);
 
@@ -587,7 +703,13 @@
           C.icons.create('trash'), C.editor.isNewDraft() ? 'Descartar' : 'Borrar canción')),
       rangeWarning(song),
       C.player.view(song),
-      h('div', { class: 'elines' }, song.lines.map(function (line, i) { return editLine(song, line, i); })),
+      (function () {
+        var score = scoreContext(song);
+        return [
+          score && score.loading ? h('p', { class: 'score-loading no-print' }, tr('Cargando la partitura…')) : null,
+          h('div', { class: 'elines' }, song.lines.map(function (line, i) { return editLine(song, line, i, score); }))
+        ];
+      })(),
       inlineDock(song));
   }
 
@@ -658,7 +780,7 @@
         'aria-pressed': String(current.key === d.key),
         title: tr('{label} ({beats})', { label: tr(d.label), beats: d.beats === 1 ? tr('1 tiempo') : tr('{n} tiempos', { n: BEAT_TEXT[d.beats] }) }),
         onclick: function () { C.editor.setDuration(d.key); }
-      }, h('span', { class: 'dur-val' }, fraction(BEAT_TEXT[d.beats])), h('span', { class: 'dur-name' }, d.label));
+      }, h('span', { class: 'dur-val' }, durationIcon(d.key, false)), h('span', { class: 'dur-name' }, d.label));
     });
     var dot = h('button', {
       type: 'button',
@@ -668,7 +790,9 @@
       'aria-pressed': String(current.dotted),
       title: 'Puntillo: alarga la nota la mitad de su valor',
       onclick: C.editor.toggleDot
-    }, h('span', { class: 'dur-val' }, '\u00B7'), h('span', { class: 'dur-name' }, 'Puntillo'));
+      // Always the quarter note's shape (not the selected note's): it only needs to say "add a dot",
+      // and syncDuration() below does not rebuild this icon when the selection changes duration.
+    }, h('span', { class: 'dur-val' }, durationIcon('q', true)), h('span', { class: 'dur-name' }, 'Puntillo'));
     return h('div', { class: 'pal-row' },
       h('span', { class: 'pal-label' }, 'Duración'),
       h('div', { class: 'pal-notes dur-row' }, buttons, dot));

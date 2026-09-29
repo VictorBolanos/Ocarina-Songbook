@@ -466,7 +466,7 @@
     'Destapar todos los agujeros': 'Uncover all holes',
     'Destapar todos': 'Uncover all',
     'Copiar la digitación de otra nota': 'Copy the fingering of another note',
-    'Elige una nota y pulsa los agujeros que se tapan. Los agujeros sin marcar están destapados. Con «Medio agujero» activado, pulsar un agujero lo marca tapado solo a medias.': 'Pick a note and click the holes that are covered. Holes you leave unmarked are open. With “Half hole” on, clicking a hole marks it covered only halfway.',
+    'Elige un instrumento y una nota, y pulsa los agujeros que se tapan. Los agujeros sin marcar están destapados. Con «Medio agujero» activado, pulsar un agujero lo marca tapado solo a medias.': 'Pick an instrument and a note, and click the holes that are covered. Holes you leave unmarked are open. With “Half hole” on, clicking a hole marks it covered only halfway.',
     'Octava': 'Octave',
     'Nota': 'Note',
     'Alteración': 'Accidental',
@@ -491,7 +491,14 @@
     'Editar la digitación de {name}, {octave}': 'Edit the fingering of {name}, {octave}',
     'Qué notas mostrar': 'Which notes to show',
     '{done} de {total} notas completadas. Las que no lo están se ven por su nombre en las canciones.': '{done} of {total} notes completed. The ones that are not show by their name in the songs.',
+    '{done} de {total} notas completadas. Las canciones se escriben para la ocarina de 12 agujeros: estas digitaciones son solo para consultarlas aquí.': '{done} of {total} notes completed. Songs are written for the 12-hole ocarina: these fingerings are only for looking them up here.',
     'Mostrar': 'Show',
+    'Instrumento': 'Instrument',
+    'Ocarina de 12 agujeros': '12-hole ocarina',
+    'Ocarina de 6 agujeros': '6-hole ocarina',
+    'Partitura': 'Score',
+    'Muestra la partitura encima de las notas, con lo que hayas elegido arriba': 'Shows the score above the notes, with whatever you picked above',
+    'Cargando la partitura…': 'Loading the score…',
     'Ninguna nota coincide con el filtro.': 'No note matches the filter.',
 
     // ---- folder and messages

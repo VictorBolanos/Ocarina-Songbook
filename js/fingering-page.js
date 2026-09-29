@@ -24,8 +24,12 @@
 
   var filter = 'all';        // kept while moving around the page
 
+  function instrumentId() {
+    return C.fingering.selected();
+  }
+
   function statusOf(key) {
-    var entry = C.fingering.entryOf(key);
+    var entry = C.fingering.entryOf(key, instrumentId());
     if (!entry) return 'none';
     return entry.done ? 'done' : 'draft';
   }
@@ -46,10 +50,10 @@
   function cell(key) {
     var note = C.notes.parse(key);
     var status = statusOf(key);
-    var entry = C.fingering.entryOf(key);
+    var entry = C.fingering.entryOf(key, instrumentId());
     var name = C.i18n.noteName(note.name) + C.notes.glyph(note.accidental) + C.notes.displayMark(note.octave);
     return h('div', { class: 'card fcell fcell--' + status, 'data-fingering': key },
-      C.fingering.diagram(entry ? entry.holes : [], 'fcell-diagram', entry ? entry.half : []),
+      C.fingering.diagram(entry ? entry.holes : [], 'fcell-diagram', entry ? entry.half : [], instrumentId()),
       h('strong', { class: 'fcell-name' }, name),
       h('span', { class: 'fcell-status' }, STATUS_TEXT[status]),
       C.store.canEdit()
@@ -58,7 +62,7 @@
           class: 'btn btn--ghost btn--sm',
           'data-key': 'fedit:' + key,
           'aria-label': tr('Editar la digitación de {name}, {octave}', { name: name, octave: tr({ high: 'aguda', mid: 'media', low: 'grave' }[note.octave]) }),
-          onclick: function () { C.fingeringEditor.open(key); }
+          onclick: function () { C.fingeringEditor.open(key, instrumentId()); }
         }, C.icons.create('edit'), 'Editar')
         : null);
   }
@@ -75,6 +79,16 @@
       onchange: function () { filter = select.value; C.store.notify(['fingering-filter']); }
     }, FILTERS.map(function (f) { return h('option', { value: f[0] }, f[1]); }));
     select.value = filter;
+
+    var instSelect = h('select', {
+      class: 'input',
+      'aria-label': 'Instrumento',
+      'data-key': 'fingering-instrument',
+      onchange: function () { C.fingering.select(instSelect.value); C.store.notify(['fingering-instrument']); }
+    }, C.fingering.INSTRUMENT_ORDER.map(function (id) {
+      return h('option', { value: id }, C.fingering.instrument(id).name);
+    }));
+    instSelect.value = instrumentId();
 
     var sections = [];
     OCTAVES.forEach(function (octave) {
@@ -93,8 +107,12 @@
         h('div', { class: 'fpage-head' },
           h('div', null,
             h('h2', null, 'Digitaciones'),
-            h('p', { class: 'results' }, tr('{done} de {total} notas completadas. Las que no lo están se ven por su nombre en las canciones.', { done: done, total: all.length }))),
-          h('label', { class: 'field field--inline' }, 'Mostrar', select))),
+            h('p', { class: 'results' }, instrumentId() === 'oc12'
+              ? tr('{done} de {total} notas completadas. Las que no lo están se ven por su nombre en las canciones.', { done: done, total: all.length })
+              : tr('{done} de {total} notas completadas. Las canciones se escriben para la ocarina de 12 agujeros: estas digitaciones son solo para consultarlas aquí.', { done: done, total: all.length }))),
+          h('div', { class: 'fpage-controls' },
+            h('label', { class: 'field field--inline' }, 'Instrumento', instSelect),
+            h('label', { class: 'field field--inline' }, 'Mostrar', select)))),
       sections.length ? sections : h('p', { class: 'nomatch' }, 'Ninguna nota coincide con el filtro.'));
   }
 

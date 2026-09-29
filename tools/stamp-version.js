@@ -45,7 +45,8 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifes
 (manifest.icons || []).forEach((icon) => files.add(icon.src));
 for (const name of fs.readdirSync(path.join(root, 'js'))) {
   const text = fs.readFileSync(path.join(root, 'js', name), 'utf8');
-  for (const match of text.matchAll(/src\/(?:svg|img)\/[\w.-]+\.(?:png|jpe?g|webp)/g)) files.add(match[0]);
+  // Allows a subfolder (and a space in its name, like "digitation base"), not just a bare file name.
+  for (const match of text.matchAll(/src\/(?:svg|img)\/[^'"]+\.(?:png|jpe?g|webp)/g)) files.add(match[0]);
 }
 
 const precache = ['./'].concat([...files].sort());

@@ -585,6 +585,47 @@ button.note{
   pointer-events: none;
 }
 
+/* Every slider in the page (size, volume, tempo, background intensity and blur...): a thin accent-coloured
+   track and a round handle, instead of the browser's plain default. */
+input[type="range"]{
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 6px;
+  min-width: 3rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--accent);        /* a plain-styled fallback where the appearance reset above is ignored */
+}
+input[type="range"]::-webkit-slider-runnable-track{ height: 6px; border-radius: 999px; background: transparent; }
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+  box-shadow: 0 1px 3px var(--shadow);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-track{ height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 18%, transparent); }
+input[type="range"]::-moz-range-progress{ height: 6px; border-radius: 999px; background: var(--accent); }
+input[type="range"]::-moz-range-thumb{
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+  box-shadow: 0 1px 3px var(--shadow);
+  cursor: pointer;
+}
+input[type="range"]:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }
+input[type="range"]:disabled{ opacity: .45; cursor: default; }
+
 /* The size of the fingering diagrams: a pill like the switch, only while the diagrams are showing. */
 .size-slider{
   display:flex;
@@ -605,6 +646,62 @@ button.note{
 .size-slider input{ width: 7.5rem; accent-color: var(--accent); }
 .size-slider output{ min-width: 2.6em; text-align: right; font-variant-numeric: tabular-nums; }
 [data-view="names"] .size-slider{ display: none; }
+
+/* Which instrument's diagrams the notes/fingering switch draws: the same pill, only while it shows any. */
+.inst-picker{
+  display:flex;
+  align-items:center;
+  gap: .6rem;
+  padding: .45rem 1rem;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px var(--shade);
+  font-family: var(--sans);
+  font-size: .82rem;
+  color: var(--ink-soft);
+  pointer-events: auto;
+}
+.inst-picker select{ width: auto; padding: .2rem .5rem; font-size: .8rem; }
+[data-view="names"] .inst-picker{ display: none; }
+
+/* "Partitura": a check, not a view, so it combines with any of the three above and is never hidden. */
+.score-toggle{
+  display:flex;
+  align-items:center;
+  gap: .5rem;
+  padding: .45rem 1rem;
+  border: 2px solid var(--accent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px var(--shade);
+  font-family: var(--sans);
+  font-size: .82rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  pointer-events: auto;
+}
+.score-toggle .fp-switch-track{ width: 2.3rem; height: 1.25rem; }
+.score-toggle .fp-switch-track::after{ width: .85rem; height: .85rem; }
+.score-toggle .fp-switch-input:checked + .fp-switch-track::after{ left: calc(100% - 1.05rem); }
+
+/* The live score itself: as wide as the page, scrolling sideways on a phone rather than shrinking to
+   the point of being unreadable. */
+.score-line{
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: .3rem 0 .4rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+/* No single note to mark while it plays (it is a picture, not chips), so the whole line is marked instead. */
+.score-line.is-playing{ outline: 3px solid var(--accent); outline-offset: 3px; }
+.score-loading{ margin: 0 0 1.2rem; font-size: .82rem; font-style: italic; color: var(--ink-soft); }
 
 .segmented{
   position: relative;
@@ -995,7 +1092,7 @@ button.note{
 /* ---- Note values, rests and playback ------------------------------------------------------ */
 .note{ position: relative; }
 
-/* Length in beats, shown only when it isn't a plain quarter note. */
+/* A little picture of the note itself, shown only when it isn't a plain quarter note. */
 .note-dur{
   position: absolute;
   bottom: -16px;                /* bottom right: the top corners belong to the remove button */
@@ -1005,22 +1102,21 @@ button.note{
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 1.7rem;                /* a circle, whatever the text */
+  width: 1.7rem;                /* a circle, whatever it holds */
   height: 1.7rem;
   padding: 0;
   border-radius: 50%;
   background: var(--accent);
   color: var(--paper);
-  font: 800 .88rem/1 var(--sans);
-  white-space: nowrap;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
 }
+.dur-icon{ display: block; width: 1rem; height: auto; }
+.note-dur .dur-icon{ width: 1rem; max-height: 1.4rem; }
 
-/* A diagonal fraction: numerator raised, denominator lowered, tucked around a slash. */
-.frac-n, .frac-d{ font-size: .88em; }
-.frac-n{ transform: translateY(-.24em); }
-.frac-d{ transform: translateY(.26em); }
-.frac-s{ margin: 0 -.1em; font-size: 1.05em; font-weight: 400; }
+/* The duration row of the palette: a note icon instead of its number of beats. `.dur-val` is shared with
+   other button groups (octave, note, accidental...), so this only touches the duration row itself. */
+.dur-row .dur-val{ display: inline-flex; align-items: center; justify-content: center; }
+.dur-row .dur-icon{ width: .9rem; max-height: 1.65rem; }
 
 .note--rest{
   min-width: 2.4em;
@@ -1353,6 +1449,7 @@ a.mode-toggle{ text-decoration: none; }
 /* ---- Fingerings page ------------------------------------------------------------------------- */
 .fpage-head{ display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: .8rem 1.2rem; }
 .fpage-head h2{ margin: 0 0 .2rem; font-size: 1.3rem; color: var(--accent); }
+.fpage-controls{ display: flex; flex-wrap: wrap; gap: .6rem 1rem; }
 .foctave{ margin-top: 1.4rem; }
 .foctave h3{ margin: 0 0 .5rem; font-size: 1.1rem; color: var(--accent); }
 .fgroup{ margin-bottom: 1rem; }
