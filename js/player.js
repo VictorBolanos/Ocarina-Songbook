@@ -62,6 +62,30 @@
     syncStretch();
   }
 
+  // A whole line was clicked instead (the "Partitura" score picture: no single note to point at). It plays
+  // from the line's first note, or, with "Tramo" on, picks the whole line as the stretch endpoint - its
+  // first note when it opens the stretch, its last note when it closes it, so the line is not cut short.
+  function lineClicked(line) {
+    var song = currentSong();
+    if (!song) return;
+    if (!stretchOn) {
+      C.audio.play(song, { line: line, index: 0 });
+      return;
+    }
+    var point = { line: line, index: 0 };
+    if (!stretch || stretch.b) {
+      stretch = { a: point, b: null };
+    } else if (line < stretch.a.line) {
+      stretch = { a: point, b: stretch.a };
+    } else {
+      stretch.b = { line: line, index: Math.max(0, song.lines[line].notes.length - 1) };
+    }
+    stretchSong = song.id;
+    C.audio.stop();
+    markStretch();
+    syncStretch();
+  }
+
   function before(x, y) {
     return x.line < y.line || (x.line === y.line && x.index < y.index);
   }
@@ -81,10 +105,25 @@
       if (isB) el.classList.add('stretch-end');
       if (isA || isB || (stretch.b && before(stretch.a, point) && before(point, stretch.b))) el.classList.add('in-stretch');
     });
+    // The "Partitura" score picture has no per-note elements to mark, so the whole line stands in for them.
+    document.querySelectorAll('.rows [data-score-line]').forEach(function (el) {
+      var line = Number(el.getAttribute('data-score-line'));
+      var isA = line === stretch.a.line;
+      var isB = stretch.b && line === stretch.b.line;
+      if (isA) el.classList.add('stretch-start');
+      if (isB) el.classList.add('stretch-end');
+      if (isA || isB || (stretch.b && line > stretch.a.line && line < stretch.b.line)) el.classList.add('in-stretch');
+    });
   }
 
   function stretchHint() {
     if (!stretchOn) return '';
+    // With the "Partitura" score on, notes have no picture of their own to click - the line stands in for them.
+    if (C.preferences.scoreOn()) {
+      if (!stretch) return 'Pulsa la primera línea del tramo.';
+      if (!stretch.b) return 'Ahora pulsa la última línea del tramo.';
+      return 'Se repetirá el tramo marcado. Pulsa otra línea para elegir otro.';
+    }
     if (!stretch) return 'Pulsa la primera nota del tramo.';
     if (!stretch.b) return 'Ahora pulsa la última nota del tramo.';
     return 'Se repetirá el tramo marcado. Pulsa otra nota para elegir otro.';
@@ -238,5 +277,5 @@
     });
   }
 
-  C.player = { view: view, init: init, noteClicked: noteClicked, markStretch: markStretch };
+  C.player = { view: view, init: init, noteClicked: noteClicked, lineClicked: lineClicked, markStretch: markStretch };
 })(window.Songbook = window.Songbook || {});

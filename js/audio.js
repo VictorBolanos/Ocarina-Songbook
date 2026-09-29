@@ -44,6 +44,18 @@
   var listeners = [];
   var startToken = 0;          // changes whenever playback is stopped or restarted, to cancel a start still pending
 
+  // While the song follows along it keeps the current note in view (see highlight() below). If the person
+  // just scrolled by hand - e.g. to reach the stop button - that auto-follow backs off for a while instead
+  // of fighting them straight back to where it was, so it always doubles as "the button is still up there".
+  var MANUAL_SCROLL_HOLD = 2500;
+  var lastManualScroll = 0;
+  function markManualScroll() { lastManualScroll = Date.now(); }
+  window.addEventListener('wheel', markManualScroll, { passive: true });
+  window.addEventListener('touchmove', markManualScroll, { passive: true });
+  window.addEventListener('keydown', function (e) {
+    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].indexOf(e.key) >= 0) markManualScroll();
+  });
+
   var supported = function () { return !!(window.AudioContext || window.webkitAudioContext); };
 
   // ---- Settings ---------------------------------------------------------------------------------
@@ -377,7 +389,8 @@
     if (!el) return;
     el.classList.add('is-playing');
     var rect = el.getBoundingClientRect();
-    if (rect.top < 150 || rect.bottom > window.innerHeight - 120) {      // keep clear of the sticky bars
+    var offScreen = rect.top < 150 || rect.bottom > window.innerHeight - 120;      // keep clear of the sticky bars
+    if (offScreen && Date.now() - lastManualScroll > MANUAL_SCROLL_HOLD) {
       el.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
   }

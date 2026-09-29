@@ -213,6 +213,10 @@
       // chosen): the usual chips would just repeat it, so they only show when there is no score for
       // this line (still loading, or nothing came out of it).
       var snippet = score && !score.loading ? scoreLine(score, li) : null;
+      if (snippet) {
+        snippet.title = 'Reproducir desde aquí';
+        snippet.addEventListener('click', function () { C.player.lineClicked(li); });
+      }
       box.appendChild(h('div', { class: 'row' + (line.subtitle ? ' has-title' : '') },
         line.subtitle ? h('h3', { translate: 'no' }, line.subtitle) : null,
         snippet || (line.notes.length

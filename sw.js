@@ -12,14 +12,14 @@
 // between the markers below; do not edit them by hand.
 
 /* BEGIN GENERATED */
-const VERSION = 'f1dcc878';
+const VERSION = '05737945';
 const PRECACHE = [
   "./",
-  "css/styles.css?v=24cd498f",
+  "css/styles.css?v=1081fcde",
   "index.html",
   "js/app.js?v=b48c4c60",
   "js/audio-import.js?v=50b1eca6",
-  "js/audio.js?v=dff55023",
+  "js/audio.js?v=6d4adc7b",
   "js/background.js?v=1efc275c",
   "js/backup.js?v=cbbf111e",
   "js/categories.js?v=e4b6179c",
@@ -30,7 +30,7 @@ const PRECACHE = [
   "js/fingering.js?v=7b1e5adc",
   "js/folder.js?v=bc073a36",
   "js/home.js?v=75d3bbf1",
-  "js/i18n.js?v=cc097f49",
+  "js/i18n.js?v=16f5ef4a",
   "js/icons.js?v=138fa6bb",
   "js/key-dialog.js?v=051c6c0b",
   "js/keys.js?v=bfc69fc7",
@@ -40,10 +40,10 @@ const PRECACHE = [
   "js/notes.js?v=d6e9795c",
   "js/ocarina-image.js?v=e7e665f2",
   "js/pitch.js?v=86aaca49",
-  "js/player.js?v=c0f48d0c",
+  "js/player.js?v=c6f13312",
   "js/preferences.js?v=199396b5",
   "js/pwa.js?v=e09ce499",
-  "js/render.js?v=c239eb82",
+  "js/render.js?v=c436f128",
   "js/router.js?v=cafb81aa",
   "js/score-image.js?v=96b1dc9d",
   "js/store.js?v=7196ee94",

@@ -701,6 +701,8 @@ input[type="range"]:disabled{ opacity: .45; cursor: default; }
 }
 /* No single note to mark while it plays (it is a picture, not chips), so the whole line is marked instead. */
 .score-line.is-playing{ outline: 3px solid var(--accent); outline-offset: 3px; }
+/* Clicking a line plays from it, same as clicking a chip - reading view only, not the editor's preview. */
+.rows .score-line{ cursor: pointer; }
 .score-loading{ margin: 0 0 1.2rem; font-size: .82rem; font-style: italic; color: var(--ink-soft); }
 
 .segmented{
