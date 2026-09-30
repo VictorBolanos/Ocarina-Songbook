@@ -10,8 +10,8 @@
   "tags": ["ragnarok online"],
   "lines": [
     { "subtitle": "B", "notes": ["Do^:e", "Do^:e.", "Si:e.", "La:e", "La", "R"] },
-    { "subtitle": "B", "notes": ["La:e.", "Si:e.", "La:e", "Si:e.", "La:e.", "Si:e", "La:q.", "Sol#:e.", "R:e"] },
-    { "subtitle": "B", "notes": ["Si_:e", "Si:s", "Si:s", "Si:e.", "La:e.", "Sol#:e", "Sol#:e."] },
+    { "subtitle": "B", "notes": ["La:e.", "Si:e.", "La:e", "Si:e.", "La:e.", "Si:e", "La:q.", "Sol#:e", "Sol#:e.", "R"] },
+    { "subtitle": "B", "notes": ["Si:s", "Si:s", "Si:e.", "La:e.", "Sol#:e", "Sol#:e."] },
     { "subtitle": "A", "notes": ["Mi^:e.", "Fa^:e", "Fa^:e.", "Mi^:e.", "Re^:e"] },
     { "subtitle": "B", "notes": ["Sol#:e.", "Fa:e.", "Mi:e", "Mi:e.", "Re:e.", "Do:s", "Re:s", "La_"] },
     { "subtitle": "A", "notes": ["Si_", "La_:s", "Si_:s", "Do:e.", "Re:e.", "Mi:e", "Mi:h"] },

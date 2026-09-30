@@ -23,8 +23,8 @@
 
   /* The look: a page tinted with the theme colour, and translucent "glass" cards framed in it. */
   --page: color-mix(in srgb, var(--accent) 34%, var(--bg));
-  --card: color-mix(in srgb, var(--paper) 64%, transparent);        /* cards */
-  --shell: color-mix(in srgb, var(--paper) 42%, transparent);       /* the frame around the content */
+  --card: color-mix(in srgb, var(--paper) 38%, transparent);        /* cards */
+  --shell: color-mix(in srgb, var(--paper) 28%, transparent);       /* the frame around the content */
   --glass-shadow: 0 14px 34px var(--shade);
   color-scheme: light;
 }
@@ -75,7 +75,7 @@
 
 *{ box-sizing: border-box; }
 
-html{ scroll-behavior: smooth; }
+html{ scroll-behavior: smooth; font-size: calc(100% * var(--text-scale, 1)); }
 @media (prefers-reduced-motion: reduce){ html{ scroll-behavior: auto; } }
 
 body{
@@ -188,6 +188,41 @@ body::before{
   cursor: pointer;
 }
 .menu button[data-font]{ font-family: var(--font); }
+
+/* A slider living inside a dropdown menu (the "Fuente" menu's text-size control), set off from the
+   buttons below it with a rule, matching .size-slider's proportions but without its own pill frame. */
+.menu-slider{
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .3rem .6rem .65rem;
+  margin-bottom: .3rem;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--sans);
+  font-size: .82rem;
+  color: var(--ink-soft);
+}
+.menu-slider input{ flex: 1; min-width: 0; }
+.menu-slider output{ min-width: 2.6em; text-align: right; font-variant-numeric: tabular-nums; }
+/* Just the tick, not another button shape: the "check" icon already draws its own circle. The extra
+   ".menu-slider" ancestor in the selector is not for scoping - it is needed to outweigh the generic
+   ".menu button" rule's width:100%/padding, which otherwise wins on specificity and left a stretched,
+   misplaced hit area that only became visible (as a hover background poking past the menu) on :hover. */
+.menu-slider .menu-slider-confirm{
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+.menu-slider .menu-slider-confirm .icon{ width: 1.3rem; height: 1.3rem; }
+.menu-slider .menu-slider-confirm:hover{ background: var(--mid); }
 .menu button:hover{ background: var(--mid); }
 .menu button.danger{ color: var(--danger); }
 .menu button[aria-pressed="true"]{ background: var(--mid); font-weight: 700; }
@@ -929,8 +964,8 @@ input[type="range"]:disabled{ opacity: .45; cursor: default; }
 .card, .song, .legend, .filters, .topbar, .site-footer, .shell{
   border: 2px solid var(--accent);
   background: var(--card);
-  -webkit-backdrop-filter: blur(10px) saturate(1.15);
-  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-backdrop-filter: blur(8.5px) saturate(1.15);
+  backdrop-filter: blur(8.5px) saturate(1.15);
   box-shadow: var(--glass-shadow);
 }
 .card, .song, .legend, .filters{ border-radius: 20px; }

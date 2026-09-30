@@ -12,10 +12,10 @@
 // between the markers below; do not edit them by hand.
 
 /* BEGIN GENERATED */
-const VERSION = '4a5f0acc';
+const VERSION = 'dbdb92f8';
 const PRECACHE = [
   "./",
-  "css/styles.css?v=a83e1e27",
+  "css/styles.css?v=f5059cc6",
   "index.html",
   "js/app.js?v=b48c4c60",
   "js/audio-import.js?v=50b1eca6",
@@ -30,7 +30,7 @@ const PRECACHE = [
   "js/fingering.js?v=7b1e5adc",
   "js/folder.js?v=9e5905e2",
   "js/home.js?v=75d3bbf1",
-  "js/i18n.js?v=7dd7cc5e",
+  "js/i18n.js?v=83427dec",
   "js/icons.js?v=138fa6bb",
   "js/key-dialog.js?v=051c6c0b",
   "js/keys.js?v=bfc69fc7",
@@ -41,7 +41,7 @@ const PRECACHE = [
   "js/ocarina-image.js?v=e7e665f2",
   "js/pitch.js?v=86aaca49",
   "js/player.js?v=c6f13312",
-  "js/preferences.js?v=199396b5",
+  "js/preferences.js?v=daf0f880",
   "js/pwa.js?v=e09ce499",
   "js/render.js?v=c436f128",
   "js/router.js?v=cafb81aa",

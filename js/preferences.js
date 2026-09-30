@@ -183,6 +183,36 @@
     input.addEventListener('change', function () { write('ocarina-size', input.value); });
   }
 
+  // How big all the page's text is, as a percentage of its normal size (--text-scale, read by html{}
+  // in the CSS). Lives in the "Fuente" menu, next to the typeface itself.
+  var FONT_SIZE = { min: 80, max: 150, fallback: 100 };
+
+  // Text size only takes effect once the check button is pressed, not while dragging: the slider itself
+  // moves as every element on the page resizes under it, which fights the drag instead of following it.
+  function initFontSize() {
+    var input = document.getElementById('font-size-input');
+    var output = document.getElementById('font-size-output');
+    var confirm = document.getElementById('font-size-confirm');
+
+    function preview(percent) {
+      input.value = String(percent);
+      output.textContent = percent + '%';
+    }
+
+    function apply(percent) {
+      root.style.setProperty('--text-scale', String(percent / 100));
+      write('ocarina-font-size', String(percent));
+    }
+
+    var saved = Number(read('ocarina-font-size'));
+    var initial = Number.isFinite(saved) && saved >= FONT_SIZE.min && saved <= FONT_SIZE.max ? saved : FONT_SIZE.fallback;
+    preview(initial);
+    apply(initial);
+
+    input.addEventListener('input', function () { preview(Number(input.value)); });
+    confirm.addEventListener('click', function () { apply(Number(input.value)); });
+  }
+
   function init() {
     migrate();
     initView();
@@ -191,6 +221,7 @@
     initSize();
     initPicker('theme', 'data-theme', 'ocarina-theme', COLORS, 'canela');
     initPicker('font', 'data-font', 'ocarina-font', FONTS, 'clasica');
+    initFontSize();
     initMode();
   }
 

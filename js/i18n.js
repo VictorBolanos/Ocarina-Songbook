@@ -38,6 +38,7 @@
     'Ambas': 'Both',
     'Tamaño': 'Size',
     'Tamaño de las digitaciones': 'Size of the fingerings',
+    'Tamaño de la letra': 'Text size',
     'octava media': 'middle octave',
     'grave': 'low',
     'aguda': 'high',
