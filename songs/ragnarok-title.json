@@ -7,7 +7,7 @@
   "difficulty": "dificil",
   "origin": "videojuegos",
   "status": "por-aprender",
-  "tags": [],
+  "tags": ["ragnarok online"],
   "lines": [
     { "subtitle": "", "notes": ["Do#:s", "Mi:s", "Sol#:s", "Do#^:s", "Re#^:h", "Mi^:h"] },
     { "subtitle": "", "notes": ["Re#^", "Do#^", "Do^:s", "Sol#:s", "Mi:s", "Do#:s", "Do#:s", "Mi:s", "Sol#:s", "Do#^:s", "Re#^:h", "Mi^:h"] },
@@ -16,7 +16,6 @@
     { "subtitle": "", "notes": ["Do^:h.", "Do#:s", "Mi:s", "Sol#:s", "Do#^:s", "Re#^:h", "Mi^:h"] },
     { "subtitle": "", "notes": ["Re#^", "Do#^:h", "Do#:s", "Mi:s", "La:s", "Do#^:s", "Re#^:h", "Mi^:q.", "Fa^:e"] },
     { "subtitle": "", "notes": ["Re#^", "Do#^:h.", "Do^:w"] },
-    { "subtitle": "", "notes": ["Do#^:h", "La#:q.", "Do^:e", "Do#^:h.", "Re#^:e", "Re^:s", "Do#^:s"] },
-    { "subtitle": "", "notes": ["Do^:w"] }
+    { "subtitle": "", "notes": ["Do#^:h", "La#:q.", "Do^:e", "Do#^:h.", "Re#^:e", "Re^:s", "Do#^:s", "Do^:w"] }
   ]
 }

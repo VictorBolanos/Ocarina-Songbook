@@ -7,7 +7,7 @@
   "difficulty": "media",
   "origin": "tradicional",
   "status": "por-aprender",
-  "tags": [],
+  "tags": ["folk"],
   "lines": [
     { "subtitle": "", "notes": ["Do", "Fa:q.", "Fa:e", "Fa", "La", "Sol:q.", "Fa:e"] },
     { "subtitle": "", "notes": ["Sol", "La", "Fa:q.", "Fa:e", "La", "Do^"] },

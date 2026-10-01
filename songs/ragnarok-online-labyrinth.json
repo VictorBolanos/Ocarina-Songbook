@@ -1,0 +1,26 @@
+{
+  "id": "ragnarok-online-labyrinth",
+  "title": "Ragnarok Online - Labyrinth",
+  "meter": "4/4",
+  "bpm": 135,
+  "signature": "sharp",
+  "difficulty": "dificil",
+  "origin": "videojuegos",
+  "status": "aprendiendo",
+  "tags": ["ragnarok online"],
+  "lines": [
+    { "subtitle": "", "notes": ["Re#:w"] },
+    { "subtitle": "", "notes": ["Re#:h", "Si_:q.", "Do#:e", "Re#:w"] },
+    { "subtitle": "", "notes": ["Re#", "Sol#:q.", "La#:e", "Si:h."] },
+    { "subtitle": "", "notes": ["Si:e.", "La#:h", "Sol#:h."] },
+    { "subtitle": "", "notes": ["Sol#:e", "Mi:e", "Re#:w", "Si_:q."] },
+    { "subtitle": "", "notes": ["Do#:e", "Re#:s", "Mi:s", "Re#:w", "Re#:q."] },
+    { "subtitle": "", "notes": ["Mi^", "Re#^", "Do#^", "Si:h", "La#:w"] },
+    { "subtitle": "", "notes": ["Sol#:h", "Mi:h", "Fa#:h", "Fa#:w"] },
+    { "subtitle": "", "notes": ["Mi^:w", "Do#^:h"] },
+    { "subtitle": "", "notes": ["Mi^:h.", "Re#^:e", "Do#^:e", "Re#^:w"] },
+    { "subtitle": "", "notes": ["Re#^", "Re#:h", "Mi:h."] },
+    { "subtitle": "", "notes": ["Fa#", "Sol:w", "Re:h"] },
+    { "subtitle": "", "notes": ["Fa#:w."] }
+  ]
+}
