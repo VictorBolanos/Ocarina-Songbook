@@ -1,0 +1,17 @@
+{
+  "id": "ragnarok-online-ancientgroover",
+  "title": "Ragnarok online - AncientGroover",
+  "meter": "4/4",
+  "bpm": 110,
+  "signature": "sharp",
+  "difficulty": "media",
+  "origin": "videojuegos",
+  "status": "por-aprender",
+  "tags": [],
+  "lines": [
+    { "subtitle": "", "notes": ["Do#:q.", "Do#:e", "Sol#", "Sol#", "Fa#", "Fa#", "Do#:h"] },
+    { "subtitle": "", "notes": ["Mi", "Fa#", "Re#", "Do#:e.", "Si_:s", "Do#:h.", "Do#:e."] },
+    { "subtitle": "", "notes": ["Do#:h", "Sol#:h", "Fa#:e.", "Mi:s", "Sol#", "Do#:h"] },
+    { "subtitle": "", "notes": ["Sol#:h", "Fa#", "Si", "Sol#:w"] }
+  ]
+}

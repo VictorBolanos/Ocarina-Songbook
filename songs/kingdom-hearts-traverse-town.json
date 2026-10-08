@@ -1,0 +1,21 @@
+{
+  "id": "kingdom-hearts-traverse-town",
+  "title": "Kingdom Hearts - Traverse Town",
+  "meter": "4/4",
+  "bpm": 112,
+  "signature": "sharp",
+  "difficulty": "dificil",
+  "origin": "videojuegos",
+  "status": "por-aprender",
+  "tags": ["Kingdom Hearts"],
+  "lines": [
+    { "subtitle": "", "notes": ["Fa#:q.", "Sol#:e", "Si:e.", "La#:e", "Sol#:e.", "La#", "Fa#", "Do#:h"] },
+    { "subtitle": "", "notes": ["Re#", "Fa#", "Fa", "Sol#", "Re#:q.", "Fa#:e", "Fa:e.", "Fa#:e", "Sol#:e."] },
+    { "subtitle": "", "notes": ["Fa#:q.", "Sol#:e", "Si:e.", "La#:e", "Sol#:e.", "La#", "Fa#", "Do#:h"] },
+    { "subtitle": "", "notes": ["Re#", "Fa#", "Fa", "Sol#", "Re#:q.", "Fa#:e", "Fa:e.", "Fa#:e", "Sol#:e."] },
+    { "subtitle": "", "notes": ["La:h.", "Do#^", "Si:h", "Mi^:h"] },
+    { "subtitle": "", "notes": ["Do#^", "Do#^:s", "Si:e.", "La", "Sol#", "Si", "La", "Sol#", "Mi"] },
+    { "subtitle": "", "notes": ["Fa#:q.", "Mi:e", "Fa#:e.", "Sol#:e", "La:e.", "Sol#", "Si", "Si:s", "La:e.", "Sol#"] },
+    { "subtitle": "", "notes": ["Fa#:w.", "Fa#:h"] }
+  ]
+}
